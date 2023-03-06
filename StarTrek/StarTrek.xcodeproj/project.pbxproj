@@ -11,8 +11,8 @@
 		E9DD8AAD29B62F6500010FFE /* StarTrek.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9DD8AA229B62F6500010FFE /* StarTrek.framework */; };
 		E9DD8AB229B62F6500010FFE /* StarTrekTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AB129B62F6500010FFE /* StarTrekTests.m */; };
 		E9DD8AB329B62F6500010FFE /* StarTrek.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8AA529B62F6500010FFE /* StarTrek.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E9DD8ABF29B63DC100010FFE /* STSocketAddress.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8ABD29B63DC100010FFE /* STSocketAddress.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E9DD8AC029B63DC100010FFE /* STSocketAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8ABE29B63DC100010FFE /* STSocketAddress.m */; };
+		E9DD8AC729B6436F00010FFE /* STSocketAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AC329B6436F00010FFE /* STSocketAddress.m */; };
+		E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8AC429B6436F00010FFE /* STSocketAddress.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,8 +31,8 @@
 		E9DD8AA629B62F6500010FFE /* StarTrek.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = StarTrek.docc; sourceTree = "<group>"; };
 		E9DD8AAC29B62F6500010FFE /* StarTrekTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarTrekTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9DD8AB129B62F6500010FFE /* StarTrekTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StarTrekTests.m; sourceTree = "<group>"; };
-		E9DD8ABD29B63DC100010FFE /* STSocketAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSocketAddress.h; sourceTree = "<group>"; };
-		E9DD8ABE29B63DC100010FFE /* STSocketAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSocketAddress.m; sourceTree = "<group>"; };
+		E9DD8AC329B6436F00010FFE /* STSocketAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSocketAddress.m; sourceTree = "<group>"; };
+		E9DD8AC429B6436F00010FFE /* STSocketAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSocketAddress.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,10 +93,42 @@
 		E9DD8ABC29B63D5D00010FFE /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				E9DD8ABD29B63DC100010FFE /* STSocketAddress.h */,
-				E9DD8ABE29B63DC100010FFE /* STSocketAddress.m */,
+				E9DD8AC229B6436F00010FFE /* type */,
+				E9DD8AC529B6436F00010FFE /* net */,
+				E9DD8AC129B6436F00010FFE /* port */,
+				E9DD8AC629B6436F00010FFE /* socket */,
 			);
 			path = Classes;
+			sourceTree = "<group>";
+		};
+		E9DD8AC129B6436F00010FFE /* port */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = port;
+			sourceTree = "<group>";
+		};
+		E9DD8AC229B6436F00010FFE /* type */ = {
+			isa = PBXGroup;
+			children = (
+				E9DD8AC429B6436F00010FFE /* STSocketAddress.h */,
+				E9DD8AC329B6436F00010FFE /* STSocketAddress.m */,
+			);
+			path = type;
+			sourceTree = "<group>";
+		};
+		E9DD8AC529B6436F00010FFE /* net */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = net;
+			sourceTree = "<group>";
+		};
+		E9DD8AC629B6436F00010FFE /* socket */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = socket;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -107,7 +139,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E9DD8AB329B62F6500010FFE /* StarTrek.h in Headers */,
-				E9DD8ABF29B63DC100010FFE /* STSocketAddress.h in Headers */,
+				E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,7 +240,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E9DD8AC029B63DC100010FFE /* STSocketAddress.m in Sources */,
+				E9DD8AC729B6436F00010FFE /* STSocketAddress.m in Sources */,
 				E9DD8AA729B62F6500010FFE /* StarTrek.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

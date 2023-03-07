@@ -13,6 +13,16 @@
 		E9DD8AB329B62F6500010FFE /* StarTrek.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8AA529B62F6500010FFE /* StarTrek.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E9DD8AC729B6436F00010FFE /* STSocketAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AC329B6436F00010FFE /* STSocketAddress.m */; };
 		E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8AC429B6436F00010FFE /* STSocketAddress.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9EF8A6A29B73DEB00BB305B /* OKWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A6829B73DEB00BB305B /* OKWeakMap.m */; };
+		E9EF8A6B29B73DEB00BB305B /* OKWeakMap.h in Headers */ = {isa = PBXBuildFile; fileRef = E9EF8A6929B73DEB00BB305B /* OKWeakMap.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9EF8A6E29B73DFA00BB305B /* STKeyPairMap.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A6C29B73DFA00BB305B /* STKeyPairMap.m */; };
+		E9EF8A6F29B73DFA00BB305B /* STKeyPairMap.h in Headers */ = {isa = PBXBuildFile; fileRef = E9EF8A6D29B73DFA00BB305B /* STKeyPairMap.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9EF8A7229B73E2900BB305B /* STHashKeyPairMap.h in Headers */ = {isa = PBXBuildFile; fileRef = E9EF8A7029B73E2900BB305B /* STHashKeyPairMap.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9EF8A7329B73E2900BB305B /* STHashKeyPairMap.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A7129B73E2900BB305B /* STHashKeyPairMap.m */; };
+		E9EF8A7629B73E4000BB305B /* STAddressPairMap.h in Headers */ = {isa = PBXBuildFile; fileRef = E9EF8A7429B73E4000BB305B /* STAddressPairMap.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9EF8A7729B73E4000BB305B /* STAddressPairMap.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A7529B73E4000BB305B /* STAddressPairMap.m */; };
+		E9EF8A7A29B73E5000BB305B /* STAddressPairObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E9EF8A7829B73E5000BB305B /* STAddressPairObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9EF8A7B29B73E5000BB305B /* STAddressPairObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A7929B73E5000BB305B /* STAddressPairObject.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +43,16 @@
 		E9DD8AB129B62F6500010FFE /* StarTrekTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StarTrekTests.m; sourceTree = "<group>"; };
 		E9DD8AC329B6436F00010FFE /* STSocketAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSocketAddress.m; sourceTree = "<group>"; };
 		E9DD8AC429B6436F00010FFE /* STSocketAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSocketAddress.h; sourceTree = "<group>"; };
+		E9EF8A6829B73DEB00BB305B /* OKWeakMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OKWeakMap.m; sourceTree = "<group>"; };
+		E9EF8A6929B73DEB00BB305B /* OKWeakMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OKWeakMap.h; sourceTree = "<group>"; };
+		E9EF8A6C29B73DFA00BB305B /* STKeyPairMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STKeyPairMap.m; sourceTree = "<group>"; };
+		E9EF8A6D29B73DFA00BB305B /* STKeyPairMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STKeyPairMap.h; sourceTree = "<group>"; };
+		E9EF8A7029B73E2900BB305B /* STHashKeyPairMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHashKeyPairMap.h; sourceTree = "<group>"; };
+		E9EF8A7129B73E2900BB305B /* STHashKeyPairMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHashKeyPairMap.m; sourceTree = "<group>"; };
+		E9EF8A7429B73E4000BB305B /* STAddressPairMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAddressPairMap.h; sourceTree = "<group>"; };
+		E9EF8A7529B73E4000BB305B /* STAddressPairMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAddressPairMap.m; sourceTree = "<group>"; };
+		E9EF8A7829B73E5000BB305B /* STAddressPairObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAddressPairObject.h; sourceTree = "<group>"; };
+		E9EF8A7929B73E5000BB305B /* STAddressPairObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAddressPairObject.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +113,7 @@
 		E9DD8ABC29B63D5D00010FFE /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				E9EF8A6729B73DEB00BB305B /* weak */,
 				E9DD8AC229B6436F00010FFE /* type */,
 				E9DD8AC529B6436F00010FFE /* net */,
 				E9DD8AC129B6436F00010FFE /* port */,
@@ -113,6 +134,14 @@
 			children = (
 				E9DD8AC429B6436F00010FFE /* STSocketAddress.h */,
 				E9DD8AC329B6436F00010FFE /* STSocketAddress.m */,
+				E9EF8A6D29B73DFA00BB305B /* STKeyPairMap.h */,
+				E9EF8A6C29B73DFA00BB305B /* STKeyPairMap.m */,
+				E9EF8A7029B73E2900BB305B /* STHashKeyPairMap.h */,
+				E9EF8A7129B73E2900BB305B /* STHashKeyPairMap.m */,
+				E9EF8A7429B73E4000BB305B /* STAddressPairMap.h */,
+				E9EF8A7529B73E4000BB305B /* STAddressPairMap.m */,
+				E9EF8A7829B73E5000BB305B /* STAddressPairObject.h */,
+				E9EF8A7929B73E5000BB305B /* STAddressPairObject.m */,
 			);
 			path = type;
 			sourceTree = "<group>";
@@ -131,6 +160,15 @@
 			path = socket;
 			sourceTree = "<group>";
 		};
+		E9EF8A6729B73DEB00BB305B /* weak */ = {
+			isa = PBXGroup;
+			children = (
+				E9EF8A6929B73DEB00BB305B /* OKWeakMap.h */,
+				E9EF8A6829B73DEB00BB305B /* OKWeakMap.m */,
+			);
+			path = weak;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -138,8 +176,13 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9EF8A7229B73E2900BB305B /* STHashKeyPairMap.h in Headers */,
 				E9DD8AB329B62F6500010FFE /* StarTrek.h in Headers */,
+				E9EF8A6B29B73DEB00BB305B /* OKWeakMap.h in Headers */,
+				E9EF8A7629B73E4000BB305B /* STAddressPairMap.h in Headers */,
+				E9EF8A6F29B73DFA00BB305B /* STKeyPairMap.h in Headers */,
 				E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */,
+				E9EF8A7A29B73E5000BB305B /* STAddressPairObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,8 +283,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9EF8A7329B73E2900BB305B /* STHashKeyPairMap.m in Sources */,
 				E9DD8AC729B6436F00010FFE /* STSocketAddress.m in Sources */,
+				E9EF8A7B29B73E5000BB305B /* STAddressPairObject.m in Sources */,
+				E9EF8A6A29B73DEB00BB305B /* OKWeakMap.m in Sources */,
 				E9DD8AA729B62F6500010FFE /* StarTrek.docc in Sources */,
+				E9EF8A7729B73E4000BB305B /* STAddressPairMap.m in Sources */,
+				E9EF8A6E29B73DFA00BB305B /* STKeyPairMap.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

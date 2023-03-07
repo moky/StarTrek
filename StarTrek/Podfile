@@ -1,5 +1,5 @@
 platform :ios, '11.0'
 
 target 'StarTrek' do
-  pod 'FiniteStateMachine', '~> 2.2'
+  pod 'FiniteStateMachine', '~> 2.2.2'
 end

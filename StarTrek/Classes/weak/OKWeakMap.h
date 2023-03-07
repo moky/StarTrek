@@ -1,6 +1,6 @@
 // license: https://mit-license.org
 //
-//  StarTrek : Interstellar Transport
+//  ObjectKey : Object & Key kits
 //
 //                               Written in 2023 by Moky <albert.moky@gmail.com>
 //
@@ -28,55 +28,37 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  STSocketAddress.m
+//  OKWeakMap.h
 //  StarTrek
 //
 //  Created by Albert Moky on 2023/3/6.
 //
 
-#import "STSocketAddress.h"
+#import <ObjectKey/ObjectKey.h>
 
-@interface STSocketAddress ()
+NS_ASSUME_NONNULL_BEGIN
 
-@property(nonatomic, strong) NSString *host;
-@property(nonatomic, assign) UInt16 port;
+/**
+ *  Weak Key & Value Map
+ */
+@interface OKWeakMap<__covariant KeyType, __covariant ObjectType> : OKAbstractMap<KeyType, ObjectType>
+
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
+- (instancetype)initWithCapacity:(NSUInteger)numItems NS_DESIGNATED_INITIALIZER;
+
+@end
+
+@interface OKWeakMap (NSDictionaryCreation)
+
++ (instancetype)dictionary;
 
 @end
 
-@implementation STSocketAddress
+@interface OKWeakMap (NSMutableDictionaryCreation)
 
-- (instancetype)init {
-    NSAssert(false, @"DON'T call me");
-    NSString *ip = nil;
-    return [self initWithHost:ip port:0];
-}
-
-/* designated initializer */
-- (instancetype)initWithHost:(NSString *)ip port:(UInt16)port {
-    if (self = [super init]) {
-        self.host = ip;
-        self.port = port;
-    }
-    return self;
-}
-
-#pragma mark Object
-
-- (NSUInteger)hash {
-    return [_host hash] + _port * 13;
-}
-
-- (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[STSocketAddress class]]) {
-        // compare with wrapper
-        if (object == self) {
-            return YES;
-        }
-        // compare with host & port
-        STSocketAddress *other = (STSocketAddress *)object;
-        return other.port == _port && [other.host isEqualToString:_host];
-    }
-    return NO;
-}
++ (instancetype)dictionaryWithCapacity:(NSUInteger)numItems;
 
 @end
+
+NS_ASSUME_NONNULL_END

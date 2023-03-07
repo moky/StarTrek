@@ -28,53 +28,71 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  STSocketAddress.m
+//  STAddressPairObject.m
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/7.
 //
 
-#import "STSocketAddress.h"
+#import "STAddressPairObject.h"
 
-@interface STSocketAddress ()
+static inline BOOL address_equal(STSocketAddress *addr1, STSocketAddress *addr2) {
+    return (addr1 == addr2) || (addr1 && [addr1 isEqual:addr2]);
+}
 
-@property(nonatomic, strong) NSString *host;
-@property(nonatomic, assign) UInt16 port;
+@interface STAddressPairObject ()
+
+@property(nonatomic, strong, nullable) STSocketAddress *remoteAddress;
+@property(nonatomic, strong, nullable) STSocketAddress *localAddress;
 
 @end
 
-@implementation STSocketAddress
+@implementation STAddressPairObject
 
 - (instancetype)init {
-    NSAssert(false, @"DON'T call me");
-    NSString *ip = nil;
-    return [self initWithHost:ip port:0];
+    NSAssert(false, @"don't call me!");
+    return [self initWithRemoteAddress:nil andLocalAddress:nil];
 }
 
 /* designated initializer */
-- (instancetype)initWithHost:(NSString *)ip port:(UInt16)port {
+- (instancetype)initWithRemoteAddress:(STSocketAddress *)remote
+                      andLocalAddress:(STSocketAddress *)local {
     if (self = [super init]) {
-        self.host = ip;
-        self.port = port;
+        self.remoteAddress = remote;
+        self.localAddress = local;
     }
     return self;
+}
+
+// Override
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\" />", [self class], [self remoteAddress], [self localAddress]];
 }
 
 #pragma mark Object
 
 - (NSUInteger)hash {
-    return [_host hash] + _port * 13;
+    // name's hashCode is multiplied by an arbitrary prime number (13)
+    // in order to make sure there is a difference in the hashCode between
+    // these two parameters:
+    //  name: a  value: aa
+    //  name: aa value: a
+    return [_remoteAddress hash] * 13 + [_localAddress hash];
 }
 
 - (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[STSocketAddress class]]) {
+    if (!object) {
+        return !_remoteAddress && !_localAddress;
+    }
+    if ([object isKindOfClass:[STAddressPairObject class]]) {
         // compare with wrapper
         if (object == self) {
             return YES;
         }
-        // compare with host & port
-        STSocketAddress *other = (STSocketAddress *)object;
-        return other.port == _port && [other.host isEqualToString:_host];
+        // compare with remote & local addresses
+        STAddressPairObject *other = (STAddressPairObject *)object;
+        return address_equal(other.remoteAddress, _remoteAddress)
+            && address_equal(other.localAddress, _localAddress);
     }
     return NO;
 }

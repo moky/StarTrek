@@ -28,55 +28,31 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  STSocketAddress.m
+//  STAddressPairMap.h
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/7.
 //
 
-#import "STSocketAddress.h"
+#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/STHashKeyPairMap.h>
 
-@interface STSocketAddress ()
+NS_ASSUME_NONNULL_BEGIN
 
-@property(nonatomic, strong) NSString *host;
-@property(nonatomic, assign) UInt16 port;
+@interface STAddressPairMap<__covariant ObjectType> : STHashKeyPairMap<STSocketAddress *, ObjectType>
 
-@end
-
-@implementation STSocketAddress
-
-- (instancetype)init {
-    NSAssert(false, @"DON'T call me");
-    NSString *ip = nil;
-    return [self initWithHost:ip port:0];
-}
-
-/* designated initializer */
-- (instancetype)initWithHost:(NSString *)ip port:(UInt16)port {
-    if (self = [super init]) {
-        self.host = ip;
-        self.port = port;
-    }
-    return self;
-}
-
-#pragma mark Object
-
-- (NSUInteger)hash {
-    return [_host hash] + _port * 13;
-}
-
-- (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[STSocketAddress class]]) {
-        // compare with wrapper
-        if (object == self) {
-            return YES;
-        }
-        // compare with host & port
-        STSocketAddress *other = (STSocketAddress *)object;
-        return other.port == _port && [other.host isEqualToString:_host];
-    }
-    return NO;
-}
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 @end
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+STSocketAddress *STAnyAddress(void);
+
+#ifdef __cplusplus
+} /* end of extern "C" */
+#endif
+
+NS_ASSUME_NONNULL_END

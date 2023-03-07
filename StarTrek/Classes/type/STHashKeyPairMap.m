@@ -28,55 +28,61 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  STSocketAddress.m
+//  STHashKeyPairMap.m
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/7.
 //
 
-#import "STSocketAddress.h"
+#import "STHashKeyPairMap.h"
 
-@interface STSocketAddress ()
+@interface STHashKeyPairMap ()
 
-@property(nonatomic, strong) NSString *host;
-@property(nonatomic, assign) UInt16 port;
+@property(nonatomic, strong) NSMutableSet<id> *cachedValues;
 
 @end
 
-@implementation STSocketAddress
+@implementation STHashKeyPairMap
 
-- (instancetype)init {
-    NSAssert(false, @"DON'T call me");
-    NSString *ip = nil;
-    return [self initWithHost:ip port:0];
+// Override
+- (NSSet<id> *)allValues {
+    NSMutableSet *mSet = [[NSMutableSet alloc] init];
+    [_cachedValues enumerateObjectsWithOptions:NSEnumerationConcurrent
+                                    usingBlock:^(id obj, BOOL *stop) {
+        [mSet addObject:obj];
+    }];
+    return mSet;
 }
 
-/* designated initializer */
-- (instancetype)initWithHost:(NSString *)ip port:(UInt16)port {
-    if (self = [super init]) {
-        self.host = ip;
-        self.port = port;
+// Override
+- (void)setObject:(id)value
+        forRemote:(nullable id)remote
+         andLocal:(nullable id)local {
+    if (value) {
+        // the caller may create different values with same pair (remote, local)
+        // so here we should try to remove it first to make sure it's clean
+        [_cachedValues removeObject:value];
+        // cache it
+        [_cachedValues addObject:value];
     }
-    return self;
+    // create indexes
+    [super setObject:value forRemote:remote andLocal:local];
 }
 
-#pragma mark Object
-
-- (NSUInteger)hash {
-    return [_host hash] + _port * 13;
-}
-
-- (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[STSocketAddress class]]) {
-        // compare with wrapper
-        if (object == self) {
-            return YES;
-        }
-        // compare with host & port
-        STSocketAddress *other = (STSocketAddress *)object;
-        return other.port == _port && [other.host isEqualToString:_host];
+// Override
+- (nullable id)removeObject:(nullable id)value
+                  forRemote:(nullable id)remote
+                   andLocal:(nullable id)local {
+    // remove indexes
+    id old = [super removeObject:value forRemote:remote andLocal:local];
+    if (old) {
+        [_cachedValues removeObject:old];
     }
-    return NO;
+    // clear cached value
+    if (value && value != old) {
+        [_cachedValues removeObject:value];
+    }
+    return old ? old : value;
 }
 
 @end

@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
     s.name                  = "StarTrek"
-    s.version               = "0.1.0"
+    s.version               = "0.1.1"
     s.summary               = "Interstellar Transport"
     s.description           = <<-DESC
             This is a library of common interfaces for network connections.
@@ -28,6 +28,6 @@ Pod::Spec.new do |s|
     # s.frameworks          = 'Security'
     # s.requires_arc        = true
 
-    s.dependency "FiniteStateMachine", "~> 2.2"
+    s.dependency "FiniteStateMachine", "~> 2.2.2"
 
 end

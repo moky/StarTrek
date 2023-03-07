@@ -28,55 +28,35 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  STSocketAddress.m
+//  STAddressPairMap.m
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/7.
 //
 
-#import "STSocketAddress.h"
+#import "STAddressPairMap.h"
 
-@interface STSocketAddress ()
-
-@property(nonatomic, strong) NSString *host;
-@property(nonatomic, assign) UInt16 port;
-
-@end
-
-@implementation STSocketAddress
+@implementation STAddressPairMap
 
 - (instancetype)init {
-    NSAssert(false, @"DON'T call me");
-    NSString *ip = nil;
-    return [self initWithHost:ip port:0];
-}
-
-/* designated initializer */
-- (instancetype)initWithHost:(NSString *)ip port:(UInt16)port {
-    if (self = [super init]) {
-        self.host = ip;
-        self.port = port;
+    if (self = [super initWithDefaultAddress:STAnyAddress()]) {
+        
     }
     return self;
 }
 
-#pragma mark Object
-
-- (NSUInteger)hash {
-    return [_host hash] + _port * 13;
-}
-
-- (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[STSocketAddress class]]) {
-        // compare with wrapper
-        if (object == self) {
-            return YES;
-        }
-        // compare with host & port
-        STSocketAddress *other = (STSocketAddress *)object;
-        return other.port == _port && [other.host isEqualToString:_host];
-    }
-    return NO;
+- (instancetype)initWithDefaultAddress:(id)any {
+    NSAssert(false, @"don't call me!");
+    return [self init];
 }
 
 @end
+
+STSocketAddress *STAnyAddress(void) {
+    static STSocketAddress *_anyAddress;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _anyAddress = [[STSocketAddress alloc] initWithHost:@"0.0.0.0" port:0];
+    });
+    return _anyAddress;
+}

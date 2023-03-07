@@ -39,9 +39,15 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STAddressPairMap<__covariant ObjectType> : STHashKeyPairMap<STSocketAddress *, ObjectType>
+@interface STAddressPairMap<__covariant ObjectType> : STHashKeyPairMap<id<STSocketAddress>, ObjectType>
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
+
+@end
+
+@interface STAddressPairMap (Creation)
+
++ (instancetype)map;
 
 @end
 
@@ -49,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 extern "C" {
 #endif
 
-STSocketAddress *STAnyAddress(void);
+id<STSocketAddress> STAnyAddress(void);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

@@ -93,11 +93,11 @@ typedef OKAbstractMap<id, OKAbstractMap<id, id> *> WeakKeyTable;
 - (instancetype)init {
     NSAssert(false, @"don't call me!");
     id address = nil;
-    return [self initWithDefaultAddress:address];
+    return [self initWithDefaultValue:address];
 }
 
 /* designated initializer */
-- (instancetype)initWithDefaultAddress:(id)any {
+- (instancetype)initWithDefaultValue:(id)any {
     if (self = [super init]) {
         self.defaultKey = any;
         self.map = [OKWeakHashMap dictionary];

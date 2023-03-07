@@ -7,10 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E93725B129B76012008EAF9E /* StarTrek.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725B029B76012008EAF9E /* StarTrek.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725B429B76064008EAF9E /* STChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725B229B76064008EAF9E /* STChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725B829B76077008EAF9E /* STConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725B629B76077008EAF9E /* STConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725BC29B761CC008EAF9E /* STHub.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725BA29B761CC008EAF9E /* STHub.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725C029B761FA008EAF9E /* STConnectionState.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725BE29B761FA008EAF9E /* STConnectionState.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725C129B761FA008EAF9E /* STConnectionState.m in Sources */ = {isa = PBXBuildFile; fileRef = E93725BF29B761FA008EAF9E /* STConnectionState.m */; };
+		E93725C429B7620B008EAF9E /* STStateMachine.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725C229B7620B008EAF9E /* STStateMachine.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725C529B7620B008EAF9E /* STStateMachine.m in Sources */ = {isa = PBXBuildFile; fileRef = E93725C329B7620B008EAF9E /* STStateMachine.m */; };
+		E93725C829B76275008EAF9E /* STShip.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725C629B76275008EAF9E /* STShip.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725CC29B76296008EAF9E /* STDocker.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725CA29B76296008EAF9E /* STDocker.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725D029B762AD008EAF9E /* STGate.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725CE29B762AD008EAF9E /* STGate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E93725D629B794C6008EAF9E /* STDocker.m in Sources */ = {isa = PBXBuildFile; fileRef = E93725D529B794C6008EAF9E /* STDocker.m */; };
 		E9DD8AA729B62F6500010FFE /* StarTrek.docc in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AA629B62F6500010FFE /* StarTrek.docc */; };
 		E9DD8AAD29B62F6500010FFE /* StarTrek.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9DD8AA229B62F6500010FFE /* StarTrek.framework */; };
 		E9DD8AB229B62F6500010FFE /* StarTrekTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AB129B62F6500010FFE /* StarTrekTests.m */; };
-		E9DD8AB329B62F6500010FFE /* StarTrek.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8AA529B62F6500010FFE /* StarTrek.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E9DD8AC729B6436F00010FFE /* STSocketAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AC329B6436F00010FFE /* STSocketAddress.m */; };
 		E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8AC429B6436F00010FFE /* STSocketAddress.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E9EF8A6A29B73DEB00BB305B /* OKWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A6829B73DEB00BB305B /* OKWeakMap.m */; };
@@ -36,8 +47,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E93725B029B76012008EAF9E /* StarTrek.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StarTrek.h; sourceTree = "<group>"; };
+		E93725B229B76064008EAF9E /* STChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STChannel.h; sourceTree = "<group>"; };
+		E93725B629B76077008EAF9E /* STConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConnection.h; sourceTree = "<group>"; };
+		E93725BA29B761CC008EAF9E /* STHub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHub.h; sourceTree = "<group>"; };
+		E93725BE29B761FA008EAF9E /* STConnectionState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConnectionState.h; sourceTree = "<group>"; };
+		E93725BF29B761FA008EAF9E /* STConnectionState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConnectionState.m; sourceTree = "<group>"; };
+		E93725C229B7620B008EAF9E /* STStateMachine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStateMachine.h; sourceTree = "<group>"; };
+		E93725C329B7620B008EAF9E /* STStateMachine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStateMachine.m; sourceTree = "<group>"; };
+		E93725C629B76275008EAF9E /* STShip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STShip.h; sourceTree = "<group>"; };
+		E93725CA29B76296008EAF9E /* STDocker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDocker.h; sourceTree = "<group>"; };
+		E93725CE29B762AD008EAF9E /* STGate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGate.h; sourceTree = "<group>"; };
+		E93725D529B794C6008EAF9E /* STDocker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDocker.m; sourceTree = "<group>"; };
 		E9DD8AA229B62F6500010FFE /* StarTrek.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StarTrek.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E9DD8AA529B62F6500010FFE /* StarTrek.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StarTrek.h; sourceTree = "<group>"; };
 		E9DD8AA629B62F6500010FFE /* StarTrek.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = StarTrek.docc; sourceTree = "<group>"; };
 		E9DD8AAC29B62F6500010FFE /* StarTrekTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarTrekTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9DD8AB129B62F6500010FFE /* StarTrekTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StarTrekTests.m; sourceTree = "<group>"; };
@@ -96,7 +118,6 @@
 		E9DD8AA429B62F6500010FFE /* StarTrek */ = {
 			isa = PBXGroup;
 			children = (
-				E9DD8AA529B62F6500010FFE /* StarTrek.h */,
 				E9DD8AA629B62F6500010FFE /* StarTrek.docc */,
 			);
 			path = StarTrek;
@@ -113,6 +134,7 @@
 		E9DD8ABC29B63D5D00010FFE /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				E93725B029B76012008EAF9E /* StarTrek.h */,
 				E9EF8A6729B73DEB00BB305B /* weak */,
 				E9DD8AC229B6436F00010FFE /* type */,
 				E9DD8AC529B6436F00010FFE /* net */,
@@ -125,6 +147,10 @@
 		E9DD8AC129B6436F00010FFE /* port */ = {
 			isa = PBXGroup;
 			children = (
+				E93725C629B76275008EAF9E /* STShip.h */,
+				E93725CA29B76296008EAF9E /* STDocker.h */,
+				E93725D529B794C6008EAF9E /* STDocker.m */,
+				E93725CE29B762AD008EAF9E /* STGate.h */,
 			);
 			path = port;
 			sourceTree = "<group>";
@@ -149,6 +175,13 @@
 		E9DD8AC529B6436F00010FFE /* net */ = {
 			isa = PBXGroup;
 			children = (
+				E93725B229B76064008EAF9E /* STChannel.h */,
+				E93725B629B76077008EAF9E /* STConnection.h */,
+				E93725BA29B761CC008EAF9E /* STHub.h */,
+				E93725BE29B761FA008EAF9E /* STConnectionState.h */,
+				E93725BF29B761FA008EAF9E /* STConnectionState.m */,
+				E93725C229B7620B008EAF9E /* STStateMachine.h */,
+				E93725C329B7620B008EAF9E /* STStateMachine.m */,
 			);
 			path = net;
 			sourceTree = "<group>";
@@ -177,12 +210,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				E9EF8A7229B73E2900BB305B /* STHashKeyPairMap.h in Headers */,
-				E9DD8AB329B62F6500010FFE /* StarTrek.h in Headers */,
+				E93725B429B76064008EAF9E /* STChannel.h in Headers */,
 				E9EF8A6B29B73DEB00BB305B /* OKWeakMap.h in Headers */,
 				E9EF8A7629B73E4000BB305B /* STAddressPairMap.h in Headers */,
+				E93725B129B76012008EAF9E /* StarTrek.h in Headers */,
+				E93725C029B761FA008EAF9E /* STConnectionState.h in Headers */,
 				E9EF8A6F29B73DFA00BB305B /* STKeyPairMap.h in Headers */,
+				E93725CC29B76296008EAF9E /* STDocker.h in Headers */,
+				E93725C429B7620B008EAF9E /* STStateMachine.h in Headers */,
+				E93725B829B76077008EAF9E /* STConnection.h in Headers */,
+				E93725D029B762AD008EAF9E /* STGate.h in Headers */,
 				E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */,
 				E9EF8A7A29B73E5000BB305B /* STAddressPairObject.h in Headers */,
+				E93725C829B76275008EAF9E /* STShip.h in Headers */,
+				E93725BC29B761CC008EAF9E /* STHub.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,7 +330,10 @@
 				E9EF8A6A29B73DEB00BB305B /* OKWeakMap.m in Sources */,
 				E9DD8AA729B62F6500010FFE /* StarTrek.docc in Sources */,
 				E9EF8A7729B73E4000BB305B /* STAddressPairMap.m in Sources */,
+				E93725C129B761FA008EAF9E /* STConnectionState.m in Sources */,
 				E9EF8A6E29B73DFA00BB305B /* STKeyPairMap.m in Sources */,
+				E93725D629B794C6008EAF9E /* STDocker.m in Sources */,
+				E93725C529B7620B008EAF9E /* STStateMachine.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

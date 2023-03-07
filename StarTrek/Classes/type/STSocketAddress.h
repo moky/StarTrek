@@ -38,14 +38,24 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STSocketAddress : NSObject
+@protocol STSocketAddress <NSObject>
 
 @property(nonatomic, readonly) NSString *host;
 @property(nonatomic, readonly) UInt16 port;
 
+@end
+
+@interface STSocketAddress : NSObject <STSocketAddress>
+
 - (instancetype)initWithHost:(NSString *)ip
                         port:(UInt16)port
 NS_DESIGNATED_INITIALIZER;
+
+@end
+
+@interface STSocketAddress (Creation)
+
++ (instancetype)addressWithHost:(NSString *)ip port:(UInt16)port;
 
 @end
 

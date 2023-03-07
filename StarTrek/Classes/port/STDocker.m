@@ -28,24 +28,26 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  STHashKeyPairMap.h
+//  STDocker.m
 //  StarTrek
 //
 //  Created by Albert Moky on 2023/3/7.
 //
 
-#import <StarTrek/STKeyPairMap.h>
+#import "STDocker.h"
 
-NS_ASSUME_NONNULL_BEGIN
-
-@interface STHashKeyPairMap<__covariant KeyType, __covariant ObjectType> : STWeakKeyPairMap<KeyType, ObjectType>
-
-@end
-
-@interface STHashKeyPairMap<KeyType, ObjectType> (Creation)
-
-+ (instancetype)mapWithDefaultValue:(ObjectType)value;
-
-@end
-
-NS_ASSUME_NONNULL_END
+STDockerStatus STDockerStatusFromConnectionState(STConnectionState *state) {
+    if (!state) {
+        return STDockerStatusError;
+    } else if ([state isEqual:kSTConnectionStateReady] ||
+               [state isEqual:kSTConnectionStateExpired] ||
+               [state isEqual:kSTConnectionStateMaintaining]) {
+        return STDockerStatusReady;
+    } else if ([state isEqual:kSTConnectionStatePreparing]) {
+        return STDockerStatusPreparing;
+    } else if ([state isEqual:kSTConnectionStateError]) {
+        return STDockerStatusError;
+    } else {
+        return STDockerStatusInit;
+    }
+}

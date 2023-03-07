@@ -40,11 +40,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface STAddressPairObject : NSObject
 
-@property(nonatomic, readonly, nullable) STSocketAddress *remoteAddress;
-@property(nonatomic, readonly, nullable) STSocketAddress *localAddress;
+@property(nonatomic, readonly, nullable) id<STSocketAddress> remoteAddress;
+@property(nonatomic, readonly, nullable) id<STSocketAddress> localAddress;
 
-- (instancetype)initWithRemoteAddress:(nullable STSocketAddress *)remote
-                      andLocalAddress:(nullable STSocketAddress *)local;
+- (instancetype)initWithRemoteAddress:(nullable id<STSocketAddress>)remote
+                      andLocalAddress:(nullable id<STSocketAddress>)local
+NS_DESIGNATED_INITIALIZER;
+
+@end
+
+@interface STAddressPairObject (Creation)
+
++ (instancetype)objectWithRemoteAddress:(nullable id<STSocketAddress>)remote
+                        andLocalAddress:(nullable id<STSocketAddress>)local;
 
 @end
 

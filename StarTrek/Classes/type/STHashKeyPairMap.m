@@ -86,3 +86,12 @@
 }
 
 @end
+
+@implementation STHashKeyPairMap (Creation)
+
++ (instancetype)mapWithDefaultValue:(id)value {
+    STHashKeyPairMap *map = [[STHashKeyPairMap alloc] initWithDefaultValue:value];
+    return map;
+}
+
+@end

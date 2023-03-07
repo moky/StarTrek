@@ -39,21 +39,30 @@
 @implementation STAddressPairMap
 
 - (instancetype)init {
-    if (self = [super initWithDefaultAddress:STAnyAddress()]) {
-        
+    if (self = [super initWithDefaultValue:STAnyAddress()]) {
+        //
     }
     return self;
 }
 
-- (instancetype)initWithDefaultAddress:(id)any {
+- (instancetype)initWithDefaultValue:(id)any {
     NSAssert(false, @"don't call me!");
     return [self init];
 }
 
 @end
 
-STSocketAddress *STAnyAddress(void) {
-    static STSocketAddress *_anyAddress;
+@implementation STAddressPairMap (Creation)
+
++ (instancetype)map {
+    STAddressPairMap *map = [[STAddressPairMap alloc] init];
+    return map;
+}
+
+@end
+
+id<STSocketAddress> STAnyAddress(void) {
+    static id<STSocketAddress> _anyAddress;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         _anyAddress = [[STSocketAddress alloc] initWithHost:@"0.0.0.0" port:0];

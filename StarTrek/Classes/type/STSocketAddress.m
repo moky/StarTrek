@@ -67,16 +67,25 @@
 }
 
 - (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[STSocketAddress class]]) {
+    if ([object conformsToProtocol:@protocol(STSocketAddress)]) {
         // compare with wrapper
         if (object == self) {
             return YES;
         }
         // compare with host & port
-        STSocketAddress *other = (STSocketAddress *)object;
+        id<STSocketAddress> other = (id<STSocketAddress>)object;
         return other.port == _port && [other.host isEqualToString:_host];
     }
     return NO;
+}
+
+@end
+
+@implementation STSocketAddress (Creation)
+
++ (instancetype)addressWithHost:(NSString *)ip port:(UInt16)port {
+    STSocketAddress *address = [[STSocketAddress alloc] initWithHost:ip port:port];
+    return address;
 }
 
 @end

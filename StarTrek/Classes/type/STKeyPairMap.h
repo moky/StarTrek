@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface STWeakKeyPairMap<__covariant KeyType, __covariant ObjectType> : STKeyPairMap<KeyType, ObjectType>
 
-- (instancetype)initWithDefaultAddress:(KeyType)any NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithDefaultValue:(KeyType)any NS_DESIGNATED_INITIALIZER;
 
 @end
 

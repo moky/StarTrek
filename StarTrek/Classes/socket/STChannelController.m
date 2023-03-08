@@ -34,8 +34,207 @@
 //  Created by Albert Moky on 2023/3/8.
 //
 
+#import "NIOException.h"
+#import "NIOByteChannel.h"
+
+#import "STBaseChannel.h"
+
 #import "STChannelController.h"
 
+@interface ChannelChecker : NSObject <STChannelChecker>
+
+@end
+
+@implementation ChannelChecker
+
+- (NIOException *)checkError:(NIOException *)error
+                socketChannel:(NIOSelectableChannel *)sock {
+    // TODO: check 'E_AGAIN' & TimeoutException
+    return error;
+}
+
+- (NIOException *)checkData:(NIOByteBuffer *)buf
+                     length:(NSInteger)len
+              socketChannel:(NIOSelectableChannel *)sock {
+    // TODO: check Timeout for received nothing
+    if (len == -1) {
+        return [[NIOClosedChannelException alloc] init];
+    }
+    return nil;
+}
+
+@end
+
+#pragma mark -
+
+@interface STChannelController ()
+
+@property(nonatomic, weak) STBaseChannel *channel;
+
+@property(nonatomic, strong) id<STChannelChecker> checker;
+
+@end
+
 @implementation STChannelController
+
+- (instancetype)initWithChannel:(STBaseChannel *)channel {
+    if (self = [super init]) {
+        self.channel = channel;
+        self.checker = [self createChecker];
+    }
+    return self;
+}
+
+- (NIOSelectableChannel *)socket {
+    return [self.channel socketChannel];
+}
+
+- (id<NIOSocketAddress>)remoteAddress {
+    return [self.channel remoteAddress];
+}
+
+- (id<NIOSocketAddress>)localAddress {
+    return [self.channel localAddress];
+}
+
+//
+//  Checker
+//
+
+// Override
+- (NIOException *)checkError:(NIOException *)error
+               socketChannel:(NIOSelectableChannel *)sock {
+    return [self.checker checkError:error socketChannel:sock];
+}
+
+// Override
+- (NIOException *)checkData:(NIOByteBuffer *)buf
+                     length:(NSInteger)len
+              socketChannel:(NIOSelectableChannel *)sock {
+    return [self.checker checkData:buf length:len socketChannel:sock];
+}
+
+- (id<STChannelChecker>)createChecker {
+    return [[ChannelChecker alloc] init];
+}
+
+@end
+
+#pragma mark -
+
+@implementation STChannelReader
+
+- (NSInteger)tryRead:(NIOByteBuffer *)dst socketChannel:(NIOSelectableChannel *)sock {
+    @try {
+        return [(id<NIOReadableByteChannel>)sock readWithBuffer:dst];
+    } @catch (NIOException *e) {
+        e = [self checkError:e socketChannel:sock];
+        if (e) {
+            // connection lost?
+            @throw e;
+        }
+        // received nothing
+        return -1;
+    }
+}
+
+// Override
+- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst {
+    NIOSelectableChannel *sock = [self socket];
+    NSAssert([sock conformsToProtocol:@protocol(NIOReadableByteChannel)], @"socket error, cannot send data: %@", sock);
+    NSInteger cnt = [self tryRead:dst socketChannel:sock];
+    // check data
+    NIOException *error = [self checkData:dst length:cnt socketChannel:sock];
+    if (error) {
+        // connection lost!
+        @throw error;
+    }
+    // OK
+    return cnt;
+    
+}
+
+- (id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst {
+    NSAssert(false, @"override me!");
+    return nil;
+}
+
+
+- (NIOException *)checkData:(NIOByteBuffer *)buf
+                     length:(NSInteger)len
+              socketChannel:(NIOSelectableChannel *)sock {
+    NSAssert(false, @"override me!");
+    return nil;
+}
+
+- (NIOException *)checkError:(NIOException *)error
+               socketChannel:(NIOSelectableChannel *)sock {
+    NSAssert(false, @"override me!");
+    return nil;
+}
+
+@end
+
+@implementation STChannelWriter
+
+- (NSInteger)tryWrite:(NIOByteBuffer *)src socketChannel:(NIOSelectableChannel *)sock {
+    @try {
+        return [(id<NIOWritableByteChannel>)sock writeWithBuffer:src];
+    } @catch (NIOException *e) {
+        e = [self checkError:e socketChannel:sock];
+        if (e) {
+            // connection lost?
+            @throw e;
+        }
+        // buffer overflow!
+        return 0;
+    }
+}
+
+- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src {
+    NIOSelectableChannel *sock = [self socket];
+    NSAssert([sock conformsToProtocol:@protocol(NIOWritableByteChannel)], @"socket error, cannot write data: %ld byte(s)", src.position);
+    NSInteger sent = 0;
+    NSInteger rest = [src position];
+    NSInteger cnt;
+    while (YES) {  // while ([sock isOpen])
+        cnt = [self tryWrite:src socketChannel:sock];
+        // check send result
+        if (cnt <= 0) {
+            // buffer overflow?
+            break;
+        }
+        // something sent, check remaining data
+        sent += cnt;
+        rest -= cnt;
+        if (rest <= 0) {
+            // done!
+            break;
+        //} else {
+        //    // remove sent part
+        }
+    }
+    return sent;
+}
+
+- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src
+              remoteAddress:(id<NIOSocketAddress>)target {
+    NSAssert(false, @"override me!");
+    return 0;
+}
+
+
+- (NIOException *)checkData:(NIOByteBuffer *)buf
+                     length:(NSInteger)len
+              socketChannel:(NIOSelectableChannel *)sock {
+    NSAssert(false, @"override me!");
+    return nil;
+}
+
+- (NIOException *)checkError:(NIOException *)error
+               socketChannel:(NIOSelectableChannel *)sock {
+    NSAssert(false, @"override me!");
+    return nil;
+}
 
 @end

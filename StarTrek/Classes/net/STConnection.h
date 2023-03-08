@@ -36,7 +36,8 @@
 
 #import <FiniteStateMachine/FiniteStateMachine.h>
 
-#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/NIOException.h>
+#import <StarTrek/NIOSocketAddress.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -53,8 +54,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly, getter=isAlive) BOOL alive;  // isOpen() && (isConnected() || isBound())
 
-@property(nonatomic, readonly) id<STSocketAddress> localAddress;
-@property(nonatomic, readonly) id<STSocketAddress> remoteAddress;
+@property(nonatomic, readonly) id<NIOSocketAddress> localAddress;
+@property(nonatomic, readonly) id<NIOSocketAddress> remoteAddress;
 
 /**
  *  Get state
@@ -131,7 +132,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param data        - outgo data package
  * @param connection  - current connection
  */
-- (void)connection:(id<STConnection>)connection failedToSendData:(NSData *)data error:(NSError *)error;
+- (void)connection:(id<STConnection>)connection failedToSendData:(NSData *)data error:(NIOError *)error;
 
 /**
  *  Called when connection (receiving) error
@@ -139,7 +140,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param error       - error message
  * @param connection  - current connection
  */
-- (void)connection:(id<STConnection>)connection error:(NSError *)error;
+- (void)connection:(id<STConnection>)connection error:(NIOError *)error;
 
 @end
 

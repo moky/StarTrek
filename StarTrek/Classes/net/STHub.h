@@ -34,7 +34,7 @@
 //  Created by Albert Moky on 2023/3/7.
 //
 
-#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/NIOSocketAddress.h>
 #import <StarTrek/STChannel.h>
 #import <StarTrek/STConnection.h>
 
@@ -81,7 +81,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local  - local address
  * @return null on socket closed
  */
-- (nullable id<STChannel>)openChannelWithRemoteAddress:(nullable id<STSocketAddress>)remote andLocalAddress:(nullable id<STSocketAddress>)local;
+- (nullable id<STChannel>)openChannelWithRemoteAddress:(nullable id<NIOSocketAddress>)remote andLocalAddress:(nullable id<NIOSocketAddress>)local;
 
 /**
  *  Get connection with direction (remote, local)
@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local  - local address
  * @return null on connection not found
  */
-- (nullable id<STConnection>)connectToRemoteAddress:(id<STSocketAddress>)remote withLocalAddress:(id<STSocketAddress>)local;
+- (nullable id<STConnection>)connectToRemoteAddress:(id<NIOSocketAddress>)remote withLocalAddress:(id<NIOSocketAddress>)local;
 
 @end
 

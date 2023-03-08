@@ -61,11 +61,11 @@
 
 @end
 
-id<STSocketAddress> STAnyAddress(void) {
-    static id<STSocketAddress> _anyAddress;
+id<NIOSocketAddress> STAnyAddress(void) {
+    static id<NIOSocketAddress> _anyAddress;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _anyAddress = [[STSocketAddress alloc] initWithHost:@"0.0.0.0" port:0];
+        _anyAddress = [[NIOSocketAddress alloc] initWithHost:@"0.0.0.0" port:0];
     });
     return _anyAddress;
 }

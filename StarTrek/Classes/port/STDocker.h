@@ -36,7 +36,9 @@
 
 #import <FiniteStateMachine/FiniteStateMachine.h>
 
-#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/NIOSocketAddress.h>
+#import <StarTrek/NIOException.h>
+
 #import <StarTrek/STConnectionState.h>
 #import <StarTrek/STShip.h>
 
@@ -72,8 +74,8 @@ STDockerStatus STDockerStatusFromConnectionState(STConnectionState *state);
 
 @property(nonatomic, readonly) STDockerStatus status;
 
-@property(nonatomic, readonly) id<STSocketAddress> remoteAddress;
-@property(nonatomic, readonly) id<STSocketAddress> localAddress;
+@property(nonatomic, readonly) id<NIOSocketAddress> remoteAddress;
+@property(nonatomic, readonly) id<NIOSocketAddress> localAddress;
 
 /**
  *  Pack data to an outgo ship (with normal priority), and
@@ -142,7 +144,7 @@ STDockerStatus STDockerStatusFromConnectionState(STConnectionState *state);
  * @param departure   - outgo data package container
  * @param worker      - connection docker
  */
-- (void)docker:(id<STDocker>)worker failedToSendShip:(id<STDeparture>)departure error:(NSError *)error;
+- (void)docker:(id<STDocker>)worker failedToSendShip:(id<STDeparture>)departure error:(NIOError *)error;
 
 /**
  *  Callback when connection error
@@ -151,7 +153,7 @@ STDockerStatus STDockerStatusFromConnectionState(STConnectionState *state);
  * @param departure   - outgo data package container
  * @param worker      - connection docker
  */
-- (void)docker:(id<STDocker>)worker sendingShip:(id<STDeparture>)departure error:(NSError *)error;
+- (void)docker:(id<STDocker>)worker sendingShip:(id<STDeparture>)departure error:(NIOError *)error;
 
 /**
  *  Callback when connection status changed

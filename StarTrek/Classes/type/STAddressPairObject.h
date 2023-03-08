@@ -34,25 +34,25 @@
 //  Created by Albert Moky on 2023/3/7.
 //
 
-#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/NIOSocketAddress.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface STAddressPairObject : NSObject
 
-@property(nonatomic, readonly, nullable) id<STSocketAddress> remoteAddress;
-@property(nonatomic, readonly, nullable) id<STSocketAddress> localAddress;
+@property(nonatomic, readonly, nullable) id<NIOSocketAddress> remoteAddress;
+@property(nonatomic, readonly, nullable) id<NIOSocketAddress> localAddress;
 
-- (instancetype)initWithRemoteAddress:(nullable id<STSocketAddress>)remote
-                      andLocalAddress:(nullable id<STSocketAddress>)local
+- (instancetype)initWithRemoteAddress:(nullable id<NIOSocketAddress>)remote
+                      andLocalAddress:(nullable id<NIOSocketAddress>)local
 NS_DESIGNATED_INITIALIZER;
 
 @end
 
 @interface STAddressPairObject (Creation)
 
-+ (instancetype)objectWithRemoteAddress:(nullable id<STSocketAddress>)remote
-                        andLocalAddress:(nullable id<STSocketAddress>)local;
++ (instancetype)objectWithRemoteAddress:(nullable id<NIOSocketAddress>)remote
+                        andLocalAddress:(nullable id<NIOSocketAddress>)local;
 
 @end
 

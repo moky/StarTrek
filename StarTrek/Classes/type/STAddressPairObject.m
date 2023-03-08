@@ -36,14 +36,14 @@
 
 #import "STAddressPairObject.h"
 
-static inline BOOL address_equal(id<STSocketAddress> addr1, id<STSocketAddress> addr2) {
+static inline BOOL address_equal(id<NIOSocketAddress> addr1, id<NIOSocketAddress> addr2) {
     return (addr1 == addr2) || (addr1 && [addr1 isEqual:addr2]);
 }
 
 @interface STAddressPairObject ()
 
-@property(nonatomic, strong, nullable) id<STSocketAddress> remoteAddress;
-@property(nonatomic, strong, nullable) id<STSocketAddress> localAddress;
+@property(nonatomic, strong, nullable) id<NIOSocketAddress> remoteAddress;
+@property(nonatomic, strong, nullable) id<NIOSocketAddress> localAddress;
 
 @end
 
@@ -55,8 +55,8 @@ static inline BOOL address_equal(id<STSocketAddress> addr1, id<STSocketAddress> 
 }
 
 /* designated initializer */
-- (instancetype)initWithRemoteAddress:(id<STSocketAddress>)remote
-                      andLocalAddress:(id<STSocketAddress>)local {
+- (instancetype)initWithRemoteAddress:(id<NIOSocketAddress>)remote
+                      andLocalAddress:(id<NIOSocketAddress>)local {
     if (self = [super init]) {
         self.remoteAddress = remote;
         self.localAddress = local;
@@ -101,8 +101,8 @@ static inline BOOL address_equal(id<STSocketAddress> addr1, id<STSocketAddress> 
 
 @implementation STAddressPairObject (Creation)
 
-+ (instancetype)objectWithRemoteAddress:(id<STSocketAddress>)remote
-                        andLocalAddress:(id<STSocketAddress>)local {
++ (instancetype)objectWithRemoteAddress:(id<NIOSocketAddress>)remote
+                        andLocalAddress:(id<NIOSocketAddress>)local {
     STAddressPairObject *object;
     object = [[STAddressPairObject alloc] initWithRemoteAddress:remote
                                                 andLocalAddress:local];

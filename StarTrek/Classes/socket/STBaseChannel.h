@@ -34,11 +34,38 @@
 //  Created by Albert Moky on 2023/3/8.
 //
 
-#import <Foundation/Foundation.h>
+#import <StarTrek/STAddressPairObject.h>
+#import <StarTrek/STChannel.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STBaseChannel : NSObject
+@protocol STSocketReader;
+@protocol STSocketWriter;
+
+@interface STBaseChannel : STAddressPairObject <STChannel>
+
+// socket reader/writer
+@property(nonatomic, readonly) id<STSocketReader> reader;
+@property(nonatomic, readonly) id<STSocketWriter> writer;
+
+@property(nonatomic, readonly) NIOSelectableChannel *socketChannel;
+
+/**
+ *  Create channel
+ *
+ * @param remote      - remote address
+ * @param local       - local address
+ */
+- (instancetype)initWithSocket:(NIOSelectableChannel *)sock
+                 remoteAddress:(nullable id<NIOSocketAddress>)remote
+                  localAddress:(nullable id<NIOSocketAddress>)local;
+
+// create socket reader/writer
+- (id<STSocketReader>)createReader;
+- (id<STSocketWriter>)createWriter;
+
+// refresh flags with inner socket
+- (void)refreshFlags;
 
 @end
 

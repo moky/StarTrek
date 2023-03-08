@@ -34,8 +34,300 @@
 //  Created by Albert Moky on 2023/3/8.
 //
 
+#import <ObjectKey/ObjectKey.h>
+
 #import "STBaseConnection.h"
 
+#define CONNECTION_EXPIRES 16.0  // seconds
+
+@interface STBaseConnection () {
+    
+    NSTimeInterval _lastSentTime;
+    NSTimeInterval _lastReceivedTime;
+    
+    __strong STConnectionStateMachine *_fsm;
+    
+    __weak id<STChannel> _channel;
+}
+
+@end
+
 @implementation STBaseConnection
+
+- (instancetype)initWithChannel:(id<STChannel>)channel
+                  remoteAddress:(id<NIOSocketAddress>)remote
+                   localAddress:(id<NIOSocketAddress>)local {
+    if (self = [super initWithRemoteAddress:remote andLocalAddress:local]) {
+        self.channel = channel;
+        self.delegate = nil;
+        
+        // active time
+        _lastSentTime = 0;
+        _lastReceivedTime = 0;
+        
+        // connection state machine
+        _fsm = nil;
+    }
+    return self;
+}
+
+// protected
+- (STConnectionStateMachine *)stateMachine {
+    return _fsm;
+}
+
+// private
+- (void)setStateMachine:(STConnectionStateMachine *)newMachine {
+    // 1. replace with new machine
+    STConnectionStateMachine *oldMachine = _fsm;
+    _fsm = newMachine;
+    // 2. stop old machine
+    if (oldMachine && oldMachine != newMachine) {
+        [oldMachine stop];
+    }
+}
+
+// protected
+- (STConnectionStateMachine *)createStateMachine {
+    STConnectionStateMachine *machine;
+    machine = [[STConnectionStateMachine alloc] initWithConnection:self];
+    [machine setDelegate:self];
+    return machine;
+}
+
+// protected
+- (id<STChannel>)channel {
+    return _channel;
+}
+
+// protected
+- (void)setChannel:(id<STChannel>)newChannel {
+    // 1. replace with new channel
+    id<STChannel> oldChannel = _channel;
+    _channel = newChannel;
+    // 2. close old channel
+    if (oldChannel && oldChannel != newChannel) {
+        if ([oldChannel isConnected]) {
+            @try {
+                [oldChannel disconnect];
+            } @catch (NIOException *e) {
+            }
+        }
+    }
+}
+
+// Override
+- (BOOL)isOpen {
+    id<STChannel> sock = [self channel];
+    return [sock isOpen];
+}
+
+// Override
+- (BOOL)isBound {
+    id<STChannel> sock = [self channel];
+    return [sock isBound];
+}
+
+// Override
+- (BOOL)isConnected {
+    id<STChannel> sock = [self channel];
+    return [sock isConnected];
+}
+
+// Override
+- (BOOL)isAlive {
+    //id<STChannel> sock = [self channel];
+    //return [sock isAlive];
+    return [self isOpen] && ([self isConnected] || [self isBound]);
+}
+
+// Override
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
+    [self class], [self remoteAddress], [self localAddress], _channel, [self class]];
+}
+
+// Override
+- (NSString *)debugDescription {
+    return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
+    [self class], [self remoteAddress], [self localAddress], _channel, [self class]];
+}
+
+// Override
+- (void)close {
+    [self setChannel:nil];
+    [self setStateMachine:nil];
+}
+
+- (void)start {
+    STConnectionStateMachine *machine = [self createStateMachine];
+    [machine start];
+    [self setStateMachine:machine];
+}
+
+- (void)stop {
+    [self setChannel:nil];
+    [self setStateMachine:nil];
+}
+
+//
+//  I/O
+//
+
+// Override
+- (void)onReceivedData:(NSData *)data {
+    _lastReceivedTime = OKGetCurrentTimeInterval();
+    id<STConnectionDelegate> delegate = [self delegate];
+    if (delegate) {
+        [delegate connection:self receivedData:data];
+    }
+}
+
+// protected
+- (NSInteger)sendBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)destination {
+    id<STChannel> sock = [self channel];
+    if (![sock isAlive]) {
+        //@throw [[NIOException alloc] init];
+        return -1;
+    }
+    int sent = [sock sendWithBuffer:src remoteAddress:destination];
+    if (sent > 0) {
+        // update sent time
+        _lastSentTime = OKGetCurrentTimeInterval();
+    }
+    return sent;
+}
+
+// Override
+- (NSInteger)sendData:(NSData *)pack {
+    // try to send data
+    NIOError *error = nil;
+    NSInteger sent = -1;
+    @try {
+        // prepare buffer
+        NIOByteBuffer *buffer = [NIOByteBuffer bufferWithCapacity:pack.length];
+        [buffer putData:pack];
+        [buffer flip];
+        // send buffer
+        id<NIOSocketAddress> destination = [self remoteAddress];
+        sent = [self sendBuffer:buffer remoteAddress:destination];
+        if (sent < 0) {  // == -1
+            @throw [[NIOException alloc] init];
+        }
+    } @catch (NIOException *e) {
+        error = [[NIOError alloc] initWithException:e];
+        // socket error, close current channel
+        [self setChannel:nil];
+    }
+    // callback
+    id<STConnectionDelegate> delegate = [self delegate];
+    if (delegate) {
+        if (error) {
+            [delegate connection:self failedToSendData:pack error:error];
+        } else {
+            [delegate connection:self sentData:pack withLength:sent];
+        }
+    }
+    return sent;
+}
+
+//
+//  States
+//
+
+// Override
+- (STConnectionState *)state {
+    STConnectionStateMachine *machine = [self stateMachine];
+    return [machine currentState];
+}
+
+// Override
+- (void)tick:(NSTimeInterval)now elapsed:(NSTimeInterval)delta {
+    STConnectionStateMachine *machine = [self stateMachine];
+    if (machine) {
+        [machine tick:now elapsed:delta];
+    }
+}
+
+//
+//  Timed
+//
+
+// Override
+- (NSTimeInterval)lastSentTime {
+    return _lastSentTime;
+}
+
+// Override
+- (NSTimeInterval)lastReceivedTime {
+    return _lastReceivedTime;
+}
+
+// Override
+- (BOOL)isSentRecently:(NSTimeInterval)now {
+    return now <= _lastSentTime + CONNECTION_EXPIRES;
+}
+
+// Override
+- (BOOL)isReceivedRecently:(NSTimeInterval)now {
+    return now <= _lastReceivedTime + CONNECTION_EXPIRES;
+}
+
+// Override
+- (BOOL)isNotReceivedLongTimeAgo:(NSTimeInterval)now {
+    return now <= _lastReceivedTime + (CONNECTION_EXPIRES * 8);
+}
+
+//
+//  Events
+//
+
+// Override
+- (void)machine:(__kindof id<FSMContext>)ctx
+     enterState:(__kindof id<FSMState>)next
+           time:(NSTimeInterval)now {
+    
+}
+
+// Override
+- (void)machine:(STConnectionStateMachine *)ctx
+      exitState:(STConnectionState *)previous
+           time:(NSTimeInterval)now {
+    STConnectionState *current = [ctx currentState];
+    // if current == 'ready'
+    if (current && current.index == STConnectionStateOrderReady) {
+        // if previous == 'preparing'
+        if (previous && previous.index == STConnectionStateOrderPreparing) {
+            // connection state changed from 'preparing' to 'ready',
+            // set times to expired soon.
+            NSTimeInterval timestamp = now - (CONNECTION_EXPIRES / 2);
+            if (_lastSentTime < timestamp) {
+                _lastSentTime = timestamp;
+            }
+            if (_lastReceivedTime < timestamp) {
+                _lastReceivedTime = timestamp;
+            }
+        }
+    }
+    // callback
+    id<STConnectionDelegate> delegate = [self delegate];
+    if (delegate) {
+        [delegate connection:self changedState:previous toState:current];
+    }
+}
+
+// Override
+- (void)machine:(__kindof id<FSMContext>)ctx
+     pauseState:(__kindof id<FSMState>)current
+           time:(NSTimeInterval)now {
+    
+}
+
+// Override
+- (void)machine:(__kindof id<FSMContext>)ctx
+    resumeState:(__kindof id<FSMState>)current
+           time:(NSTimeInterval)now {
+    
+}
 
 @end

@@ -34,39 +34,39 @@
 //  Created by Albert Moky on 2023/3/7.
 //
 
-#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/NIOByteChannel.h>
+#import <StarTrek/NIOSelectableChannel.h>
+#import <StarTrek/NIONetworkChannel.h>
+
+#import <StarTrek/NIOSocketAddress.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef STSelectableChannel id;
-typedef STNetworkChannel id;
-typedef STByteChannel id;
+@protocol STChannel <NIOByteChannel>
 
-@protocol STChannel <NSObject>
-
-@property(nonatomic, readonly, getter=isOpen) BOOL opened;
+//@property(nonatomic, readonly, getter=isOpen) BOOL opened;
 @property(nonatomic, readonly, getter=isBound) BOOL bound;
 @property(nonatomic, readonly, getter=isAlive) BOOL alive;  // isOpen() && (isConnected() || isBound())
 
-- (void)close;
+//- (void)close;
 
 /*================================================*\
 |*          Readable Byte Channel                 *|
 \*================================================*/
 
-- (nullable NSData *)readDataWithMaxLength:(NSUInteger)maxLen;
+//- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst
 
 /*================================================*\
 |*          Writable Byte Channel                 *|
 \*================================================*/
 
-- (NSInteger)writeData:(NSData *)data;
+//- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src
 
 /*================================================*\
 |*          Selectable Channel                    *|
 \*================================================*/
 
-- (nullable STSelectableChannel)configureBlocking:(BOOL)blocking;
+- (nullable NIOSelectableChannel *)configureBlocking:(BOOL)blocking;
 
 @property(nonatomic, readonly, getter=isBlocking) BOOL blocking;
 
@@ -74,9 +74,9 @@ typedef STByteChannel id;
 |*          Network Channel                       *|
 \*================================================*/
 
-- (nullable STNetworkChannel)bindLocalAddress:(id<STSocketAddress>)local;
+- (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local;
 
-@property(nonatomic, readonly) id<STSocketAddress> localAddress;
+@property(nonatomic, readonly) id<NIOSocketAddress> localAddress;
 
 /*================================================*\
 |*          Socket/Datagram Channel               *|
@@ -84,19 +84,19 @@ typedef STByteChannel id;
 
 @property(nonatomic, readonly, getter=isConnected) BOOL connected;
 
-- (nullable STNetworkChannel)connectRemoteAddress:(id<STSocketAddress>)remote;
+- (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote;
 
-@property(nonatomic, readonly) id<STSocketAddress> remoteAddress;
+@property(nonatomic, readonly) id<NIOSocketAddress> remoteAddress;
 
 /*================================================*\
 |*          Datagram Channel                      *|
 \*================================================*/
 
-- (nullable STByteChannel)disconnect;
+- (nullable id<NIOByteChannel>)disconnect;
 
-- (nullable NSData *)receiveDataWithMaxLength:(NSUInteger)maxLen;
+- (nullable id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst;
 
-- (NSInteger)sendData:(NSData *)data toRemoteAddress:(id<STSocketAddress>)remote;
+- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)remote;
 
 @end
 

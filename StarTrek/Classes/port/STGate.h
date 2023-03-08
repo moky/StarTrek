@@ -36,7 +36,7 @@
 
 #import <FiniteStateMachine/FiniteStateMachine.h>
 
-#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/NIOSocketAddress.h>
 #import <StarTrek/STShip.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local   - local address
  * @return false on error
  */
-- (BOOL)sendData:(NSData *)payload remoteAddress:(id<STSocketAddress>)remote localAddress:(nullable id<STSocketAddress>)local;
+- (BOOL)sendData:(NSData *)payload remoteAddress:(id<NIOSocketAddress>)remote localAddress:(nullable id<NIOSocketAddress>)local;
 
 /**
  *  Append outgo ship (carrying data package, with priority)
@@ -101,7 +101,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local  - local address
  * @return false on error
  */
-- (BOOL)sendShip:(id<STDeparture>)outgo remoteAddress:(id<STSocketAddress>)remote localAddress:(nullable id<STSocketAddress>)local;
+- (BOOL)sendShip:(id<STDeparture>)outgo remoteAddress:(id<NIOSocketAddress>)remote localAddress:(nullable id<NIOSocketAddress>)local;
 
 @end
 

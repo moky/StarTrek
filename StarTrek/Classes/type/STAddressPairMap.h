@@ -34,12 +34,12 @@
 //  Created by Albert Moky on 2023/3/7.
 //
 
-#import <StarTrek/STSocketAddress.h>
+#import <StarTrek/NIOSocketAddress.h>
 #import <StarTrek/STHashKeyPairMap.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STAddressPairMap<__covariant ObjectType> : STHashKeyPairMap<id<STSocketAddress>, ObjectType>
+@interface STAddressPairMap<__covariant ObjectType> : STHashKeyPairMap<id<NIOSocketAddress>, ObjectType>
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 
@@ -55,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 extern "C" {
 #endif
 
-id<STSocketAddress> STAnyAddress(void);
+id<NIOSocketAddress> STAnyAddress(void);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

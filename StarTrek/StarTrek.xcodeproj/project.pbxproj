@@ -19,6 +19,24 @@
 		E93725CC29B76296008EAF9E /* STDocker.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725CA29B76296008EAF9E /* STDocker.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E93725D029B762AD008EAF9E /* STGate.h in Headers */ = {isa = PBXBuildFile; fileRef = E93725CE29B762AD008EAF9E /* STGate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E93725D629B794C6008EAF9E /* STDocker.m in Sources */ = {isa = PBXBuildFile; fileRef = E93725D529B794C6008EAF9E /* STDocker.m */; };
+		E9C5969829B8A7DA000E4656 /* NIOSocketAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C5968C29B8A7DA000E4656 /* NIOSocketAddress.m */; };
+		E9C5969929B8A7DA000E4656 /* NIOByteChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C5968D29B8A7DA000E4656 /* NIOByteChannel.m */; };
+		E9C5969A29B8A7DA000E4656 /* NIOException.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C5968E29B8A7DA000E4656 /* NIOException.m */; };
+		E9C5969B29B8A7DA000E4656 /* NIONetworkChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C5968F29B8A7DA000E4656 /* NIONetworkChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C5969C29B8A7DA000E4656 /* NIOChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C5969029B8A7DA000E4656 /* NIOChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C5969D29B8A7DA000E4656 /* NIOSelectableChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C5969129B8A7DA000E4656 /* NIOSelectableChannel.m */; };
+		E9C5969E29B8A7DA000E4656 /* NIOException.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C5969229B8A7DA000E4656 /* NIOException.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C5969F29B8A7DA000E4656 /* NIOByteChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C5969329B8A7DA000E4656 /* NIOByteChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C596A029B8A7DA000E4656 /* NIOSocketAddress.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C5969429B8A7DA000E4656 /* NIOSocketAddress.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C596A129B8A7DA000E4656 /* NIOSelectableChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C5969529B8A7DA000E4656 /* NIOSelectableChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C596A229B8A7DA000E4656 /* NIOChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C5969629B8A7DA000E4656 /* NIOChannel.m */; };
+		E9C596A329B8A7DA000E4656 /* NIONetworkChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C5969729B8A7DA000E4656 /* NIONetworkChannel.m */; };
+		E9C596AA29B8B852000E4656 /* NIOByteBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C596A829B8B852000E4656 /* NIOByteBuffer.m */; };
+		E9C596AB29B8B852000E4656 /* NIOByteBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C596A929B8B852000E4656 /* NIOByteBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C596AE29B8CE0F000E4656 /* NIOSocketChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C596AC29B8CE0F000E4656 /* NIOSocketChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C596AF29B8CE0F000E4656 /* NIOSocketChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C596AD29B8CE0F000E4656 /* NIOSocketChannel.m */; };
+		E9C596B229B8D067000E4656 /* NIODatagramChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E9C596B029B8D067000E4656 /* NIODatagramChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E9C596B329B8D067000E4656 /* NIODatagramChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C596B129B8D067000E4656 /* NIODatagramChannel.m */; };
 		E9D889E829B885D10017B93A /* STChannelController.h in Headers */ = {isa = PBXBuildFile; fileRef = E9D889E629B885D10017B93A /* STChannelController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E9D889E929B885D10017B93A /* STChannelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9D889E729B885D10017B93A /* STChannelController.m */; };
 		E9D889EC29B886810017B93A /* STBaseChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = E9D889EA29B886810017B93A /* STBaseChannel.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -30,8 +48,6 @@
 		E9DD8AA729B62F6500010FFE /* StarTrek.docc in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AA629B62F6500010FFE /* StarTrek.docc */; };
 		E9DD8AAD29B62F6500010FFE /* StarTrek.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9DD8AA229B62F6500010FFE /* StarTrek.framework */; };
 		E9DD8AB229B62F6500010FFE /* StarTrekTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AB129B62F6500010FFE /* StarTrekTests.m */; };
-		E9DD8AC729B6436F00010FFE /* STSocketAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DD8AC329B6436F00010FFE /* STSocketAddress.m */; };
-		E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */ = {isa = PBXBuildFile; fileRef = E9DD8AC429B6436F00010FFE /* STSocketAddress.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E9EF8A6A29B73DEB00BB305B /* OKWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A6829B73DEB00BB305B /* OKWeakMap.m */; };
 		E9EF8A6B29B73DEB00BB305B /* OKWeakMap.h in Headers */ = {isa = PBXBuildFile; fileRef = E9EF8A6929B73DEB00BB305B /* OKWeakMap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E9EF8A6E29B73DFA00BB305B /* STKeyPairMap.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EF8A6C29B73DFA00BB305B /* STKeyPairMap.m */; };
@@ -67,6 +83,24 @@
 		E93725CA29B76296008EAF9E /* STDocker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDocker.h; sourceTree = "<group>"; };
 		E93725CE29B762AD008EAF9E /* STGate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGate.h; sourceTree = "<group>"; };
 		E93725D529B794C6008EAF9E /* STDocker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDocker.m; sourceTree = "<group>"; };
+		E9C5968C29B8A7DA000E4656 /* NIOSocketAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIOSocketAddress.m; sourceTree = "<group>"; };
+		E9C5968D29B8A7DA000E4656 /* NIOByteChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIOByteChannel.m; sourceTree = "<group>"; };
+		E9C5968E29B8A7DA000E4656 /* NIOException.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIOException.m; sourceTree = "<group>"; };
+		E9C5968F29B8A7DA000E4656 /* NIONetworkChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIONetworkChannel.h; sourceTree = "<group>"; };
+		E9C5969029B8A7DA000E4656 /* NIOChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIOChannel.h; sourceTree = "<group>"; };
+		E9C5969129B8A7DA000E4656 /* NIOSelectableChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIOSelectableChannel.m; sourceTree = "<group>"; };
+		E9C5969229B8A7DA000E4656 /* NIOException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIOException.h; sourceTree = "<group>"; };
+		E9C5969329B8A7DA000E4656 /* NIOByteChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIOByteChannel.h; sourceTree = "<group>"; };
+		E9C5969429B8A7DA000E4656 /* NIOSocketAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIOSocketAddress.h; sourceTree = "<group>"; };
+		E9C5969529B8A7DA000E4656 /* NIOSelectableChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIOSelectableChannel.h; sourceTree = "<group>"; };
+		E9C5969629B8A7DA000E4656 /* NIOChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIOChannel.m; sourceTree = "<group>"; };
+		E9C5969729B8A7DA000E4656 /* NIONetworkChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIONetworkChannel.m; sourceTree = "<group>"; };
+		E9C596A829B8B852000E4656 /* NIOByteBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIOByteBuffer.m; sourceTree = "<group>"; };
+		E9C596A929B8B852000E4656 /* NIOByteBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIOByteBuffer.h; sourceTree = "<group>"; };
+		E9C596AC29B8CE0F000E4656 /* NIOSocketChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIOSocketChannel.h; sourceTree = "<group>"; };
+		E9C596AD29B8CE0F000E4656 /* NIOSocketChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIOSocketChannel.m; sourceTree = "<group>"; };
+		E9C596B029B8D067000E4656 /* NIODatagramChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIODatagramChannel.h; sourceTree = "<group>"; };
+		E9C596B129B8D067000E4656 /* NIODatagramChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIODatagramChannel.m; sourceTree = "<group>"; };
 		E9D889E629B885D10017B93A /* STChannelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STChannelController.h; sourceTree = "<group>"; };
 		E9D889E729B885D10017B93A /* STChannelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STChannelController.m; sourceTree = "<group>"; };
 		E9D889EA29B886810017B93A /* STBaseChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STBaseChannel.h; sourceTree = "<group>"; };
@@ -79,8 +113,6 @@
 		E9DD8AA629B62F6500010FFE /* StarTrek.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = StarTrek.docc; sourceTree = "<group>"; };
 		E9DD8AAC29B62F6500010FFE /* StarTrekTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarTrekTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9DD8AB129B62F6500010FFE /* StarTrekTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StarTrekTests.m; sourceTree = "<group>"; };
-		E9DD8AC329B6436F00010FFE /* STSocketAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSocketAddress.m; sourceTree = "<group>"; };
-		E9DD8AC429B6436F00010FFE /* STSocketAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSocketAddress.h; sourceTree = "<group>"; };
 		E9EF8A6829B73DEB00BB305B /* OKWeakMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OKWeakMap.m; sourceTree = "<group>"; };
 		E9EF8A6929B73DEB00BB305B /* OKWeakMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OKWeakMap.h; sourceTree = "<group>"; };
 		E9EF8A6C29B73DFA00BB305B /* STKeyPairMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STKeyPairMap.m; sourceTree = "<group>"; };
@@ -112,6 +144,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E9C5968B29B8A7DA000E4656 /* nio */ = {
+			isa = PBXGroup;
+			children = (
+				E9C596A929B8B852000E4656 /* NIOByteBuffer.h */,
+				E9C596A829B8B852000E4656 /* NIOByteBuffer.m */,
+				E9C5969229B8A7DA000E4656 /* NIOException.h */,
+				E9C5968E29B8A7DA000E4656 /* NIOException.m */,
+				E9C5969429B8A7DA000E4656 /* NIOSocketAddress.h */,
+				E9C5968C29B8A7DA000E4656 /* NIOSocketAddress.m */,
+				E9C5969029B8A7DA000E4656 /* NIOChannel.h */,
+				E9C5969629B8A7DA000E4656 /* NIOChannel.m */,
+				E9C5968F29B8A7DA000E4656 /* NIONetworkChannel.h */,
+				E9C5969729B8A7DA000E4656 /* NIONetworkChannel.m */,
+				E9C5969529B8A7DA000E4656 /* NIOSelectableChannel.h */,
+				E9C5969129B8A7DA000E4656 /* NIOSelectableChannel.m */,
+				E9C5969329B8A7DA000E4656 /* NIOByteChannel.h */,
+				E9C5968D29B8A7DA000E4656 /* NIOByteChannel.m */,
+				E9C596AC29B8CE0F000E4656 /* NIOSocketChannel.h */,
+				E9C596AD29B8CE0F000E4656 /* NIOSocketChannel.m */,
+				E9C596B029B8D067000E4656 /* NIODatagramChannel.h */,
+				E9C596B129B8D067000E4656 /* NIODatagramChannel.m */,
+			);
+			path = nio;
+			sourceTree = "<group>";
+		};
 		E9DD8A9829B62F6500010FFE = {
 			isa = PBXGroup;
 			children = (
@@ -151,6 +208,7 @@
 			isa = PBXGroup;
 			children = (
 				E9EF8A6729B73DEB00BB305B /* weak */,
+				E9C5968B29B8A7DA000E4656 /* nio */,
 				E9DD8AC229B6436F00010FFE /* type */,
 				E9DD8AC529B6436F00010FFE /* net */,
 				E9DD8AC129B6436F00010FFE /* port */,
@@ -174,8 +232,6 @@
 		E9DD8AC229B6436F00010FFE /* type */ = {
 			isa = PBXGroup;
 			children = (
-				E9DD8AC429B6436F00010FFE /* STSocketAddress.h */,
-				E9DD8AC329B6436F00010FFE /* STSocketAddress.m */,
 				E9EF8A6D29B73DFA00BB305B /* STKeyPairMap.h */,
 				E9EF8A6C29B73DFA00BB305B /* STKeyPairMap.m */,
 				E9EF8A7029B73E2900BB305B /* STHashKeyPairMap.h */,
@@ -234,6 +290,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				E9D889EC29B886810017B93A /* STBaseChannel.h in Headers */,
+				E9C596AB29B8B852000E4656 /* NIOByteBuffer.h in Headers */,
+				E9C5969C29B8A7DA000E4656 /* NIOChannel.h in Headers */,
+				E9C5969E29B8A7DA000E4656 /* NIOException.h in Headers */,
 				E9EF8A7229B73E2900BB305B /* STHashKeyPairMap.h in Headers */,
 				E93725B429B76064008EAF9E /* STChannel.h in Headers */,
 				E9EF8A6B29B73DEB00BB305B /* OKWeakMap.h in Headers */,
@@ -243,15 +302,20 @@
 				E93725C029B761FA008EAF9E /* STConnectionState.h in Headers */,
 				E9EF8A6F29B73DFA00BB305B /* STKeyPairMap.h in Headers */,
 				E93725CC29B76296008EAF9E /* STDocker.h in Headers */,
+				E9C596A029B8A7DA000E4656 /* NIOSocketAddress.h in Headers */,
 				E93725C429B7620B008EAF9E /* STStateMachine.h in Headers */,
+				E9C5969F29B8A7DA000E4656 /* NIOByteChannel.h in Headers */,
+				E9C596AE29B8CE0F000E4656 /* NIOSocketChannel.h in Headers */,
 				E93725B829B76077008EAF9E /* STConnection.h in Headers */,
 				E93725D029B762AD008EAF9E /* STGate.h in Headers */,
-				E9DD8AC829B6436F00010FFE /* STSocketAddress.h in Headers */,
 				E9EF8A7A29B73E5000BB305B /* STAddressPairObject.h in Headers */,
 				E93725C829B76275008EAF9E /* STShip.h in Headers */,
 				E93725BC29B761CC008EAF9E /* STHub.h in Headers */,
 				E9D889F029B886930017B93A /* STBaseConnection.h in Headers */,
+				E9C596B229B8D067000E4656 /* NIODatagramChannel.h in Headers */,
+				E9C5969B29B8A7DA000E4656 /* NIONetworkChannel.h in Headers */,
 				E9D889E829B885D10017B93A /* STChannelController.h in Headers */,
+				E9C596A129B8A7DA000E4656 /* NIOSelectableChannel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,19 +416,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9C596AF29B8CE0F000E4656 /* NIOSocketChannel.m in Sources */,
 				E9EF8A7329B73E2900BB305B /* STHashKeyPairMap.m in Sources */,
-				E9DD8AC729B6436F00010FFE /* STSocketAddress.m in Sources */,
 				E9EF8A7B29B73E5000BB305B /* STAddressPairObject.m in Sources */,
+				E9C596B329B8D067000E4656 /* NIODatagramChannel.m in Sources */,
+				E9C596A229B8A7DA000E4656 /* NIOChannel.m in Sources */,
+				E9C5969D29B8A7DA000E4656 /* NIOSelectableChannel.m in Sources */,
 				E9EF8A6A29B73DEB00BB305B /* OKWeakMap.m in Sources */,
 				E9D889E929B885D10017B93A /* STChannelController.m in Sources */,
+				E9C596AA29B8B852000E4656 /* NIOByteBuffer.m in Sources */,
 				E9D889F129B886930017B93A /* STBaseConnection.m in Sources */,
+				E9C5969929B8A7DA000E4656 /* NIOByteChannel.m in Sources */,
 				E9D889ED29B886810017B93A /* STBaseChannel.m in Sources */,
 				E9D889F529B886A40017B93A /* STBaseHub.m in Sources */,
 				E9DD8AA729B62F6500010FFE /* StarTrek.docc in Sources */,
 				E9EF8A7729B73E4000BB305B /* STAddressPairMap.m in Sources */,
 				E93725C129B761FA008EAF9E /* STConnectionState.m in Sources */,
+				E9C596A329B8A7DA000E4656 /* NIONetworkChannel.m in Sources */,
+				E9C5969829B8A7DA000E4656 /* NIOSocketAddress.m in Sources */,
 				E9EF8A6E29B73DFA00BB305B /* STKeyPairMap.m in Sources */,
 				E93725D629B794C6008EAF9E /* STDocker.m in Sources */,
+				E9C5969A29B8A7DA000E4656 /* NIOException.m in Sources */,
 				E93725C529B7620B008EAF9E /* STStateMachine.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

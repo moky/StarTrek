@@ -34,11 +34,34 @@
 //  Created by Albert Moky on 2023/3/8.
 //
 
-#import <Foundation/Foundation.h>
+#import <StarTrek/STAddressPairObject.h>
+#import <StarTrek/STChannel.h>
+#import <StarTrek/STConnection.h>
+#import <StarTrek/STConnectionState.h>
+#import <StarTrek/STStateMachine.h>
+
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STBaseConnection : NSObject
+@interface STBaseConnection : STAddressPairObject <STConnection, STTimedConnection, STConnectionStateDelegate>
+
+@property(nonatomic, weak) id<STConnectionDelegate> delegate;  // delegate for handling connection events
+@property(nonatomic, weak) id<STChannel> channel;  // socket channel
+
+- (instancetype)initWithChannel:(id<STChannel>)channel
+                  remoteAddress:(id<NIOSocketAddress>)remote
+                   localAddress:(id<NIOSocketAddress>)local;
+
+// protected
+- (STConnectionStateMachine *)stateMachine;
+// protected
+- (STConnectionStateMachine *)createStateMachine;
+
+- (void)start;
+- (void)stop;
+
+// protected
+- (NSInteger)sendBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)destination;
 
 @end
 

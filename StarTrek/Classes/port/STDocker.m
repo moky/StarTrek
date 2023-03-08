@@ -39,15 +39,23 @@
 STDockerStatus STDockerStatusFromConnectionState(STConnectionState *state) {
     if (!state) {
         return STDockerStatusError;
-    } else if ([state isEqual:kSTConnectionStateReady] ||
-               [state isEqual:kSTConnectionStateExpired] ||
-               [state isEqual:kSTConnectionStateMaintaining]) {
-        return STDockerStatusReady;
-    } else if ([state isEqual:kSTConnectionStatePreparing]) {
-        return STDockerStatusPreparing;
-    } else if ([state isEqual:kSTConnectionStateError]) {
-        return STDockerStatusError;
-    } else {
-        return STDockerStatusInit;
+    }
+    NSUInteger stateIndex = state.index;
+    switch (stateIndex) {
+        case STConnectionStateOrderReady:
+        case STConnectionStateOrderExpired:
+        case STConnectionStateOrderMaintaining:
+            return STDockerStatusReady;
+            break;
+        case STConnectionStateOrderPreparing:
+            return STDockerStatusPreparing;
+            break;
+        case STConnectionStateOrderError:
+            return STDockerStatusError;
+            break;
+            
+        default:
+            return STDockerStatusInit;
+            break;
     }
 }

@@ -38,13 +38,6 @@
 
 #import "STConnectionState.h"
 
-NSString *kSTConnectionStateDefault     = @"default";
-NSString *kSTConnectionStatePreparing   = @"preparing";
-NSString *kSTConnectionStateReady       = @"ready";
-NSString *kSTConnectionStateMaintaining = @"maintaining";
-NSString *kSTConnectionStateExpired     = @"expired";
-NSString *kSTConnectionStateError       = @"error";
-
 @interface STConnectionState () {
     
     NSTimeInterval _enterTime;
@@ -55,9 +48,9 @@ NSString *kSTConnectionStateError       = @"error";
 @implementation STConnectionState
 
 /* designated initializer */
-- (instancetype)initWithName:(NSString *)name
+- (instancetype)initWithIndex:(NSUInteger)stateIndex
                     capacity:(NSUInteger)countOfTransitions {
-    if (self = [super initWithName:name capacity:countOfTransitions]) {
+    if (self = [super initWithIndex:stateIndex capacity:countOfTransitions]) {
         _enterTime = 0;
     }
     return self;
@@ -69,18 +62,18 @@ NSString *kSTConnectionStateError       = @"error";
             return YES;
         }
         STConnectionState *state = (STConnectionState *)object;
-        object = [state name];
+        return state.index == self.index;
     }
-    return [self.name isEqual:object];
+    return NO;
 }
 
-- (NSString *)description {
-    return self.name;
-}
-
-- (NSString *)debugDescription {
-    return self.name;
-}
+//- (NSString *)description {
+//    return self.name;
+//}
+//
+//- (NSString *)debugDescription {
+//    return self.name;
+//}
 
 - (NSTimeInterval)enterTime {
     return _enterTime;
@@ -112,6 +105,12 @@ NSString *kSTConnectionStateError       = @"error";
 
 @end
 
+#pragma mark -
+
+static inline STConnectionState *create_state(NSUInteger index, NSUInteger capacity) {
+    return [[STConnectionState alloc] initWithIndex:index capacity:capacity];
+}
+
 @interface STConnectionStateBuilder () {
     
     STConnectionStateTransitionBuilder *_stb;
@@ -130,9 +129,7 @@ NSString *kSTConnectionStateError       = @"error";
 
 // Connection not started yet
 - (STConnectionState *)defaultState {
-    STConnectionState *state;
-    state = [[STConnectionState alloc] initWithName:kSTConnectionStateDefault
-                                           capacity:1];
+    STConnectionState *state = create_state(STConnectionStateOrderDefault, 1);
     // Default -> Preparing
     [state addTransition:_stb.defaultPreparingTransition];
     return state;
@@ -140,9 +137,7 @@ NSString *kSTConnectionStateError       = @"error";
 
 // Connection started, preparing to connect/bind
 - (STConnectionState *)preparingState {
-    STConnectionState *state;
-    state = [[STConnectionState alloc] initWithName:kSTConnectionStatePreparing
-                                           capacity:2];
+    STConnectionState *state = create_state(STConnectionStateOrderPreparing, 2);
     // Preparing -> Ready
     [state addTransition:_stb.preparingReadyTransition];
     // Preparing -> Default
@@ -152,9 +147,7 @@ NSString *kSTConnectionStateError       = @"error";
 
 // Normal state of connection
 - (STConnectionState *)readyState {
-    STConnectionState *state;
-    state = [[STConnectionState alloc] initWithName:kSTConnectionStateReady
-                                           capacity:2];
+    STConnectionState *state = create_state(STConnectionStateOrderReady, 2);
     // Ready -> Expired
     [state addTransition:_stb.readyExpiredTransition];
     // Ready -> Error
@@ -164,9 +157,7 @@ NSString *kSTConnectionStateError       = @"error";
 
 // Long time no response, need maintaining
 - (STConnectionState *)expiredState {
-    STConnectionState *state;
-    state = [[STConnectionState alloc] initWithName:kSTConnectionStateExpired
-                                           capacity:2];
+    STConnectionState *state = create_state(STConnectionStateOrderExpired, 2);
     // Expired -> Maintaining
     [state addTransition:_stb.expiredMaintainingTransition];
     // Expired -> Error
@@ -176,9 +167,7 @@ NSString *kSTConnectionStateError       = @"error";
 
 // Heartbeat sent, waiting response
 - (STConnectionState *)maintainingState {
-    STConnectionState *state;
-    state = [[STConnectionState alloc] initWithName:kSTConnectionStateMaintaining
-                                           capacity:3];
+    STConnectionState *state = create_state(STConnectionStateOrderMaintaining, 3);
     // Maintaining -> Ready
     [state addTransition:_stb.maintainingReadyTransition];
     // Maintaining -> Expired
@@ -190,9 +179,7 @@ NSString *kSTConnectionStateError       = @"error";
 
 // Connection lost
 - (STConnectionState *)errorState {
-    STConnectionState *state;
-    state = [[STConnectionState alloc] initWithName:kSTConnectionStateError
-                                           capacity:1];
+    STConnectionState *state = create_state(STConnectionStateOrderError, 1);
     // Error -> Default
     [state addTransition:_stb.errorDefaultTransition];
     return state;

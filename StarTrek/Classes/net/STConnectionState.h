@@ -38,12 +38,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-FOUNDATION_EXTERN NSString *kSTConnectionStateDefault;      // "default"
-FOUNDATION_EXTERN NSString *kSTConnectionStatePreparing;    // "preparing"
-FOUNDATION_EXTERN NSString *kSTConnectionStateReady;        // "ready"
-FOUNDATION_EXTERN NSString *kSTConnectionStateMaintaining;  // "maintaining"
-FOUNDATION_EXTERN NSString *kSTConnectionStateExpired;      // "expired"
-FOUNDATION_EXTERN NSString *kSTConnectionStateError;        // "error"
+typedef NS_ENUM(UInt8, STConnectionStateOrder) {
+    STConnectionStateOrderDefault = 0,
+    STConnectionStateOrderPreparing,
+    STConnectionStateOrderReady,
+    STConnectionStateOrderMaintaining,
+    STConnectionStateOrderExpired,
+    STConnectionStateOrderError
+};
 
 /**
  *  Connection State

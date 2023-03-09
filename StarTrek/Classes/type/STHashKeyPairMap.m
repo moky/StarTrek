@@ -56,8 +56,7 @@
 
 // Override
 - (void)setObject:(id)value
-        forRemote:(nullable id)remote
-         andLocal:(nullable id)local {
+        forRemote:(nullable id)remote local:(nullable id)local {
     if (value) {
         // the caller may create different values with same pair (remote, local)
         // so here we should try to remove it first to make sure it's clean
@@ -66,15 +65,14 @@
         [_cachedValues addObject:value];
     }
     // create indexes
-    [super setObject:value forRemote:remote andLocal:local];
+    [super setObject:value forRemote:remote local:local];
 }
 
 // Override
 - (nullable id)removeObject:(nullable id)value
-                  forRemote:(nullable id)remote
-                   andLocal:(nullable id)local {
+                  forRemote:(nullable id)remote local:(nullable id)local {
     // remove indexes
-    id old = [super removeObject:value forRemote:remote andLocal:local];
+    id old = [super removeObject:value forRemote:remote local:local];
     if (old) {
         [_cachedValues removeObject:old];
     }

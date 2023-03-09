@@ -69,7 +69,7 @@
 
 @interface STChannelController ()
 
-@property(nonatomic, weak) STBaseChannel *channel;
+@property(nonatomic, weak) STChannel *channel;
 
 @property(nonatomic, strong) id<STChannelChecker> checker;
 
@@ -77,7 +77,7 @@
 
 @implementation STChannelController
 
-- (instancetype)initWithChannel:(STBaseChannel *)channel {
+- (instancetype)initWithChannel:(STChannel *)channel {
     if (self = [super init]) {
         self.channel = channel;
         self.checker = [self createChecker];

@@ -54,8 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local  - local address
  * @return mapped value
  */
-- (nullable ObjectType)objectForRemote:(nullable KeyType)remote
-                              andLocal:(nullable KeyType)local;
+- (nullable ObjectType)objectForRemote:(nullable KeyType)remote local:(nullable KeyType)local;
 
 @end
 
@@ -68,9 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local  - local address
  * @param value  - mapping value
  */
-- (void)setObject:(ObjectType)value
-        forRemote:(nullable KeyType)remote
-         andLocal:(nullable KeyType)local;
+- (void)setObject:(ObjectType)value forRemote:(nullable KeyType)remote local:(nullable KeyType)local;
 
 /**
  *  Remove mapping by key pair (remote, local)
@@ -80,9 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param value  - mapped value (Optional)
  * @return removed value
  */
-- (nullable ObjectType)removeObject:(nullable ObjectType)value
-                          forRemote:(nullable KeyType)remote
-                           andLocal:(nullable KeyType)local;
+- (nullable ObjectType)removeObject:(nullable ObjectType)value forRemote:(nullable KeyType)remote local:(nullable KeyType)local;
 
 @end
 

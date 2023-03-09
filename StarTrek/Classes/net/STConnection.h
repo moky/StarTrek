@@ -54,15 +54,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly, getter=isAlive) BOOL alive;  // isOpen() && (isConnected() || isBound())
 
-@property(nonatomic, readonly) id<NIOSocketAddress> localAddress;
-@property(nonatomic, readonly) id<NIOSocketAddress> remoteAddress;
+@property(nonatomic, readonly, nullable) id<NIOSocketAddress> localAddress;
+@property(nonatomic, readonly, nullable) id<NIOSocketAddress> remoteAddress;
 
 /**
  *  Get state
  *
  * @return connection state
  */
-@property(nonatomic, readonly) STConnectionState *state;
+@property(nonatomic, readonly, nullable) STConnectionState *state;
 
 /**
  *  Send data
@@ -106,7 +106,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param current    - new state
  * @param connection - current connection
  */
-- (void)connection:(id<STConnection>)connection changedState:(STConnectionState *)previous toState:(STConnectionState *)current;
+- (void)connection:(id<STConnection>)connection changedState:(nullable STConnectionState *)previous toState:(nullable STConnectionState *)current;
 
 /**
  *  Called when connection received data

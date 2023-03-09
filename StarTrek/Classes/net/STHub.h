@@ -81,7 +81,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local  - local address
  * @return null on socket closed
  */
-- (nullable id<STChannel>)openChannelWithRemoteAddress:(nullable id<NIOSocketAddress>)remote andLocalAddress:(nullable id<NIOSocketAddress>)local;
+- (nullable id<STChannel>)openChannelForRemoteAddress:(nullable id<NIOSocketAddress>)remote
+                                         localAddress:(nullable id<NIOSocketAddress>)local;
 
 /**
  *  Get connection with direction (remote, local)
@@ -90,7 +91,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @param local  - local address
  * @return null on connection not found
  */
-- (nullable id<STConnection>)connectToRemoteAddress:(id<NIOSocketAddress>)remote withLocalAddress:(id<NIOSocketAddress>)local;
+- (nullable id<STConnection>)connectToRemoteAddress:(id<NIOSocketAddress>)remote
+                                       localAddress:(nullable id<NIOSocketAddress>)local;
 
 @end
 

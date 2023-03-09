@@ -51,12 +51,12 @@ static inline BOOL address_equal(id<NIOSocketAddress> addr1, id<NIOSocketAddress
 
 - (instancetype)init {
     NSAssert(false, @"don't call me!");
-    return [self initWithRemoteAddress:nil andLocalAddress:nil];
+    return [self initWithRemoteAddress:nil localAddress:nil];
 }
 
 /* designated initializer */
-- (instancetype)initWithRemoteAddress:(id<NIOSocketAddress>)remote
-                      andLocalAddress:(id<NIOSocketAddress>)local {
+- (instancetype)initWithRemoteAddress:(nullable id<NIOSocketAddress>)remote
+                         localAddress:(nullable id<NIOSocketAddress>)local {
     if (self = [super init]) {
         self.remoteAddress = remote;
         self.localAddress = local;
@@ -101,11 +101,11 @@ static inline BOOL address_equal(id<NIOSocketAddress> addr1, id<NIOSocketAddress
 
 @implementation STAddressPairObject (Creation)
 
-+ (instancetype)objectWithRemoteAddress:(id<NIOSocketAddress>)remote
-                        andLocalAddress:(id<NIOSocketAddress>)local {
++ (instancetype)objectWithRemoteAddress:(nullable id<NIOSocketAddress>)remote
+                           localAddress:(nullable id<NIOSocketAddress>)local {
     STAddressPairObject *object;
     object = [[STAddressPairObject alloc] initWithRemoteAddress:remote
-                                                andLocalAddress:local];
+                                                   localAddress:local];
     return object;
 }
 

@@ -76,7 +76,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local;
 
-@property(nonatomic, readonly) id<NIOSocketAddress> localAddress;
+@property(nonatomic, readonly, nullable) id<NIOSocketAddress> localAddress;
 
 /*================================================*\
 |*          Socket/Datagram Channel               *|
@@ -86,7 +86,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote;
 
-@property(nonatomic, readonly) id<NIOSocketAddress> remoteAddress;
+@property(nonatomic, readonly, nullable) id<NIOSocketAddress> remoteAddress;
 
 /*================================================*\
 |*          Datagram Channel                      *|

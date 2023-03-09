@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly, nullable) id<NIOSocketAddress> localAddress;
 
 - (instancetype)initWithRemoteAddress:(nullable id<NIOSocketAddress>)remote
-                      andLocalAddress:(nullable id<NIOSocketAddress>)local
+                         localAddress:(nullable id<NIOSocketAddress>)local
 NS_DESIGNATED_INITIALIZER;
 
 @end
@@ -52,7 +52,7 @@ NS_DESIGNATED_INITIALIZER;
 @interface STAddressPairObject (Creation)
 
 + (instancetype)objectWithRemoteAddress:(nullable id<NIOSocketAddress>)remote
-                        andLocalAddress:(nullable id<NIOSocketAddress>)local;
+                           localAddress:(nullable id<NIOSocketAddress>)local;
 
 @end
 

@@ -39,11 +39,12 @@
 #import <StarTrek/STConnection.h>
 #import <StarTrek/STConnectionState.h>
 #import <StarTrek/STStateMachine.h>
+#import <StarTrek/STHub.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STBaseConnection : STAddressPairObject <STConnection, STTimedConnection, STConnectionStateDelegate>
+@interface STConnection : STAddressPairObject <STConnection, STTimedConnection, STConnectionStateDelegate>
 
 @property(nonatomic, weak) id<STConnectionDelegate> delegate;  // delegate for handling connection events
 @property(nonatomic, weak) id<STChannel> channel;  // socket channel
@@ -62,6 +63,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 // protected
 - (NSInteger)sendBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)destination;
+
+@end
+
+/**
+ * Active connection for client
+ */
+@interface STActiveConnection : STConnection
+
+- (instancetype)initWithHub:(id<STHub>)hub
+                    channel:(id<STChannel>)channel
+              remoteAddress:(id<NIOSocketAddress>)remote
+               localAddress:(id<NIOSocketAddress>)local;
 
 @end
 

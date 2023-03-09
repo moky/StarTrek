@@ -51,7 +51,7 @@
 
 @end
 
-@interface STBaseChannel () {
+@interface STChannel () {
     
     // flags
     BOOL _blocking;
@@ -87,12 +87,12 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
     }
 }
 
-@implementation STBaseChannel
+@implementation STChannel
 
 - (instancetype)initWithSocket:(NIOSelectableChannel *)sock
                  remoteAddress:(nullable id<NIOSocketAddress>)remote
                   localAddress:(nullable id<NIOSocketAddress>)local {
-    if (self = [super initWithRemoteAddress:remote andLocalAddress:local]) {
+    if (self = [super initWithRemoteAddress:remote localAddress:local]) {
         self.reader = [self createReader];
         self.writer = [self createWriter];
         self.socketChannel = sock;

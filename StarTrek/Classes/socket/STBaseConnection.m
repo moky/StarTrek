@@ -40,7 +40,7 @@
 
 #define CONNECTION_EXPIRES 16.0  // seconds
 
-@interface STBaseConnection () {
+@interface STConnection () {
     
     NSTimeInterval _lastSentTime;
     NSTimeInterval _lastReceivedTime;
@@ -52,12 +52,12 @@
 
 @end
 
-@implementation STBaseConnection
+@implementation STConnection
 
 - (instancetype)initWithChannel:(id<STChannel>)channel
                   remoteAddress:(id<NIOSocketAddress>)remote
                    localAddress:(id<NIOSocketAddress>)local {
-    if (self = [super initWithRemoteAddress:remote andLocalAddress:local]) {
+    if (self = [super initWithRemoteAddress:remote localAddress:local]) {
         self.channel = channel;
         self.delegate = nil;
         
@@ -190,7 +190,7 @@
         //@throw [[NIOException alloc] init];
         return -1;
     }
-    int sent = [sock sendWithBuffer:src remoteAddress:destination];
+    NSInteger sent = [sock sendWithBuffer:src remoteAddress:destination];
     if (sent > 0) {
         // update sent time
         _lastSentTime = OKGetCurrentTimeInterval();
@@ -328,6 +328,49 @@
     resumeState:(__kindof id<FSMState>)current
            time:(NSTimeInterval)now {
     
+}
+
+@end
+
+@interface STActiveConnection ()
+
+@property(nonatomic, weak) id<STHub> hub;
+
+@end
+
+@implementation STActiveConnection
+
+- (instancetype)initWithHub:(id<STHub>)hub
+                    channel:(id<STChannel>)channel
+              remoteAddress:(id<NIOSocketAddress>)remote
+               localAddress:(id<NIOSocketAddress>)local {
+    if (self = [super initWithChannel:channel remoteAddress:remote localAddress:local]) {
+        self.hub = hub;
+    }
+    return self;
+}
+
+// Override
+- (BOOL)isOpen {
+    return [self stateMachine] != nil;
+}
+
+// Override
+- (id<STChannel>)channel {
+    id<STChannel> sock = [super channel];
+    if (![sock isOpen]) {
+        if ([self stateMachine] == nil) {
+            // closed (not start yet)
+            return nil;
+        }
+        // get new channel via hub
+        id<NIOSocketAddress> remote = [self remoteAddress];
+        id<NIOSocketAddress> local = [self localAddress];
+        sock = [self.hub openChannelForRemoteAddress:remote localAddress:local];
+        NSAssert(sock, @"failed to open channel: %@, %@", remote, local);
+        [self setChannel:sock];
+    }
+    return sock;
 }
 
 @end

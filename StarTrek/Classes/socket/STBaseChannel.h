@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol STSocketReader;
 @protocol STSocketWriter;
 
-@interface STBaseChannel : STAddressPairObject <STChannel>
+@interface STChannel : STAddressPairObject <STChannel>
 
 // socket reader/writer
 @property(nonatomic, readonly) id<STSocketReader> reader;

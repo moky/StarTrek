@@ -45,8 +45,7 @@
     return nil;
 }
 
-- (nullable id)objectForRemote:(nullable id)remote
-                      andLocal:(nullable id)local {
+- (nullable id)objectForRemote:(nullable id)remote local:(nullable id)local {
     NSAssert(false, @"override me!");
     return nil;
 }
@@ -55,16 +54,12 @@
 
 @implementation STKeyPairMap (Mutable)
 
-- (void)setObject:(id)value
-        forRemote:(nullable id)remote
-         andLocal:(nullable id)local {
+- (void)setObject:(id)value forRemote:(nullable id)remote local:(nullable id)local {
     NSAssert(false, @"override me!");
 }
 
 - (nullable id)removeObject:(nullable id)value
-                  forRemote:(nullable id)remote
-                   andLocal:(nullable id)local {
-    
+                  forRemote:(nullable id)remote local:(nullable id)local {
     NSAssert(false, @"override me!");
     return nil;
 }
@@ -100,14 +95,13 @@ typedef OKAbstractMap<id, OKAbstractMap<id, id> *> WeakKeyTable;
 - (instancetype)initWithDefaultValue:(id)any {
     if (self = [super init]) {
         self.defaultKey = any;
-        self.map = [OKWeakHashMap dictionary];
+        self.map = [OKWeakHashMap map];
     }
     return self;
 }
 
 // Override
-- (nullable id)objectForRemote:(nullable id)remote
-                      andLocal:(nullable id)local {
+- (nullable id)objectForRemote:(nullable id)remote local:(nullable id)local {
     id key1, key2;
     if (!remote) {
         NSAssert(local, @"local & remote addresses should not empty at the same time");
@@ -150,9 +144,7 @@ typedef OKAbstractMap<id, OKAbstractMap<id, id> *> WeakKeyTable;
 }
 
 // Override
-- (void)setObject:(id)value
-        forRemote:(nullable id)remote
-         andLocal:(nullable id)local {
+- (void)setObject:(id)value forRemote:(nullable id)remote local:(nullable id)local {
     // create indexes with key pair (remote, local)
     id key1, key2;
     if (!remote) {
@@ -182,8 +174,7 @@ typedef OKAbstractMap<id, OKAbstractMap<id, id> *> WeakKeyTable;
 
 // Override
 - (nullable id)removeObject:(nullable id)value
-                  forRemote:(nullable id)remote
-                   andLocal:(nullable id)local {
+                  forRemote:(nullable id)remote local:(nullable id)local {
     // remove indexes with key pair (remote, local)
     id key1, key2;
     if (!remote) {

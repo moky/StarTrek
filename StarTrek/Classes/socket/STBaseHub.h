@@ -34,11 +34,95 @@
 //  Created by Albert Moky on 2023/3/8.
 //
 
-#import <Foundation/Foundation.h>
+#import <StarTrek/STAddressPairMap.h>
+#import <StarTrek/STConnection.h>
+#import <StarTrek/STHub.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STBaseHub : NSObject
+@interface STHub : NSObject <STHub>
+
+// delegate for handling connection events
+@property(nonatomic, weak, readonly) id<STConnectionDelegate> delegate;
+
+- (instancetype)initWithConnectionDelegate:(id<STConnectionDelegate>)delegate
+NS_DESIGNATED_INITIALIZER;
+
+// protected
+- (STAddressPairMap<id<STConnection>> *)createConnectionPool;
+
+@end
+
+@interface STHub (Channel)  // protected
+
+/**
+ *  Get all channels
+ *
+ * @return copy of channels
+ */
+@property(nonatomic, copy, readonly) NSSet<id<STChannel>> *allChannels;
+
+/**
+ *  Remove socket channel
+ *
+ * @param remote  - remote address
+ * @param local   - local address
+ * @param channel - socket channel
+ */
+- (void)removeChannel:(id<STChannel>)channel
+        remoteAddress:(id<NIOSocketAddress>)remote
+         localAddress:(id<NIOSocketAddress>)local;
+
+@end
+
+@interface STHub (Connection)  // protected
+
+@property(nonatomic, copy, readonly) NSSet<id<STConnection>> *allConnections;
+
+/**
+ *  Create connection with sock channel & addresses
+ *
+ * @param channel - socket channel
+ * @param remote  - remote address
+ * @param local   - local address
+ * @return null on channel not exists
+ */
+- (id<STConnection>)createConnectionWithChannel:(id<STChannel>)channel
+                                  remoteAddress:(id<NIOSocketAddress>)remote
+                                   localAddress:(id<NIOSocketAddress>)local;
+
+// protected
+- (id<STConnection>)connectionWithRemoteAddress:(id<NIOSocketAddress>)remote
+                                   localAddress:(id<NIOSocketAddress>)local;
+
+// protected
+- (void)setConnection:(id<STConnection>)conn
+        remoteAddress:(id<NIOSocketAddress>)remote
+         localAddress:(id<NIOSocketAddress>)local;
+
+// protected
+- (void)removeConnection:(id<STConnection>)conn
+           remoteAddress:(id<NIOSocketAddress>)remote
+            localAddress:(id<NIOSocketAddress>)local;
+
+@end
+
+@interface STHub (Processor)
+
+// protected
+- (BOOL)driveChannel:(id<STChannel>)channel;
+
+// protected
+- (NSInteger)driveChannels:(NSSet<id<STChannel>> *)channels;
+
+// protected
+- (void)cleanupChannels:(NSSet<id<STChannel>> *)channels;
+
+// protected
+- (void)driveConnections:(NSSet<id<STConnection>> *)connections;
+
+// protected
+- (void)cleanupConnections:(NSSet<id<STConnection>> *)connections;
 
 @end
 

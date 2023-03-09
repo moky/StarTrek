@@ -109,7 +109,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-@class STBaseChannel;
+@class STChannel;
 
 /**
  *  Socket Channel Controller
@@ -119,13 +119,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface STChannelController : NSObject <STChannelChecker>
 
-@property(nonatomic, readonly, weak) STBaseChannel *channel;
+@property(nonatomic, readonly, weak) STChannel *channel;
 @property(nonatomic, readonly) NIOSelectableChannel *socket;
 
 @property(nonatomic, readonly) id<NIOSocketAddress> remoteAddress;
 @property(nonatomic, readonly) id<NIOSocketAddress> localAddress;
 
-- (instancetype)initWithChannel:(STBaseChannel *)channel;
+- (instancetype)initWithChannel:(STChannel *)channel;
 
 // protected
 - (id<STChannelChecker>)createChecker;

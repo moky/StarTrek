@@ -334,6 +334,7 @@
         return [[NIOHeapByteBuffer alloc] initWithData:array offset:offset length:len];
     } @catch (NIOIllegalArgumentException *e) {
         @throw [[NIOIndexOutOfBoundsException alloc] init];
+    } @finally {
     }
 }
 

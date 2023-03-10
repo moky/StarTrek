@@ -133,8 +133,7 @@ typedef OKAbstractMap<id, OKAbstractMap<id, id> *> WeakKeyTable;
         return value;
     }
     // take any Connection connected to remote / bound to local
-    [table enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent
-                                   usingBlock:^(id key, id obj, BOOL *stop) {
+    [table enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         if (obj) {
             value = obj;
             *stop = YES;

@@ -1,6 +1,6 @@
 // license: https://mit-license.org
 //
-//  ObjectKey : Object & Key kits
+//  StarTrek : Interstellar Transport
 //
 //                               Written in 2023 by Moky <albert.moky@gmail.com>
 //
@@ -28,45 +28,59 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  OKWeakMap.h
+//  STDeparture.h
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/9.
 //
 
-#import <ObjectKey/ObjectKey.h>
+#import <StarTrek/STShip.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface STDeparture : NSObject <STDeparture>
+
+- (instancetype)initWithPriority:(NSInteger)prior maxTries:(NSInteger)count
+NS_DESIGNATED_INITIALIZER;
+
+@end
+
+#pragma mark -
+
 /**
- *  Weak Key & Value Map
+ *  Memory cache for Departures
  */
-@interface OKWeakMap<__covariant KeyType, __covariant ObjectType> : OKAbstractMap<KeyType, ObjectType>
+@interface STDepartureHall : NSObject
 
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
+/**
+ *  Add outgoing ship to the waiting queue
+ *
+ * @param outgo - departure task
+ * @return false on duplicated
+ */
+- (BOOL)addDeparture:(id<STDeparture>)outgo;
 
-- (instancetype)initWithCapacity:(NSUInteger)numItems NS_DESIGNATED_INITIALIZER;
+/**
+ *  Check response from incoming ship
+ *
+ * @param response - incoming ship with SN
+ * @return finished task
+ */
+- (id<STDeparture>)checkResponseInArrival:(id<STArrival>)response;
+
+/**
+ *  Get next new/timeout task
+ *
+ * @param now - current time
+ * @return departure task
+ */
+- (id<STDeparture>)nextDepartureWithTime:(NSTimeInterval)now;
+
+/**
+ *  Clear all expired tasks
+ */
+- (void)purge;
 
 @end
-
-@interface OKWeakMap (NSDictionaryCreation)
-
-+ (instancetype)map;
-
-@end
-
-@interface OKWeakMap (NSMutableDictionaryCreation)
-
-+ (instancetype)mapWithCapacity:(NSUInteger)numItems;
-
-@end
-
-//
-//  strong references
-//
-
-typedef NSMutableDictionary OKHashMap;
-typedef NSMutableSet        OKHashSet;
-typedef NSMutableArray      OKArrayList;
 
 NS_ASSUME_NONNULL_END

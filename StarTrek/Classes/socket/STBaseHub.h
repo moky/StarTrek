@@ -53,7 +53,8 @@ NS_DESIGNATED_INITIALIZER;
 
 @end
 
-@interface STHub (Channel)  // protected
+// protected
+@interface STHub (Channel)
 
 /**
  *  Get all channels
@@ -69,13 +70,14 @@ NS_DESIGNATED_INITIALIZER;
  * @param local   - local address
  * @param channel - socket channel
  */
-- (void)removeChannel:(id<STChannel>)channel
-        remoteAddress:(id<NIOSocketAddress>)remote
-         localAddress:(id<NIOSocketAddress>)local;
+- (void)removeChannel:(nullable id<STChannel>)channel
+        remoteAddress:(nullable id<NIOSocketAddress>)remote
+         localAddress:(nullable id<NIOSocketAddress>)local;
 
 @end
 
-@interface STHub (Connection)  // protected
+// protected
+@interface STHub (Connection)
 
 @property(nonatomic, copy, readonly) NSSet<id<STConnection>> *allConnections;
 
@@ -89,39 +91,32 @@ NS_DESIGNATED_INITIALIZER;
  */
 - (id<STConnection>)createConnectionWithChannel:(id<STChannel>)channel
                                   remoteAddress:(id<NIOSocketAddress>)remote
-                                   localAddress:(id<NIOSocketAddress>)local;
+                                   localAddress:(nullable id<NIOSocketAddress>)local;
 
-// protected
 - (id<STConnection>)connectionWithRemoteAddress:(id<NIOSocketAddress>)remote
-                                   localAddress:(id<NIOSocketAddress>)local;
+                                   localAddress:(nullable id<NIOSocketAddress>)local;
 
-// protected
 - (void)setConnection:(id<STConnection>)conn
         remoteAddress:(id<NIOSocketAddress>)remote
-         localAddress:(id<NIOSocketAddress>)local;
+         localAddress:(nullable id<NIOSocketAddress>)local;
 
-// protected
-- (void)removeConnection:(id<STConnection>)conn
+- (void)removeConnection:(nullable id<STConnection>)conn
            remoteAddress:(id<NIOSocketAddress>)remote
-            localAddress:(id<NIOSocketAddress>)local;
+            localAddress:(nullable id<NIOSocketAddress>)local;
 
 @end
 
+// protected
 @interface STHub (Processor)
 
-// protected
 - (BOOL)driveChannel:(id<STChannel>)channel;
 
-// protected
 - (NSInteger)driveChannels:(NSSet<id<STChannel>> *)channels;
 
-// protected
 - (void)cleanupChannels:(NSSet<id<STChannel>> *)channels;
 
-// protected
 - (void)driveConnections:(NSSet<id<STConnection>> *)connections;
 
-// protected
 - (void)cleanupConnections:(NSSet<id<STConnection>> *)connections;
 
 @end

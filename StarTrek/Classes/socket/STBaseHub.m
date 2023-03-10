@@ -46,7 +46,7 @@
 
 // Override
 - (void)setObject:(id<STConnection>)value
-        forRemote:(id)remote local:(id)local {
+        forRemote:(nullable id)remote local:(nullable id)local {
     id<STConnection> old = [self objectForRemote:remote local:local];
     if (old && old != value) {
         [self removeObject:old forRemote:remote local:local];
@@ -55,8 +55,8 @@
 }
 
 // Override
-- (id<STConnection>)removeObject:(id<STConnection>)value
-                       forRemote:(id)remote local:(id)local {
+- (id<STConnection>)removeObject:(nullable id<STConnection>)value
+                       forRemote:(nullable id)remote local:(nullable id)local {
     id<STConnection> cached = [super removeObject:value forRemote:remote local:local];
     if ([cached isOpen]) {
         [cached close];
@@ -65,6 +65,8 @@
 }
 
 @end
+
+#pragma mark -
 
 /*  Maximum Segment Size
  *  ~~~~~~~~~~~~~~~~~~~~
@@ -243,6 +245,7 @@ static const NSInteger NIO_MSS = 1472;  // 1500 - 20 - 8
             }
         }
         return NO;
+    } @finally {
     }
     if (!remote) {
         // received nothing

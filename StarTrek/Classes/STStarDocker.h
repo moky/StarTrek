@@ -28,61 +28,74 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  StarTrek.h
+//  STStarDocker.h
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/9.
 //
 
-#import <Foundation/Foundation.h>
-
-//! Project version number for StarTrek.
-FOUNDATION_EXPORT double StarTrekVersionNumber;
-
-//! Project version string for StarTrek.
-FOUNDATION_EXPORT const unsigned char StarTrekVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <StarTrek/PublicHeader.h>
-
-#import <StarTrek/OKWeakMap.h>
-
-// nio
-#import <StarTrek/NIOException.h>
-#import <StarTrek/NIOByteBuffer.h>
-#import <StarTrek/NIOSocketAddress.h>
-#import <StarTrek/NIOChannel.h>
-#import <StarTrek/NIONetworkChannel.h>
-#import <StarTrek/NIOSelectableChannel.h>
-#import <StarTrek/NIOByteChannel.h>
-#import <StarTrek/NIOSocketChannel.h>
-#import <StarTrek/NIODatagramChannel.h>
-
-// type
-#import <StarTrek/STKeyPairMap.h>
-#import <StarTrek/STHashKeyPairMap.h>
-#import <StarTrek/STAddressPairMap.h>
 #import <StarTrek/STAddressPairObject.h>
-
-// net
-#import <StarTrek/STChannel.h>
 #import <StarTrek/STConnection.h>
-#import <StarTrek/STHub.h>
-#import <StarTrek/STConnectionState.h>
-#import <StarTrek/STStateMachine.h>
-
-// port
-#import <StarTrek/STShip.h>
 #import <StarTrek/STDocker.h>
-#import <StarTrek/STGate.h>
-
-// socket
-#import <StarTrek/STChannelController.h>
-#import <StarTrek/STBaseChannel.h>
-#import <StarTrek/STBaseConnection.h>
-#import <StarTrek/STHub.h>
-
-#import <StarTrek/STArrival.h>
-#import <StarTrek/STDeparture.h>
 #import <StarTrek/STDock.h>
-#import <StarTrek/STStarDocker.h>
-#import <StarTrek/STStarGate.h>
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface STDocker : STAddressPairObject <STDocker>
+
+@property(nonatomic, weak) id<STDockerDelegate> delegate;
+
+@property(nonatomic, weak, readonly) id<STConnection> connection;
+
+- (instancetype)initWithConnection:(id<STConnection>)conn
+NS_DESIGNATED_INITIALIZER;
+
+// protected
+- (STDock *)createDock;
+
+@end
+
+@interface STDocker (Shipping)  // protected
+
+/**
+ *  Get income Ship from received data
+ *
+ * @param data - received data
+ * @return income ship carrying data package/fragment
+ */
+- (id<STArrival>)arrivalWithData:(NSData *)data;
+
+/**
+ *  Check income ship for responding
+ *
+ * @param income - income ship carrying data package/fragment/response
+ * @return income ship carrying completed data package
+ */
+- (id<STArrival>)checkArrival:(id<STArrival>)income;
+
+/**
+ * Check received ship for completed package
+ *
+ * @param income - income ship carrying data package (fragment)
+ * @return ship carrying completed data package
+ */
+- (id<STArrival>)assembleArrival:(id<STArrival>)income;
+
+/**
+ *  Check and remove linked departure ship with same SN (and page index for fragment)
+ *
+ * @param income - income ship with SN
+ */
+- (void)checkResponseInArrival:(id<STArrival>)income;
+
+/**
+ *  Get outgo ship from waiting queue
+ *
+ * @param now - current time
+ * @return next new or timeout task
+ */
+- (id<STDeparture>)nextDepartureWithTime:(NSTimeInterval)now;
+
+@end
+
+NS_ASSUME_NONNULL_END

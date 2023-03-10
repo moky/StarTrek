@@ -101,6 +101,12 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
     return self;
 }
 
+//- (void)finalize {
+//    // make sure the relative socket is removed
+//    [self removeSocketChannel];
+//    [super finalize];
+//}
+
 - (id<STSocketReader>)createReader {
     NSAssert(false, @"override me!");
     return nil;
@@ -264,6 +270,7 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
     } @catch (NIOException *e) {
         [self close];
         @throw e;
+    } @finally {
     }
 }
 
@@ -274,6 +281,7 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
     } @catch (NIOException *e) {
         [self close];
         @throw e;
+    } @finally {
     }
 }
 
@@ -284,6 +292,7 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
     } @catch (NIOException *e) {
         [self close];
         @throw e;
+    } @finally {
     }
 }
 
@@ -295,6 +304,7 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
     } @catch (NIOException *e) {
         [self close];
         @throw e;
+    } @finally {
     }
 }
 

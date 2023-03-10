@@ -39,6 +39,8 @@
 #import <StarTrek/NIOSocketAddress.h>
 #import <StarTrek/NIOByteBuffer.h>
 
+#import <StarTrek/STBaseChannel.h>
+
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol STSocketReader <NSObject>
@@ -108,8 +110,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 #pragma mark -
-
-@class STChannel;
 
 /**
  *  Socket Channel Controller

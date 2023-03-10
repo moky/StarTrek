@@ -1,6 +1,6 @@
 // license: https://mit-license.org
 //
-//  ObjectKey : Object & Key kits
+//  StarTrek : Interstellar Transport
 //
 //                               Written in 2023 by Moky <albert.moky@gmail.com>
 //
@@ -28,45 +28,66 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  OKWeakMap.h
+//  STDock.h
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/9.
 //
 
-#import <ObjectKey/ObjectKey.h>
+#import <StarTrek/STArrival.h>
+#import <StarTrek/STDeparture.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface STDock : NSObject
+
+// protected
+- (STArrivalHall *)createArrivalHall;
+
+// protected
+- (STDepartureHall *)createDepartureHall;
+
 /**
- *  Weak Key & Value Map
+ * Check received ship for completed package
+ *
+ * @param income - received ship carrying data package (fragment)
+ * @return ship carrying completed data package
  */
-@interface OKWeakMap<__covariant KeyType, __covariant ObjectType> : OKAbstractMap<KeyType, ObjectType>
+- (id<STArrival>)assembleArrival:(id<STArrival>)income;
 
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
+/**
+ *  Add outgoing ship to the waiting queue
+ *
+ * @param outgo - departure task
+ * @return false on duplicated
+ */
+- (BOOL)addDeparture:(id<STDeparture>)outgo;
 
-- (instancetype)initWithCapacity:(NSUInteger)numItems NS_DESIGNATED_INITIALIZER;
+/**
+ *  Check response from incoming ship
+ *
+ * @param response - incoming ship with SN
+ * @return finished task
+ */
+- (id<STDeparture>)checkResponseInArrival:(id<STArrival>)response;
+
+/**
+ *  Get next new/timeout task
+ *
+ * @param now - current time
+ * @return departure task
+ */
+- (id<STDeparture>)nextDepartureWithTime:(NSTimeInterval)now;
+
+/**
+ * Clear all expired tasks
+ */
+- (void)purge;
 
 @end
 
-@interface OKWeakMap (NSDictionaryCreation)
-
-+ (instancetype)map;
+@interface STLockedDock : STDock
 
 @end
-
-@interface OKWeakMap (NSMutableDictionaryCreation)
-
-+ (instancetype)mapWithCapacity:(NSUInteger)numItems;
-
-@end
-
-//
-//  strong references
-//
-
-typedef NSMutableDictionary OKHashMap;
-typedef NSMutableSet        OKHashSet;
-typedef NSMutableArray      OKArrayList;
 
 NS_ASSUME_NONNULL_END

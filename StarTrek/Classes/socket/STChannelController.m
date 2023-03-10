@@ -135,6 +135,7 @@
         }
         // received nothing
         return -1;
+    } @finally {
     }
 }
 
@@ -188,6 +189,7 @@
         }
         // buffer overflow!
         return 0;
+    } @finally {
     }
 }
 

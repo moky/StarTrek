@@ -71,6 +71,13 @@
     return self;
 }
 
+//- (void)finalize {
+//    // make sure the relative channel is closed
+//    [self setChannel:nil];
+//    [self setStateMachine:nil];
+//    [super finalize];
+//}
+
 // protected
 - (STConnectionStateMachine *)stateMachine {
     return _fsm;
@@ -111,6 +118,7 @@
             @try {
                 [oldChannel disconnect];
             } @catch (NIOException *e) {
+            } @finally {
             }
         }
     }
@@ -177,10 +185,7 @@
 // Override
 - (void)onReceivedData:(NSData *)data {
     _lastReceivedTime = OKGetCurrentTimeInterval();
-    id<STConnectionDelegate> delegate = [self delegate];
-    if (delegate) {
-        [delegate connection:self receivedData:data];
-    }
+    [_delegate connection:self receivedData:data];
 }
 
 // protected
@@ -218,15 +223,13 @@
         error = [[NIOError alloc] initWithException:e];
         // socket error, close current channel
         [self setChannel:nil];
+    } @finally {
     }
     // callback
-    id<STConnectionDelegate> delegate = [self delegate];
-    if (delegate) {
-        if (error) {
-            [delegate connection:self failedToSendData:pack error:error];
-        } else {
-            [delegate connection:self sentData:pack withLength:sent];
-        }
+    if (error) {
+        [_delegate connection:self failedToSendData:pack error:error];
+    } else {
+        [_delegate connection:self sentData:pack withLength:sent];
     }
     return sent;
 }
@@ -310,10 +313,7 @@
         }
     }
     // callback
-    id<STConnectionDelegate> delegate = [self delegate];
-    if (delegate) {
-        [delegate connection:self changedState:previous toState:current];
-    }
+    [_delegate connection:self changedState:previous toState:current];
 }
 
 // Override

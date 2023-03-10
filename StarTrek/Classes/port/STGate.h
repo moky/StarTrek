@@ -79,7 +79,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  Star Gate
  *  ~~~~~~~~~
  */
-@interface STGate : FSMProcessor
+@protocol STGate <FSMProcessor>
 
 /**
  *  Pack data to an outgo ship (with normal priority), and

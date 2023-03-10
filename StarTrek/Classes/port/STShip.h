@@ -55,6 +55,8 @@ typedef NS_ENUM(UInt8, STShipStatus) {
     STShipStatusFailed     = 0x14,  // tried 3 times and missed response(s)
 };
 
+#define STShipID NSCopying
+
 /**
  *  Star Ship
  *  ~~~~~~~~~
@@ -68,7 +70,7 @@ typedef NS_ENUM(UInt8, STShipStatus) {
  *
  * @return SN
  */
-@property(nonatomic, readonly) id sn;
+@property(nonatomic, readonly) id<STShipID> sn;
 
 /**
  *  Update sent time
@@ -76,6 +78,14 @@ typedef NS_ENUM(UInt8, STShipStatus) {
  * @param now - current time
  */
 - (void)touch:(NSTimeInterval)now;
+
+/**
+ *  Check ship state
+ *
+ * @param now - current time
+ * @return current status
+ */
+- (STShipStatus)status:(NSTimeInterval)now;
 
 @end
 

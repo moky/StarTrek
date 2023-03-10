@@ -1,6 +1,6 @@
 // license: https://mit-license.org
 //
-//  ObjectKey : Object & Key kits
+//  StarTrek : Interstellar Transport
 //
 //                               Written in 2023 by Moky <albert.moky@gmail.com>
 //
@@ -28,45 +28,43 @@
 // SOFTWARE.
 // =============================================================================
 //
-//  OKWeakMap.h
+//  STArrival.h
 //  StarTrek
 //
-//  Created by Albert Moky on 2023/3/6.
+//  Created by Albert Moky on 2023/3/9.
 //
 
-#import <ObjectKey/ObjectKey.h>
+#import <StarTrek/STShip.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface STArrival : NSObject <STArrival>
+
+- (instancetype)initWithTime:(NSTimeInterval)now
+NS_DESIGNATED_INITIALIZER;
+
+@end
+
+#pragma mark -
+
 /**
- *  Weak Key & Value Map
+ *  Memory cache for Arrivals
  */
-@interface OKWeakMap<__covariant KeyType, __covariant ObjectType> : OKAbstractMap<KeyType, ObjectType>
+@interface STArrivalHall : NSObject
 
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
+/**
+ *  Check received ship for completed package
+ *
+ * @param income - received ship carrying data package (fragment)
+ * @return ship carrying completed data package
+ */
+- (id<STArrival>)assembleArrival:(id<STArrival>)income;
 
-- (instancetype)initWithCapacity:(NSUInteger)numItems NS_DESIGNATED_INITIALIZER;
-
-@end
-
-@interface OKWeakMap (NSDictionaryCreation)
-
-+ (instancetype)map;
-
-@end
-
-@interface OKWeakMap (NSMutableDictionaryCreation)
-
-+ (instancetype)mapWithCapacity:(NSUInteger)numItems;
+/**
+ *  Clear all expired tasks
+ */
+- (void)purge;
 
 @end
-
-//
-//  strong references
-//
-
-typedef NSMutableDictionary OKHashMap;
-typedef NSMutableSet        OKHashSet;
-typedef NSMutableArray      OKArrayList;
 
 NS_ASSUME_NONNULL_END

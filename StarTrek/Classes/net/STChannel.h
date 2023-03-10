@@ -34,11 +34,10 @@
 //  Created by Albert Moky on 2023/3/7.
 //
 
+#import <StarTrek/NIOSocketAddress.h>
 #import <StarTrek/NIOByteChannel.h>
 #import <StarTrek/NIOSelectableChannel.h>
 #import <StarTrek/NIONetworkChannel.h>
-
-#import <StarTrek/NIOSocketAddress.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

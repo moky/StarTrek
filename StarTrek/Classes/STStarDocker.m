@@ -54,7 +54,7 @@
 
 - (instancetype)initWithRemoteAddress:(id<NIOSocketAddress>)remote
                          localAddress:(id<NIOSocketAddress>)local {
-    NSAssert(false, @"don't call me!");
+    NSAssert(false, @"DON'T call me!");
     id<STConnection> conn = nil;
     return [self initWithConnection:conn];
 }

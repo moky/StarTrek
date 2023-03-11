@@ -77,7 +77,8 @@
 
 #pragma mark -
 
-static inline FSMTransition *create_transition(NSUInteger stateIndex, FSMBlock block) {
+static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
+                                                  FSMBlock block) {
     return [[FSMBlockTransition alloc] initWithTarget:stateIndex block:block];
 }
 

@@ -23,7 +23,7 @@
 @implementation NIOBuffer
 
 - (instancetype)init {
-    NSAssert(false, @"DON'T call me");;
+    NSAssert(false, @"DON'T call me");
     return [self initWithMark:-1 position:0 limit:0 capacity:0];
 }
 
@@ -277,7 +277,7 @@
     for (NSInteger i = offset; i < end; ++i) {
         bytes[i] = [self getByte];
     }
-    return self;;
+    return self;
 }
 
 - (NIOByteBuffer *)getData:(NSMutableData *)dst {

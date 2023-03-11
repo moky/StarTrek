@@ -117,10 +117,10 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  Reader, Writer, ErrorChecker
  */
-@interface STChannelController : NSObject <STChannelChecker>
+@interface STChannelController<__covariant C : NIOSelectableChannel *> : NSObject <STChannelChecker>
 
 @property(nonatomic, readonly, weak) STChannel *channel;
-@property(nonatomic, readonly) NIOSelectableChannel *socket;
+@property(nonatomic, readonly) C socket;
 
 @property(nonatomic, readonly) id<NIOSocketAddress> remoteAddress;
 @property(nonatomic, readonly) id<NIOSocketAddress> localAddress;
@@ -134,17 +134,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-@interface STChannelReader : STChannelController <STSocketReader>
+@interface STChannelReader<__covariant C : NIOSelectableChannel *> : STChannelController <STSocketReader>
 
 // protected
-- (NSInteger)tryRead:(NIOByteBuffer *)dst socketChannel:(NIOSelectableChannel *)sock;
+- (NSInteger)tryRead:(NIOByteBuffer *)dst socketChannel:(C)sock;
 
 @end
 
-@interface STChannelWriter : STChannelController <STSocketWriter>
+@interface STChannelWriter<__covariant C : NIOSelectableChannel *> : STChannelController <STSocketWriter>
 
 // protected
-- (NSInteger)tryWrite:(NIOByteBuffer *)src socketChannel:(NIOSelectableChannel *)sock;
+- (NSInteger)tryWrite:(NIOByteBuffer *)src socketChannel:(C)sock;
 
 @end
 

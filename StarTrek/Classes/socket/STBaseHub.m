@@ -93,7 +93,7 @@ static const NSInteger NIO_MSS = 1472;  // 1500 - 20 - 8
 @implementation STHub
 
 - (instancetype)init {
-    NSAssert(false, @"don't call me!");
+    NSAssert(false, @"DON'T call me!");
     id<STConnectionDelegate> delegate = nil;
     return [self initWithConnectionDelegate:delegate];
 }

@@ -77,7 +77,7 @@
 @implementation STGate
 
 - (instancetype)init {
-    NSAssert(false, @"don't call me!");
+    NSAssert(false, @"DON'T call me!");
     id<STDockerDelegate> delegate = nil;
     return [self initWithDockerDelegate:delegate];
 }

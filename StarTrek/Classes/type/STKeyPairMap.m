@@ -86,7 +86,7 @@ typedef OKAbstractMap<id, OKAbstractMap<id, id> *> WeakKeyTable;
 @implementation STWeakKeyPairMap
 
 - (instancetype)init {
-    NSAssert(false, @"don't call me!");
+    NSAssert(false, @"DON'T call me!");
     id address = nil;
     return [self initWithDefaultValue:address];
 }

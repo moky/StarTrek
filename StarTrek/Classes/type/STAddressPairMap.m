@@ -46,7 +46,7 @@
 }
 
 - (instancetype)initWithDefaultValue:(id)any {
-    NSAssert(false, @"don't call me!");
+    NSAssert(false, @"DON'T call me!");
     return [self init];
 }
 
@@ -65,7 +65,8 @@ id<NIOSocketAddress> STAnyAddress(void) {
     static id<NIOSocketAddress> _anyAddress;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _anyAddress = [[NIOSocketAddress alloc] initWithHost:@"0.0.0.0" port:0];
+        _anyAddress = [[NIOInetSocketAddress alloc] initWithHost:@"0.0.0.0"
+                                                            port:0];
     });
     return _anyAddress;
 }

@@ -42,13 +42,13 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol STSocketReader;
 @protocol STSocketWriter;
 
-@interface STChannel : STAddressPairObject <STChannel>
+@interface STChannel<__covariant C : NIOSelectableChannel *> : STAddressPairObject <STChannel>
 
 // socket reader/writer
 @property(nonatomic, readonly) id<STSocketReader> reader;
 @property(nonatomic, readonly) id<STSocketWriter> writer;
 
-@property(nonatomic, readonly) NIOSelectableChannel *socketChannel;
+@property(nonatomic, readonly) C socketChannel;
 
 /**
  *  Create channel
@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param remote      - remote address
  * @param local       - local address
  */
-- (instancetype)initWithSocket:(NIOSelectableChannel *)sock
+- (instancetype)initWithSocket:(C)sock
                  remoteAddress:(nullable id<NIOSocketAddress>)remote
                   localAddress:(nullable id<NIOSocketAddress>)local;
 

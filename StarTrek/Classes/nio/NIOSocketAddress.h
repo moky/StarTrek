@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface NIOSocketAddress : NSObject <NIOSocketAddress>
+@interface NIOInetSocketAddress : NSObject <NIOSocketAddress>
 
 - (instancetype)initWithHost:(NSString *)ip
                         port:(UInt16)port
@@ -28,7 +28,7 @@ NS_DESIGNATED_INITIALIZER;
 
 @end
 
-@interface NIOSocketAddress (Creation)
+@interface NIOInetSocketAddress (Creation)
 
 + (instancetype)addressWithHost:(NSString *)ip port:(UInt16)port;
 

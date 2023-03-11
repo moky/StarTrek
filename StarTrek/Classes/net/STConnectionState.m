@@ -107,14 +107,13 @@
 
 #pragma mark -
 
-static inline STConnectionState *create_state(NSUInteger index, NSUInteger capacity) {
+static inline id<FSMState> create_state(NSUInteger index, NSUInteger capacity) {
     return [[STConnectionState alloc] initWithIndex:index capacity:capacity];
 }
 
-@interface STConnectionStateBuilder () {
-    
-    STConnectionStateTransitionBuilder *_stb;
-}
+@interface STConnectionStateBuilder ()
+
+@property(nonatomic, strong) STConnectionStateTransitionBuilder *stb;
 
 @end
 

@@ -50,7 +50,7 @@ static inline BOOL address_equal(id<NIOSocketAddress> addr1, id<NIOSocketAddress
 @implementation STAddressPairObject
 
 - (instancetype)init {
-    NSAssert(false, @"don't call me!");
+    NSAssert(false, @"DON'T call me!");
     return [self initWithRemoteAddress:nil localAddress:nil];
 }
 

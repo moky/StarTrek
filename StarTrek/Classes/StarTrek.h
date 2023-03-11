@@ -79,7 +79,7 @@ FOUNDATION_EXPORT const unsigned char StarTrekVersionString[];
 #import <StarTrek/STChannelController.h>
 #import <StarTrek/STBaseChannel.h>
 #import <StarTrek/STBaseConnection.h>
-#import <StarTrek/STHub.h>
+#import <StarTrek/STBaseHub.h>
 
 #import <StarTrek/STArrival.h>
 #import <StarTrek/STDeparture.h>

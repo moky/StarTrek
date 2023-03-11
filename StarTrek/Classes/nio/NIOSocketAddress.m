@@ -7,14 +7,14 @@
 
 #import "NIOSocketAddress.h"
 
-@interface NIOSocketAddress ()
+@interface NIOInetSocketAddress ()
 
 @property(nonatomic, strong) NSString *host;
 @property(nonatomic, assign) UInt16 port;
 
 @end
 
-@implementation NIOSocketAddress
+@implementation NIOInetSocketAddress
 
 - (instancetype)init {
     NSAssert(false, @"DON'T call me");
@@ -52,10 +52,11 @@
 
 @end
 
-@implementation NIOSocketAddress (Creation)
+@implementation NIOInetSocketAddress (Creation)
 
 + (instancetype)addressWithHost:(NSString *)ip port:(UInt16)port {
-    NIOSocketAddress *address = [[NIOSocketAddress alloc] initWithHost:ip port:port];
+    NIOInetSocketAddress *address;
+    address = [[NIOInetSocketAddress alloc] initWithHost:ip port:port];
     return address;
 }
 

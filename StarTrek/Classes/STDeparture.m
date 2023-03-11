@@ -368,9 +368,9 @@ static const NSInteger DEPARTURE_RETRIES = 2;
             [emptyPositions addObject:@(idx)];
         }
     }];
-    [emptyPositions enumerateObjectsWithOptions:NSEnumerationConcurrent
+    [emptyPositions enumerateObjectsWithOptions:NSEnumerationReverse
                                      usingBlock:^(NSNumber *pos, NSUInteger idx, BOOL *stop) {
-        [_priorities removeObject:pos];
+        [_priorities removeObjectAtIndex:[pos integerValue]];
     }];
     // 2. seeking neglected finished times
     OKArrayList<id<STShipID>> *neglected = [[OKArrayList alloc] init];

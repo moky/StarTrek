@@ -38,6 +38,23 @@
 
 #import "STConnectionState.h"
 
+static NSArray *s_names = nil;
+
+static inline NSString *get_name(STConnectionStateOrder order) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        s_names = @[
+            @"STConnectionStateOrderDefault",
+            @"STConnectionStateOrderPreparing",
+            @"STConnectionStateOrderReady",
+            @"STConnectionStateOrderMaintaining",
+            @"STConnectionStateOrderExpired",
+            @"STConnectionStateOrderError",
+        ];
+    });
+    return [s_names objectAtIndex:order];
+}
+
 @interface STConnectionState () {
     
     NSTimeInterval _enterTime;
@@ -67,13 +84,13 @@
     return NO;
 }
 
-//- (NSString *)description {
-//    return self.name;
-//}
-//
-//- (NSString *)debugDescription {
-//    return self.name;
-//}
+- (NSString *)description {
+    return get_name([self index]);
+}
+
+- (NSString *)debugDescription {
+    return get_name([self index]);
+}
 
 - (NSTimeInterval)enterTime {
     return _enterTime;

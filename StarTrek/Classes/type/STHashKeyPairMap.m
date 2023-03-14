@@ -44,6 +44,13 @@
 
 @implementation STHashKeyPairMap
 
+- (instancetype)initWithDefaultValue:(id)any {
+    if (self = [super initWithDefaultValue:any]) {
+        self.cachedValues = [NSMutableSet set];
+    }
+    return self;
+}
+
 // Override
 - (NSSet<id> *)allValues {
     NSMutableSet *mSet = [[NSMutableSet alloc] init];

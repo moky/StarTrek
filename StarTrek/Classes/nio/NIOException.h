@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NIOException : NSException
 
+- (instancetype)initWithReason:(nullable NSString *)text;
+
 @end
 
 #pragma mark Runtime

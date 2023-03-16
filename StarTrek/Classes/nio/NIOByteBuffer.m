@@ -50,6 +50,16 @@
     return self;
 }
 
+// Override
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@ capacity=%ld position=%ld limit=%ld mark=%ld />", [self class], _capacity, _position, _limit, _mark];
+}
+
+// Override
+- (NSString *)debugDescription {
+    return [self description];
+}
+
 - (NSInteger)capacity {
     return _capacity;
 }

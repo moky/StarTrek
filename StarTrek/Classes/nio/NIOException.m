@@ -9,6 +9,15 @@
 
 @implementation NIOException
 
+- (instancetype)init {
+    NSString *name = [NSString stringWithFormat:@"%@", [self class]];
+    return [self initWithReason:name];
+}
+
+- (instancetype)initWithReason:(nullable NSString *)text {
+    return [super initWithName:NSNetServicesErrorDomain reason:text userInfo:nil];
+}
+
 @end
 
 #pragma mark Runtime
@@ -47,8 +56,15 @@
 
 @implementation NIOError
 
+- (instancetype)init {
+    return [super initWithDomain:NSNetServicesErrorDomain code:-1 userInfo:nil];
+}
+
 - (instancetype)initWithException:(NIOException *)e {
-    if (self = [super init]) {
+    NSDictionary *info = @{
+        NSUnderlyingErrorKey: e
+    };
+    if (self = [self initWithDomain:NSNetServicesErrorDomain code:-2 userInfo:info]) {
         self.exception = e;
     }
     return self;

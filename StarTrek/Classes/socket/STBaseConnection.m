@@ -150,15 +150,10 @@
 }
 
 // Override
-- (NSString *)description {
-    return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
-    [self class], [self remoteAddress], [self localAddress], _channel, [self class]];
-}
-
-// Override
 - (NSString *)debugDescription {
+    NSString *child = [_channel debugDescription];
     return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
-    [self class], [self remoteAddress], [self localAddress], _channel, [self class]];
+    [self class], [self remoteAddress], [self localAddress], child, [self class]];
 }
 
 // Override
@@ -212,7 +207,6 @@
         // prepare buffer
         NIOByteBuffer *buffer = [NIOByteBuffer bufferWithCapacity:pack.length];
         [buffer putData:pack];
-        [buffer flip];
         // send buffer
         id<NIOSocketAddress> destination = [self remoteAddress];
         sent = [self sendBuffer:buffer remoteAddress:destination];

@@ -215,12 +215,22 @@ static const NSInteger NIO_MSS = 1472;  // 1500 - 20 - 8
 
 @implementation STHub (Processor)
 
+- (NSUInteger)availableInChannel:(id<STChannel>)channel {
+    NSAssert(false, @"override me!");
+    return NIO_MSS;
+}
+
 - (BOOL)driveChannel:(id<STChannel>)sock {
     if (![sock isAlive]) {
         // cannot drive closed channel
         return NO;
     }
-    NIOByteBuffer *buffer = [NIOByteBuffer bufferWithCapacity:NIO_MSS];
+    NSUInteger capacity = [self availableInChannel:sock];
+    if (capacity == 0) {
+        // no data received
+        return NO;
+    }
+    NIOByteBuffer *buffer = [NIOByteBuffer bufferWithCapacity:capacity];
     id<NIOSocketAddress> remote;
     id<NIOSocketAddress> local;
     id<STConnection> conn;

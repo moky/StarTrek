@@ -115,8 +115,8 @@ static const NSTimeInterval ARRIVAL_EXPIRES = 300.0;  // seconds
 
 - (instancetype)init {
     if (self = [super init]) {
-        self.arrivals = [OKHashSet set];
-        self.arrivalMap = [OKWeakMap map];
+        self.arrivals        = [OKHashSet set];
+        self.arrivalMap      = [OKWeakMap map];
         self.arrivalFinished = [OKHashMap dictionary];
     }
     return self;

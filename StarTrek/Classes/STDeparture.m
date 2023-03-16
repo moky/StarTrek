@@ -159,6 +159,19 @@ static const NSInteger DEPARTURE_RETRIES = 2;
 
 @implementation STDepartureHall
 
+- (instancetype)init {
+    if (self = [super init]) {
+        self.allDepartures     = [OKWeakSet set];
+        self.virginDepartures  = [OKArrayList array];
+        self.fleets            = [OKHashMap dictionary];
+        self.priorities        = [OKArrayList array];
+        self.departureMap      = [OKWeakMap map];
+        self.departureFinished = [OKHashMap dictionary];
+        self.departureLevel    = [OKWeakHashMap map];
+    }
+    return self;
+}
+
 - (BOOL)addDeparture:(id<STDeparture>)outgo {
     // 1. check duplicated
     if ([_allDepartures containsObject:outgo]) {

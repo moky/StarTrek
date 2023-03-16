@@ -109,6 +109,8 @@ NS_DESIGNATED_INITIALIZER;
 // protected
 @interface STHub (Processor)
 
+- (NSUInteger)availableInChannel:(id<STChannel>)channel;
+
 - (BOOL)driveChannel:(id<STChannel>)channel;
 
 - (NSInteger)driveChannels:(NSSet<id<STChannel>> *)channels;

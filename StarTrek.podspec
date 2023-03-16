@@ -28,6 +28,6 @@ Pod::Spec.new do |s|
     # s.frameworks          = 'Security'
     # s.requires_arc        = true
 
-    s.dependency "FiniteStateMachine", "~> 2.2.3"
-    s.dependency 'ObjectKey', '~> 0.1.2'
+    s.dependency "FiniteStateMachine", "~> 2.2.4"
+    s.dependency 'ObjectKey', '~> 0.1.3'
 end

@@ -208,6 +208,8 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 - (FSMTransition *)errorDefaultTransition {
     return create_transition(STConnectionStateOrderDefault, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
+        return [conn isOpen];
+        /*/
         if (![conn isAlive]) {
             return NO;
         }
@@ -217,6 +219,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
         STConnectionState *current = [machine currentState];
         NSTimeInterval enter = [current enterTime];
         return 0 < enter && enter < [timed lastReceivedTime];
+        /*/
     });
 }
 

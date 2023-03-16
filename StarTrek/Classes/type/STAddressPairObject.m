@@ -69,6 +69,11 @@ static inline BOOL address_equal(id<NIOSocketAddress> addr1, id<NIOSocketAddress
     return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\" />", [self class], [self remoteAddress], [self localAddress]];
 }
 
+// Override
+- (NSString *)debugDescription {
+    return [self description];
+}
+
 #pragma mark Object
 
 - (NSUInteger)hash {

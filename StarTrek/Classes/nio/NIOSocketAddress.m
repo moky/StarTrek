@@ -9,6 +9,8 @@
 
 @interface NIOInetSocketAddress ()
 
+@property(nonatomic, strong) NSString *desc;
+
 @property(nonatomic, strong) NSString *host;
 @property(nonatomic, assign) UInt16 port;
 
@@ -27,11 +29,20 @@
     if (self = [super init]) {
         self.host = ip;
         self.port = port;
+        self.desc = [NSString stringWithFormat:@"('%@', %u)", _host, _port];
     }
     return self;
 }
 
 #pragma mark Object
+
+- (NSString *)description {
+    return _desc;
+}
+
+- (NSString *)debugDescription {
+    return _desc;
+}
 
 - (NSUInteger)hash {
     return [_host hash] + _port * 13;
@@ -46,6 +57,8 @@
         // compare with host & port
         id<NIOSocketAddress> other = (id<NIOSocketAddress>)object;
         return other.port == _port && [other.host isEqualToString:_host];
+    } else if ([object isKindOfClass:[NSString class]]) {
+        return [_desc isEqual:object];
     }
     return NO;
 }

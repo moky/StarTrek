@@ -126,15 +126,10 @@
 //}
 
 // Override
-- (NSString *)description {
-    return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
-    [self class], [self remoteAddress], [self localAddress], _connection, [self class]];
-}
-
-// Override
 - (NSString *)debugDescription {
+    NSString *child = [_connection debugDescription];
     return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
-    [self class], [self remoteAddress], [self localAddress], _connection, [self class]];
+    [self class], [self remoteAddress], [self localAddress], child, [self class]];
 }
 
 // Override

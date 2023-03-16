@@ -178,15 +178,10 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
 }
 
 // Override
-- (NSString *)description {
-    return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
-    [self class], [self remoteAddress], [self localAddress], _socketChannel, [self class]];
-}
-
-// Override
 - (NSString *)debugDescription {
+    NSString *child = [_socketChannel debugDescription];
     return [NSString stringWithFormat:@"<%@ remote=\"%@\" local=\"%@\">\n\t%@\n</%@>",
-    [self class], [self remoteAddress], [self localAddress], _socketChannel, [self class]];
+    [self class], [self remoteAddress], [self localAddress], child, [self class]];
 }
 
 // Override

@@ -160,20 +160,6 @@
     return nil;
 }
 
-
-- (NIOException *)checkData:(NIOByteBuffer *)buf
-                     length:(NSInteger)len
-              socketChannel:(NIOSelectableChannel *)sock {
-    NSAssert(false, @"override me!");
-    return nil;
-}
-
-- (NIOException *)checkError:(NIOException *)error
-               socketChannel:(NIOSelectableChannel *)sock {
-    NSAssert(false, @"override me!");
-    return nil;
-}
-
 @end
 
 @implementation STChannelWriter
@@ -223,20 +209,6 @@
               remoteAddress:(id<NIOSocketAddress>)target {
     NSAssert(false, @"override me!");
     return 0;
-}
-
-
-- (NIOException *)checkData:(NIOByteBuffer *)buf
-                     length:(NSInteger)len
-              socketChannel:(NIOSelectableChannel *)sock {
-    NSAssert(false, @"override me!");
-    return nil;
-}
-
-- (NIOException *)checkError:(NIOException *)error
-               socketChannel:(NIOSelectableChannel *)sock {
-    NSAssert(false, @"override me!");
-    return nil;
 }
 
 @end

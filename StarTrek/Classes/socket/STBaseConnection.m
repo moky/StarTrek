@@ -272,7 +272,7 @@
 
 // Override
 - (BOOL)isNotReceivedLongTimeAgo:(NSTimeInterval)now {
-    return now <= _lastReceivedTime + (CONNECTION_EXPIRES * 8);
+    return now > _lastReceivedTime + (CONNECTION_EXPIRES * 8);
 }
 
 //

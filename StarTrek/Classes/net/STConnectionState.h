@@ -60,7 +60,7 @@ typedef NS_ENUM(UInt8, STConnectionStateOrder) {
  *      MAINTAINING - sent 'PING', waiting for response
  *      ERROR       - long long time no response, connection lost
  */
-@interface STConnectionState : FSMState
+@interface STConnectionState : SMState
 
 @property(nonatomic, readonly) NSTimeInterval enterTime;
 
@@ -72,7 +72,7 @@ typedef NS_ENUM(UInt8, STConnectionStateOrder) {
  *
  *  callback when connection state changed
  */
-@protocol STConnectionStateDelegate <FSMDelegate>
+@protocol STConnectionStateDelegate <SMDelegate>
 
 @end
 

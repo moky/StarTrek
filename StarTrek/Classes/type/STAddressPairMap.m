@@ -34,6 +34,8 @@
 //  Created by Albert Moky on 2023/3/7.
 //
 
+#import <ObjectKey/ObjectKey.h>
+
 #import "STAddressPairMap.h"
 
 @implementation STAddressPairMap
@@ -63,8 +65,7 @@
 
 id<NIOSocketAddress> STAnyAddress(void) {
     static id<NIOSocketAddress> _anyAddress;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
+    OKSingletonDispatchOnce(^{
         _anyAddress = [[NIOInetSocketAddress alloc] initWithHost:@"0.0.0.0"
                                                             port:0];
     });

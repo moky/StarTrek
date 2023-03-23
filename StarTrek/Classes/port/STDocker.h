@@ -67,7 +67,7 @@ STDockerStatus STDockerStatusFromConnectionState(STConnectionState *state);
  *
  *  Processor for Star Ships
  */
-@protocol STDocker <FSMProcessor>
+@protocol STDocker <SMProcessor>
 
 @property(nonatomic, readonly, getter=isOpen) BOOL opened;  // connection.isOpen()
 @property(nonatomic, readonly, getter=isAlive) BOOL alive;  // connection.isAlive()

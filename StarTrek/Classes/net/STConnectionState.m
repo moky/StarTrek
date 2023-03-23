@@ -34,6 +34,8 @@
 //  Created by Albert Moky on 2023/3/7.
 //
 
+#import <ObjectKey/ObjectKey.h>
+
 #import "STStateMachine.h"
 
 #import "STConnectionState.h"
@@ -41,8 +43,7 @@
 static NSArray *s_names = nil;
 
 static inline NSString *get_name(STConnectionStateOrder order) {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
+    OKSingletonDispatchOnce((^{
         s_names = @[
             @"STConnectionStateOrderDefault",
             @"STConnectionStateOrderPreparing",
@@ -51,7 +52,7 @@ static inline NSString *get_name(STConnectionStateOrder order) {
             @"STConnectionStateOrderExpired",
             @"STConnectionStateOrderError",
         ];
-    });
+    }));
     return [s_names objectAtIndex:order];
 }
 
@@ -101,22 +102,22 @@ static inline NSString *get_name(STConnectionStateOrder order) {
 //
 
 // Override
-- (void)onEnter:(id<FSMState>)previous machine:(id<FSMContext>)ctx time:(NSTimeInterval)now {
+- (void)onEnter:(id<SMState>)previous machine:(id<SMContext>)ctx time:(NSTimeInterval)now {
     _enterTime = now;
 }
 
 // Override
-- (void)onExit:(id<FSMState>)next machine:(id<FSMContext>)ctx time:(NSTimeInterval)now {
+- (void)onExit:(id<SMState>)next machine:(id<SMContext>)ctx time:(NSTimeInterval)now {
     _enterTime = 0;
 }
 
 // Override
-- (void)onPaused:(id<FSMContext>)ctx time:(NSTimeInterval)now {
+- (void)onPaused:(id<SMContext>)ctx time:(NSTimeInterval)now {
     //
 }
 
 // Override
-- (void)onResume:(id<FSMContext>)ctx time:(NSTimeInterval)now {
+- (void)onResume:(id<SMContext>)ctx time:(NSTimeInterval)now {
     //
 }
 
@@ -124,7 +125,7 @@ static inline NSString *get_name(STConnectionStateOrder order) {
 
 #pragma mark -
 
-static inline id<FSMState> create_state(NSUInteger index, NSUInteger capacity) {
+static inline id<SMState> create_state(NSUInteger index, NSUInteger capacity) {
     return [[STConnectionState alloc] initWithIndex:index capacity:capacity];
 }
 

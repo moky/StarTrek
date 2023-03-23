@@ -41,7 +41,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface STConnectionStateMachine : FSMMachine <FSMContext>
+@interface STConnectionStateMachine : SMMachine <SMContext>
 
 @property(nonatomic, weak, readonly) id<STConnection> connection;
 
@@ -86,37 +86,37 @@ NS_ASSUME_NONNULL_BEGIN
 @interface STConnectionStateTransitionBuilder : NSObject
 
 // Default -> Preparing
-- (FSMTransition *)defaultPreparingTransition;
+- (SMTransition *)defaultPreparingTransition;
 
 // Preparing -> Ready
-- (FSMTransition *)preparingReadyTransition;
+- (SMTransition *)preparingReadyTransition;
 
 // Preparing -> Default
-- (FSMTransition *)preparingDefaultTransition;
+- (SMTransition *)preparingDefaultTransition;
 
 // Ready -> Expired
-- (FSMTransition *)readyExpiredTransition;
+- (SMTransition *)readyExpiredTransition;
 
 // Ready -> Error
-- (FSMTransition *)readyErrorTransition;
+- (SMTransition *)readyErrorTransition;
 
 // Expired -> Maintaining
-- (FSMTransition *)expiredMaintainingTransition;
+- (SMTransition *)expiredMaintainingTransition;
 
 // Expired -> Error
-- (FSMTransition *)expiredErrorTransition;
+- (SMTransition *)expiredErrorTransition;
 
 // Maintaining -> Ready
-- (FSMTransition *)maintainingReadyTransition;
+- (SMTransition *)maintainingReadyTransition;
 
 // Maintaining -> Expired
-- (FSMTransition *)maintainingExpiredTransition;
+- (SMTransition *)maintainingExpiredTransition;
 
 // Maintaining -> Error
-- (FSMTransition *)maintainingErrorTransition;
+- (SMTransition *)maintainingErrorTransition;
 
 // Error -> Default
-- (FSMTransition *)errorDefaultTransition;
+- (SMTransition *)errorDefaultTransition;
 
 @end
 

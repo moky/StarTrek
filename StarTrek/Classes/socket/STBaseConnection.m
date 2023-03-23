@@ -280,8 +280,8 @@
 //
 
 // Override
-- (void)machine:(__kindof id<FSMContext>)ctx
-     enterState:(__kindof id<FSMState>)next
+- (void)machine:(__kindof id<SMContext>)ctx
+     enterState:(__kindof id<SMState>)next
            time:(NSTimeInterval)now {
     
 }
@@ -311,15 +311,15 @@
 }
 
 // Override
-- (void)machine:(__kindof id<FSMContext>)ctx
-     pauseState:(__kindof id<FSMState>)current
+- (void)machine:(__kindof id<SMContext>)ctx
+     pauseState:(__kindof id<SMState>)current
            time:(NSTimeInterval)now {
     
 }
 
 // Override
-- (void)machine:(__kindof id<FSMContext>)ctx
-    resumeState:(__kindof id<FSMState>)current
+- (void)machine:(__kindof id<SMContext>)ctx
+    resumeState:(__kindof id<SMState>)current
            time:(NSTimeInterval)now {
     
 }

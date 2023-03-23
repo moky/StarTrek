@@ -72,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  Connections & Channels Container
  */
-@protocol STHub <FSMProcessor>
+@protocol STHub <SMProcessor>
 
 /**
  *  Get opened channel with direction (remote, local)

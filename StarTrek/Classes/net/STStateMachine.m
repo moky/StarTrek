@@ -69,7 +69,7 @@
 }
 
 // Override
-- (id<FSMContext>)context {
+- (id<SMContext>)context {
     return self;
 }
 
@@ -77,15 +77,15 @@
 
 #pragma mark -
 
-static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
-                                                  FSMBlock block) {
-    return [[FSMBlockTransition alloc] initWithTarget:stateIndex block:block];
+static inline id<SMTransition> create_transition(NSUInteger stateIndex,
+                                                 SMBlock block) {
+    return [[SMBlockTransition alloc] initWithTarget:stateIndex block:block];
 }
 
 @implementation STConnectionStateTransitionBuilder
 
 // Default -> Preparing
-- (FSMTransition *)defaultPreparingTransition {
+- (SMTransition *)defaultPreparingTransition {
     return create_transition(STConnectionStateOrderPreparing, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         // connection started? change state to 'preparing'
@@ -94,7 +94,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Preparing -> Ready
-- (FSMTransition *)preparingReadyTransition {
+- (SMTransition *)preparingReadyTransition {
     return create_transition(STConnectionStateOrderReady, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         // connected or bound, change state to 'ready'
@@ -103,7 +103,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Preparing -> Default
-- (FSMTransition *)preparingDefaultTransition {
+- (SMTransition *)preparingDefaultTransition {
     return create_transition(STConnectionStateOrderDefault, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         // connection stopped, change state to 'not_connect'
@@ -112,7 +112,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Ready -> Expired
-- (FSMTransition *)readyExpiredTransition {
+- (SMTransition *)readyExpiredTransition {
     return create_transition(STConnectionStateOrderExpired, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         if (![conn isAlive]) {
@@ -126,7 +126,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Ready -> Error
-- (FSMTransition *)readyErrorTransition {
+- (SMTransition *)readyErrorTransition {
     return create_transition(STConnectionStateOrderError, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         // connection lost, change state to 'error'
@@ -135,7 +135,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Expired -> Maintaining
-- (FSMTransition *)expiredMaintainingTransition {
+- (SMTransition *)expiredMaintainingTransition {
     return create_transition(STConnectionStateOrderMaintaining, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         if (![conn isAlive]) {
@@ -149,7 +149,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Expired -> Error
-- (FSMTransition *)expiredErrorTransition {
+- (SMTransition *)expiredErrorTransition {
     return create_transition(STConnectionStateOrderError, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         if (![conn isAlive]) {
@@ -163,7 +163,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Maintaining -> Ready
-- (FSMTransition *)maintainingReadyTransition {
+- (SMTransition *)maintainingReadyTransition {
     return create_transition(STConnectionStateOrderReady, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         if (![conn isAlive]) {
@@ -177,7 +177,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Maintaining -> Expired
-- (FSMTransition *)maintainingExpiredTransition {
+- (SMTransition *)maintainingExpiredTransition {
     return create_transition(STConnectionStateOrderExpired, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         if (![conn isAlive]) {
@@ -191,7 +191,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Maintaining -> Error
-- (FSMTransition *)maintainingErrorTransition {
+- (SMTransition *)maintainingErrorTransition {
     return create_transition(STConnectionStateOrderError, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         if (![conn isAlive]) {
@@ -205,7 +205,7 @@ static inline id<FSMTransition> create_transition(NSUInteger stateIndex,
 }
 
 // Error -> Default
-- (FSMTransition *)errorDefaultTransition {
+- (SMTransition *)errorDefaultTransition {
     return create_transition(STConnectionStateOrderDefault, ^BOOL(STConnectionStateMachine *machine, NSTimeInterval now) {
         id<STConnection> conn = [machine connection];
         if (![conn isAlive]) {

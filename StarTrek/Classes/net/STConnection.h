@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class STConnectionState;
 
-@protocol STConnection <FSMTicker>
+@protocol STConnection <SMTicker>
 
 //
 //  Flags

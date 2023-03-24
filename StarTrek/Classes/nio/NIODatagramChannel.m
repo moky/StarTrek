@@ -19,12 +19,12 @@
     return NO;
 }
 
-- (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local {
+- (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local throws:(NIOException **)error {
     NSAssert(false, @"override me!");
     return nil;
 }
 
-- (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote {
+- (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote throws:(NIOException **)error {
     NSAssert(false, @"override me!");
     return nil;
 }
@@ -35,13 +35,13 @@
 }
 
 // Override
-- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst {
+- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error {
     NSAssert(false, @"override me!");
     return 0;
 }
 
 // Override
-- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src {
+- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src throws:(NIOException **)error {
     NSAssert(false, @"override me!");
     return 0;
 }

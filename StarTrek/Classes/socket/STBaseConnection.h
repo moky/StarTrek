@@ -41,9 +41,6 @@
 #import <StarTrek/STStateMachine.h>
 #import <StarTrek/STHub.h>
 
-
-NS_ASSUME_NONNULL_BEGIN
-
 @interface STConnection : STAddressPairObject <STConnection, STTimedConnection, STConnectionStateDelegate>
 
 @property(nonatomic, weak) id<STConnectionDelegate> delegate;  // delegate for handling connection events
@@ -62,7 +59,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)stop;
 
 // protected
-- (NSInteger)sendBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)destination;
+- (NSInteger)sendBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)destination
+                 throws:(NIOException **)error;
 
 @end
 
@@ -77,5 +75,3 @@ NS_ASSUME_NONNULL_BEGIN
                localAddress:(id<NIOSocketAddress>)local;
 
 @end
-
-NS_ASSUME_NONNULL_END

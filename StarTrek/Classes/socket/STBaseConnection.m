@@ -115,11 +115,7 @@
     // 2. close old channel
     if (oldChannel && oldChannel != newChannel) {
         if ([oldChannel isConnected]) {
-            @try {
-                [oldChannel disconnect];
-            } @catch (NIOException *e) {
-            } @finally {
-            }
+            [oldChannel disconnect];
         }
     }
 }
@@ -184,13 +180,28 @@
 }
 
 // protected
-- (NSInteger)sendBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)destination {
+- (NSInteger)sendBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)destination
+                 throws:(NIOException **)error {
     id<STChannel> sock = [self channel];
     if (![sock isAlive]) {
+        /*/
+        if (error) {
+            *error = [[NIOException alloc] init];;
+        }
         //@throw [[NIOException alloc] init];
+        /*/
         return -1;
     }
-    NSInteger sent = [sock sendWithBuffer:src remoteAddress:destination];
+    NIOException *e = nil;
+    NSInteger sent = [sock sendWithBuffer:src remoteAddress:destination throws:&e];
+    if (e) {
+        // uncaught error
+        if (error) {
+            *error = e;
+        }
+        // fake return, the caller should check the error first
+        return sent; // -1;
+    }
     if (sent > 0) {
         // update sent time
         _lastSentTime = OKGetCurrentTimeInterval();
@@ -203,22 +214,26 @@
     // try to send data
     NIOError *error = nil;
     NSInteger sent = -1;
-    @try {
-        // prepare buffer
-        NIOByteBuffer *buffer = [NIOByteBuffer bufferWithCapacity:pack.length];
-        [buffer putData:pack];
-        // send buffer
-        id<NIOSocketAddress> destination = [self remoteAddress];
-        sent = [self sendBuffer:buffer remoteAddress:destination];
-        if (sent < 0) {  // == -1
-            @throw [[NIOException alloc] init];
-        }
-    } @catch (NIOException *e) {
+    
+    NIOException *e = nil;
+    // @try
+
+    // prepare buffer
+    NIOByteBuffer *buffer = [NIOByteBuffer bufferWithCapacity:pack.length];
+    [buffer putData:pack];
+    // send buffer
+    id<NIOSocketAddress> destination = [self remoteAddress];
+    sent = [self sendBuffer:buffer remoteAddress:destination throws:&e];
+    if (!e && sent < 0) {  // == -1
+        e = [[NIOException alloc] init];
+    }
+    if (e) {
+        // @catch (NIOException *e)
         error = [[NIOError alloc] initWithException:e];
         // socket error, close current channel
         [self setChannel:nil];
-    } @finally {
     }
+
     // callback
     if (error) {
         [_delegate connection:self failedToSendData:pack error:error];

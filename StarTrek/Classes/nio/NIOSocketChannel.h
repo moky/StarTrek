@@ -28,8 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly, getter=isBound) BOOL bound;
 @property(nonatomic, readonly, getter=isConnected) BOOL connected;
 
-- (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local;
-- (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote;
+- (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local throws:(NIOException *_Nullable*_Nullable)error;
+- (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote throws:(NIOException *_Nullable*_Nullable)error;
 
 @end
 

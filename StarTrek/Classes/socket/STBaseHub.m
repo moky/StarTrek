@@ -235,9 +235,12 @@ static const NSInteger NIO_MSS = 1472;  // 1500 - 20 - 8
     id<NIOSocketAddress> local;
     id<STConnection> conn;
     // try to receive
-    @try {
-        remote = [sock receiveWithBuffer:buffer];
-    } @catch (NIOException *e) {
+    NIOException *e = nil;
+    remote = [sock receiveWithBuffer:buffer throws:&e];
+    if (!e) {
+        // normal return
+    } else {
+        // @catch (NIOException *e)
         remote = [sock remoteAddress];
         local = [sock localAddress];
         id<STConnectionDelegate> delegate = [self delegate];
@@ -255,7 +258,6 @@ static const NSInteger NIO_MSS = 1472;  // 1500 - 20 - 8
             }
         }
         return NO;
-    } @finally {
     }
     if (!remote) {
         // received nothing

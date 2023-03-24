@@ -53,13 +53,13 @@ NS_ASSUME_NONNULL_BEGIN
 |*          Readable Byte Channel                 *|
 \*================================================*/
 
-//- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst
+//- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error;
 
 /*================================================*\
 |*          Writable Byte Channel                 *|
 \*================================================*/
 
-//- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src
+//- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src throws:(NIOException **)error;
 
 /*================================================*\
 |*          Selectable Channel                    *|
@@ -73,7 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
 |*          Network Channel                       *|
 \*================================================*/
 
-- (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local;
+- (nullable id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local throws:(NIOException *_Nullable*_Nullable)error;
 
 @property(nonatomic, readonly, nullable) id<NIOSocketAddress> localAddress;
 
@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly, getter=isConnected) BOOL connected;
 
-- (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote;
+- (nullable id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote throws:(NIOException *_Nullable*_Nullable)error;
 
 @property(nonatomic, readonly, nullable) id<NIOSocketAddress> remoteAddress;
 
@@ -93,9 +93,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable id<NIOByteChannel>)disconnect;
 
-- (nullable id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst;
+- (nullable id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst throws:(NIOException *_Nullable*_Nullable)error;
 
-- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)remote;
+- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)remote throws:(NIOException *_Nullable*_Nullable)error;
 
 @end
 

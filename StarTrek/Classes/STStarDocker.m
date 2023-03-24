@@ -245,6 +245,7 @@
             return YES;
         }
     } @catch (NIOException *ex) {
+        NSLog(@"docker connection error: %@", ex);
         error = [[NIOError alloc] initWithException:ex];
     } @finally {
     }

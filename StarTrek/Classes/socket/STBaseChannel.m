@@ -145,7 +145,8 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
 - (NIOSelectableChannel *)configureBlocking:(BOOL)blocking {
     NIOSelectableChannel *sock = [self socketChannel];
     if (!sock) {
-        @throw [[NIOSocketException alloc] init];
+        //@throw [[NIOSocketException alloc] init];
+        return nil;
     }
     [sock configureBlocking:blocking];
     _blocking = blocking;
@@ -185,16 +186,28 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
 }
 
 // Override
-- (id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local {
+- (id<NIONetworkChannel>)bindLocalAddress:(id<NIOSocketAddress>)local throws:(NIOException **)error {
     if (!local) {
         local = [self localAddress];
         NSAssert(local, @"local address not set");
     }
     NIOSelectableChannel *sock = [self socketChannel];
+    id<NIONetworkChannel> nc;
+    
+    NIOException *e = nil;
     if (!sock) {
-        @throw [[NIOSocketException alloc] init];
+        e = [[NIOSocketException alloc] init];
+    } else {
+        nc = [(id<NIONetworkChannel>)sock bindLocalAddress:local throws:&e];
     }
-    id<NIONetworkChannel> nc = [(id<NIONetworkChannel>)sock bindLocalAddress:local];
+    if (e) {
+        if (error) {
+            *error = e;
+        }
+        //@throw e;
+        return nil;
+    }
+    
     self.localAddress = local;
     _bound = YES;
     _opened = YES;
@@ -203,22 +216,31 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
 }
 
 // Override
-- (id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote {
+- (id<NIONetworkChannel>)connectRemoteAddress:(id<NIOSocketAddress>)remote throws:(NIOException **)error {
     if (!remote) {
         remote = [self remoteAddress];
         NSAssert(remote, @"remote address not set");
     }
     NIOSelectableChannel *sock = [self socketChannel];
+
+    NIOException *e = nil;
     if (!sock) {
-        @throw [[NIOSocketException alloc] init];
-    }
-    if ([sock isKindOfClass:[NIOSocketChannel class]]) {
-        [(NIOSocketChannel *)sock connectRemoteAddress:remote];
+        e = [[NIOSocketException alloc] init];
+    } else if ([sock isKindOfClass:[NIOSocketChannel class]]) {
+        [(NIOSocketChannel *)sock connectRemoteAddress:remote throws:&e];
     } else if ([sock isKindOfClass:[NIODatagramChannel class]]) {
-        [(NIODatagramChannel *)sock connectRemoteAddress:remote];
+        [(NIODatagramChannel *)sock connectRemoteAddress:remote throws:&e];
     } else {
-        @throw [[NIOSocketException alloc] init];
+        e = [[NIOSocketException alloc] init];
     }
+    if (e) {
+        if (error) {
+            *error = e;
+        }
+        //@throw e;
+        return nil;
+    }
+    
     self.remoteAddress = remote;
     _connected = YES;
     _opened = YES;
@@ -232,11 +254,7 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
     if ([sock isKindOfClass:[NIODatagramChannel class]]) {
         NIODatagramChannel *udp = (NIODatagramChannel *)sock;
         if ([udp isConnected]) {
-            @try {
-                return [udp disconnect];
-            } @finally {
-                [self refreshFlags];
-            }
+            return [udp disconnect];
         }
     } else {
         [self removeSocketChannel];
@@ -259,47 +277,79 @@ static inline BOOL check_bound(NIOSelectableChannel *channel) {
 //
 
 // Override
-- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst {
-    @try {
-        return [self.reader readWithBuffer:dst];
-    } @catch (NIOException *e) {
+- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error {
+    NIOException *e = nil;
+    NSInteger cnt = [self.reader readWithBuffer:dst throws:&e];
+    if (!e) {
+        // normal return
+        return cnt;
+    } else {
+        // @catch (NIOException *e)
         [self close];
-        @throw e;
-    } @finally {
+
+        if (error) {
+            *error = e;
+        }
+        //@throw e;
+        return cnt; // -1;
     }
 }
 
 // Override
-- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src {
-    @try {
-        return [self.writer writeWithBuffer:src];
-    } @catch (NIOException *e) {
+- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src throws:(NIOException **)error {
+    NIOException *e = nil;
+    NSInteger cnt = [self.writer writeWithBuffer:src throws:&e];
+    if (!e) {
+        // normal return
+        return cnt;
+    } else {
+        // @catch (NIOException *e)
         [self close];
-        @throw e;
-    } @finally {
+        
+        if (error) {
+            *error = e;
+        }
+        //@throw e;
+        return cnt; // -1;
     }
 }
 
 // Override
-- (id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst {
-    @try {
-        return [self.reader receiveWithBuffer:dst];
-    } @catch (NIOException *e) {
+- (id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error {
+    NIOException *e = nil;
+    id<NIOSocketAddress> remote = [self.reader receiveWithBuffer:dst throws:&e];
+    if (!e) {
+        // normal return
+        return remote;
+    } else {
+        // @catch (NIOException *e)
         [self close];
-        @throw e;
-    } @finally {
+
+        if (error) {
+            *error = e;
+        }
+        //@throw e;
+        return remote; // nil;
     }
 }
 
 // Override
-- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src
-              remoteAddress:(id<NIOSocketAddress>)remote {
-    @try {
-        return [self.writer sendWithBuffer:src remoteAddress:remote];
-    } @catch (NIOException *e) {
+- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)remote
+                     throws:(NIOException **)error {
+    NIOException *e = nil;
+    NSInteger cnt = [self.writer sendWithBuffer:src remoteAddress:remote throws:&e];
+    if (!e) {
+        // normal return
+        return cnt;
+    } else {
+        // @catch (NIOException *e)
         [self close];
-        @throw e;
-    } @finally {
+
+        if (error) {
+            *error = e;
+        }
+        //@throw e;
+        return cnt; // -1;
     }
 }
 

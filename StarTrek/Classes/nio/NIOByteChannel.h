@@ -5,10 +5,9 @@
 //  Created by Albert Moky on 2023/3/8.
 //
 
+#import <StarTrek/NIOException.h>
 #import <StarTrek/NIOByteBuffer.h>
 #import <StarTrek/NIOChannel.h>
-
-NS_ASSUME_NONNULL_BEGIN
 
 @protocol NIOReadableByteChannel <NIOChannel>
 
@@ -67,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @throws  IOException
  *          If some other I/O error occurs
  */
-- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst;
+- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error;
 
 @end
 
@@ -124,7 +123,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @throws  IOException
  *          If some other I/O error occurs
  */
-- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src;
+- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src throws:(NIOException **)error;
 
 @end
 
@@ -136,5 +135,3 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol NIOByteChannel <NIOReadableByteChannel, NIOWritableByteChannel>
 
 @end
-
-NS_ASSUME_NONNULL_END

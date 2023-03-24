@@ -41,8 +41,6 @@
 
 #import <StarTrek/STBaseChannel.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
 @protocol STSocketReader <NSObject>
 
 /**
@@ -52,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return data length
  * @throws IOException on socket error
  */
-- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst;
+- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error;
 
 /**
  *  Receive data via socket, and return remote address
@@ -61,7 +59,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return remote address
  * @throws IOException on socket error
  */
-- (id<NIOSocketAddress>) receiveWithBuffer:(NIOByteBuffer *)dst;
+- (id<NIOSocketAddress>) receiveWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error;
 
 @end
 
@@ -74,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return sent length
  * @throws IOException on socket error
  */
-- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src;
+- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src throws:(NIOException **)error;
 
 /**
  *  Send data via socket with remote address
@@ -84,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return sent length
  * @throws IOException on socket error
  */
-- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)target;
+- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)target throws:(NIOException **)error;
 
 @end
 
@@ -137,15 +135,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface STChannelReader<__covariant C : NIOSelectableChannel *> : STChannelController <STSocketReader>
 
 // protected
-- (NSInteger)tryRead:(NIOByteBuffer *)dst socketChannel:(C)sock;
+- (NSInteger)tryRead:(NIOByteBuffer *)dst socketChannel:(C)sock throws:(NIOException **)error;
 
 @end
 
 @interface STChannelWriter<__covariant C : NIOSelectableChannel *> : STChannelController <STSocketWriter>
 
 // protected
-- (NSInteger)tryWrite:(NIOByteBuffer *)src socketChannel:(C)sock;
+- (NSInteger)tryWrite:(NIOByteBuffer *)src socketChannel:(C)sock throws:(NIOException **)error;
 
 @end
-
-NS_ASSUME_NONNULL_END

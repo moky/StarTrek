@@ -124,38 +124,58 @@
 
 @implementation STChannelReader
 
-- (NSInteger)tryRead:(NIOByteBuffer *)dst socketChannel:(NIOSelectableChannel *)sock {
-    @try {
-        return [(id<NIOReadableByteChannel>)sock readWithBuffer:dst];
-    } @catch (NIOException *e) {
+- (NSInteger)tryRead:(NIOByteBuffer *)dst socketChannel:(NIOSelectableChannel *)sock
+              throws:(NIOException **)error {
+    NIOException *e = nil;
+    NSInteger cnt = [(id<NIOReadableByteChannel>)sock readWithBuffer:dst throws:&e];
+    if (!e) {
+        // normal return
+        return cnt;
+    } else {
+        // @catch (NIOException *e)
         e = [self checkError:e socketChannel:sock];
         if (e) {
             // connection lost?
-            @throw e;
+            if (error) {
+                *error = e;
+            }
+            //@throw e;
         }
         // received nothing
-        return -1;
-    } @finally {
+        return cnt; // -1;
     }
 }
 
 // Override
-- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst {
+- (NSInteger)readWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error {
     NIOSelectableChannel *sock = [self socket];
     NSAssert([sock conformsToProtocol:@protocol(NIOReadableByteChannel)], @"socket error, cannot send data: %@", sock);
-    NSInteger cnt = [self tryRead:dst socketChannel:sock];
+    NIOException *e = nil;
+    NSInteger cnt = [self tryRead:dst socketChannel:sock throws:&e];
+    if (e) {
+        // uncaught error
+        if (error) {
+            *error = e;
+        }
+        // fake return, the caller should check the error first
+        return cnt; // -1;
+    }
     // check data
-    NIOException *error = [self checkData:dst length:cnt socketChannel:sock];
-    if (error) {
+    e = [self checkData:dst length:cnt socketChannel:sock];
+    if (e) {
         // connection lost!
-        @throw error;
+        if (error) {
+            *error = e;
+        }
+        //@throw e;
+        return cnt; // -1;
     }
     // OK
     return cnt;
     
 }
 
-- (id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst {
+- (id<NIOSocketAddress>)receiveWithBuffer:(NIOByteBuffer *)dst throws:(NIOException **)error {
     NSAssert(false, @"override me!");
     return nil;
 }
@@ -164,29 +184,48 @@
 
 @implementation STChannelWriter
 
-- (NSInteger)tryWrite:(NIOByteBuffer *)src socketChannel:(NIOSelectableChannel *)sock {
-    @try {
-        return [(id<NIOWritableByteChannel>)sock writeWithBuffer:src];
-    } @catch (NIOException *e) {
+- (NSInteger)tryWrite:(NIOByteBuffer *)src socketChannel:(NIOSelectableChannel *)sock throws:(NIOException **)error {
+    NIOException *e = nil;
+    NSInteger cnt = [(id<NIOWritableByteChannel>)sock writeWithBuffer:src throws:&e];
+    if (!e) {
+        // normal return
+        return cnt;
+    } else {
+        // @catch (NIOException *e)
         e = [self checkError:e socketChannel:sock];
         if (e) {
             // connection lost?
-            @throw e;
+            if (error) {
+                *error = e;
+            }
+            //@throw e;
         }
         // buffer overflow!
-        return 0;
-    } @finally {
+        return cnt; // 0;
     }
 }
 
-- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src {
+- (NSInteger)writeWithBuffer:(NIOByteBuffer *)src throws:(NIOException **)error {
     NIOSelectableChannel *sock = [self socket];
     NSAssert([sock conformsToProtocol:@protocol(NIOWritableByteChannel)], @"socket error, cannot write data: %ld byte(s)", src.position);
     NSInteger sent = 0;
     NSInteger rest = [src position];
     NSInteger cnt;
+    NIOException *e = nil;
     while (YES) {  // while ([sock isOpen])
-        cnt = [self tryWrite:src socketChannel:sock];
+        cnt = [self tryWrite:src socketChannel:sock throws:&e];
+        if (e) {
+            // uncaught error
+            if (error) {
+                *error = e;
+            }
+            // fake return, the caller should check the error first
+            if (cnt > 0) {
+                sent += cnt;
+                rest -= cnt;
+            }
+            return sent;
+        }
         // check send result
         if (cnt <= 0) {
             // buffer overflow?
@@ -205,8 +244,8 @@
     return sent;
 }
 
-- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src
-              remoteAddress:(id<NIOSocketAddress>)target {
+- (NSInteger)sendWithBuffer:(NIOByteBuffer *)src remoteAddress:(id<NIOSocketAddress>)target
+                     throws:(NIOException **)error {
     NSAssert(false, @"override me!");
     return 0;
 }

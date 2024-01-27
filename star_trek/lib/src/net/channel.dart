@@ -30,39 +30,39 @@
  */
 import 'dart:typed_data';
 
-import '../type/address.dart';
+import '../nio/address.dart';
+import '../nio/channel.dart';
+import '../nio/network.dart';
+import '../nio/selectable.dart';
 
-abstract interface class Channel {
 
-  bool get isClosed;  // !isOpen()
+abstract interface class Channel implements ByteChannel {
+
+  // bool get isClosed;  // !isOpen()
 
   bool get isBound;
 
   bool get isAlive;  // isOpen && (isConnected || isBound)
 
-  ///  Close the channel
-  Future<void> close();
+  // Future<void> close();
 
   /*================================================*\
   |*          Readable Byte Channel                 *|
   \*================================================*/
 
-  ///  Reads a sequence of bytes from this channel into the given buffer.
-  Future<int> read(ByteBuffer dst);
+  // Future<int> read(ByteBuffer dst);
 
   /*================================================*\
   |*          Writable Byte Channel                 *|
   \*================================================*/
 
-  ///  Writes a sequence of bytes to this channel from the given buffer.
-  Future<int> write(ByteBuffer src);
+  // Future<int> write(ByteBuffer src);
 
   /*================================================*\
   |*          Selectable Channel                    *|
   \*================================================*/
 
-  ///  Adjusts this channel's blocking mode.
-  configureBlocking(bool block);
+  SelectableChannel? configureBlocking(bool block);
 
   bool get isBlocking;
 
@@ -70,8 +70,7 @@ abstract interface class Channel {
   |*          Network Channel                       *|
   \*================================================*/
 
-  ///  Binds the channel's socket to a local address (host, port).
-  Future<dynamic> bind(SocketAddress local);
+  Future<NetworkChannel?> bind(SocketAddress? local);
 
   SocketAddress? get localAddress;
 
@@ -81,8 +80,7 @@ abstract interface class Channel {
 
   bool get isConnected;
 
-  ///  Connects this channel's socket.
-  Future<dynamic> connect(SocketAddress remote);
+  Future<NetworkChannel?> connect(SocketAddress? remote);
 
   SocketAddress? get remoteAddress;
 
@@ -90,8 +88,7 @@ abstract interface class Channel {
   |*          Datagram Channel                      *|
   \*================================================*/
 
-  ///  Disconnects this channel's socket.
-  Future<dynamic> disconnect();
+  Future<ByteChannel?> disconnect();
 
   ///  Receives a data package via this channel.
   Future<SocketAddress?> receive(ByteBuffer dst);

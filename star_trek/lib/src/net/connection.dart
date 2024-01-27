@@ -31,7 +31,7 @@
 import 'dart:typed_data';
 
 import '../fsm/ticker.dart';
-import '../type/address.dart';
+import '../nio/address.dart';
 import 'state.dart';
 
 
@@ -55,12 +55,12 @@ abstract interface class Connection implements Ticker {
   ///
   /// @param data        - outgo data package
   /// @return count of bytes sent, probably zero when it's non-blocking mode
-  Future<int> send(Uint8List data);
+  Future<int> sendData(Uint8List data);
 
   ///  Process received data
   ///
   /// @param data   - received data
-  Future<void> onReceived(Uint8List data);
+  Future<void> onReceivedData(Uint8List data);
 
   ///  Close the connection
   Future<void> close();
@@ -75,33 +75,33 @@ abstract interface class ConnectionDelegate {
   /// @param previous   - old state
   /// @param current    - new state
   /// @param connection - current connection
-  void onConnectionStateChanged(ConnectionState previous, ConnectionState current, Connection connection);
+  Future<void> onConnectionStateChanged(ConnectionState? previous, ConnectionState? current, Connection connection);
 
   ///  Called when connection received data
   ///
   /// @param data        - received data package
   /// @param connection  - current connection
-  void onConnectionReceived(Uint8List data, Connection connection);
+  Future<void> onConnectionReceived(Uint8List data, Connection connection);
 
   ///  Called after data sent via the connection
   ///
   /// @param sent        - length of sent bytes
   /// @param data        - outgo data package
   /// @param connection  - current connection
-  void onConnectionSent(int sent, Uint8List data, Connection connection);
+  Future<void> onConnectionSent(int sent, Uint8List data, Connection connection);
 
   ///  Called when failed to send data via the connection
   ///
   /// @param error       - error message
   /// @param data        - outgo data package
   /// @param connection  - current connection
-  void onConnectionFailed(dynamic error, Uint8List data, Connection connection);
+  Future<void> onConnectionFailed(IOError error, Uint8List data, Connection connection);
 
   ///  Called when connection (receiving) error
   ///
   /// @param error       - error message
   /// @param connection  - current connection
-  void onConnectionError(dynamic error, Connection connection);
+  Future<void> onConnectionError(IOError error, Connection connection);
 
 }
 

@@ -28,28 +28,40 @@
  * SOFTWARE.
  * =============================================================================
  */
-import '../fsm/runner.dart';
-import '../nio/address.dart';
-import 'channel.dart';
-import 'connection.dart';
 
 
-///  Connections & Channels Container
-///  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-abstract interface class Hub implements Processor {
+abstract interface class SocketAddress {
 
-  ///  Get opened channel with direction (remote, local)
-  ///
-  /// @param remote - remote address
-  /// @param local  - local address
-  /// @return null on socket closed
-  Channel? open(SocketAddress? remote, SocketAddress? local);
+}
 
-  ///  Get connection with direction (remote, local)
-  ///
-  /// @param remote - remote address
-  /// @param local  - local address
-  /// @return null on connection not found
-  Connection? connect(SocketAddress remote, SocketAddress? local);
+
+class InetSocketAddress implements SocketAddress {
+
+  InetSocketAddress(this.host, this.port);
+
+  final String host;
+  final int port;
+
+}
+
+
+class IOException implements Exception {
+  IOException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'IOException: $message';
+
+}
+
+
+class IOError extends Error {
+  IOError(this.cause);
+
+  final dynamic cause;
+
+  @override
+  String toString() => 'IOError: $cause';
 
 }

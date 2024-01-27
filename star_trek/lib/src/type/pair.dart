@@ -28,18 +28,44 @@
  * SOFTWARE.
  * =============================================================================
  */
+import '../nio/address.dart';
 
 
-abstract interface class SocketAddress {
+class AddressPairObject {
+  AddressPairObject(this.remoteAddress, this.localAddress);
 
-}
+  SocketAddress? remoteAddress;
+  SocketAddress? localAddress;
 
+  @override
+  bool operator ==(Object other) {
+    if (other is AddressPairObject) {
+      if (identical(this, other)) {
+        // same object
+        return true;
+      }
+      return other.remoteAddress == remoteAddress && other.localAddress == localAddress;
+    } else {
+      return false;
+    }
+  }
 
-class InetSocketAddress implements SocketAddress {
+  @override
+  int get hashCode {
+    // name's hashCode is multiplied by an arbitrary prime number (13)
+    // in order to make sure there is a difference in the hashCode between
+    // these two parameters:
+    //  name: a  value: aa
+    //  name: aa value: a
+    int? remote = remoteAddress?.hashCode;
+    int? local = localAddress?.hashCode;
+    return (remote ?? 0) * 13 + (local ?? 0);
+  }
 
-  InetSocketAddress(this.host, this.port);
-
-  final String host;
-  final int port;
+  @override
+  String toString() {
+    Type clazz = runtimeType;
+    return '<$clazz remote="$remoteAddress" local="$localAddress" />';
+  }
 
 }

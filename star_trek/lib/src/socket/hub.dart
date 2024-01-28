@@ -53,7 +53,7 @@ class ConnectionPool extends AddressPairMap<Connection> {
   @override
   Connection? removeItem(SocketAddress? remote, SocketAddress? local, Connection? value) {
     Connection? cached = super.removeItem(remote, local, value);
-    if (cached != null && !cached.isClosed) {
+    if (cached == null || cached.isClosed) {} else {
       cached.close();
     }
     return cached;

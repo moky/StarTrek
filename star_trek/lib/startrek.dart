@@ -25,3 +25,9 @@ export 'src/socket/channel.dart';
 export 'src/socket/checker.dart';
 export 'src/socket/connection.dart';
 export 'src/socket/hub.dart';
+
+export 'src/arrival.dart';
+export 'src/departure.dart';
+export 'src/dock.dart';
+export 'src/stardocker.dart';
+export 'src/stargate.dart';

@@ -1,6 +1,6 @@
 ## 0.1.0
 
-- Finite State Machine.
+- Star Gate.
 
 ## 0.0.1
 

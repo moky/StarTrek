@@ -72,7 +72,7 @@ abstract interface class Docker implements Processor {
   void heartbeat();
 
   ///  Clear all expired tasks
-  void purge();
+  void purge([DateTime? now]);
 
   ///  Close connection for this docker
   void close();

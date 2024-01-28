@@ -147,10 +147,13 @@ class BaseConnection extends AddressPairObject
   }
 
   // protected
-  Future<int> sendBuffer(ByteBuffer src, SocketAddress destination) async {
+  Future<int> doSend(Uint8List src, SocketAddress? destination) async {
     Channel? sock = channel;
     if (sock == null || !sock.isAlive) {
-      // throw 'socket channel lost: $sock';
+      assert(false, 'socket channel lost: $sock');
+      return -1;
+    } else if (destination == null) {
+      assert(false, 'remote address should not empty');
       return -1;
     }
     int sent = await sock.send(src, destination);
@@ -167,17 +170,9 @@ class BaseConnection extends AddressPairObject
     IOError? error;
     int sent = -1;
     try {
-      // prepare buffer
-      ByteBuffer buffer = data.buffer;
-      // send buffer
-      SocketAddress? dst = remoteAddress;
-      if (dst == null) {
-        sent = -1;
-      } else {
-        sent = await sendBuffer(buffer, dst);
-      }
+      sent = await doSend(data, remoteAddress);
       if (sent < 0) { // == -1
-        throw IOException('failed to send data: ${data.length} byte(s) to $dst');
+        throw IOException('failed to send data: ${data.length} byte(s) to $remoteAddress');
       }
     } on IOException catch (e) {
       // print(e);

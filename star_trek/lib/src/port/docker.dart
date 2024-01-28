@@ -79,12 +79,12 @@ abstract interface class Docker implements Processor {
 
 }
 
-class DockerStatus {
+abstract class DockerStatus {
 
-  static final int kError     = -1;
-  static final int kInit      = 0;
-  static final int kPreparing = 1;
-  static final int kReady     = 2;
+  static const int kError     = -1;
+  static const int kInit      = 0;
+  static const int kPreparing = 1;
+  static const int kReady     = 2;
 
   static int getStatus(ConnectionState? state) {
     if (state == null) {

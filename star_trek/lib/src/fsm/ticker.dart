@@ -103,7 +103,7 @@ class Metronome extends Runner {
     return true;
   }
 
-  // private
+  // protected
   void onError(dynamic error, dynamic stacktrace, Ticker ticker) {}
 
 }

@@ -30,6 +30,8 @@
  */
 import 'dart:typed_data';
 
+import 'package:object_key/object_key.dart';
+
 import '../nio/address.dart';
 import '../nio/channel.dart';
 import '../nio/network.dart';
@@ -50,13 +52,13 @@ abstract interface class Channel implements ByteChannel {
   |*          Readable Byte Channel                 *|
   \*================================================*/
 
-  // Future<int> read(ByteBuffer dst);
+  // Future<Uint8List?> read(int maxLen);
 
   /*================================================*\
   |*          Writable Byte Channel                 *|
   \*================================================*/
 
-  // Future<int> write(ByteBuffer src);
+  // Future<int> write(Uint8List src);
 
   /*================================================*\
   |*          Selectable Channel                    *|
@@ -91,9 +93,9 @@ abstract interface class Channel implements ByteChannel {
   Future<ByteChannel?> disconnect();
 
   ///  Receives a data package via this channel.
-  Future<SocketAddress?> receive(ByteBuffer dst);
+  Future<Pair<Uint8List?, SocketAddress?>> receive(int maxLen);
 
   ///  Sends a data package via this channel.
-  Future<int> send(ByteBuffer src, SocketAddress target);
+  Future<int> send(Uint8List src, SocketAddress target);
 
 }

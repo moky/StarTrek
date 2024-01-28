@@ -119,7 +119,7 @@ abstract interface class ReadableByteChannel implements NIOChannel {
   ///
   /// @return  The number of bytes read, possibly zero, or <tt>-1</tt> if the
   ///          channel has reached end-of-stream
-  Future<int> read(ByteBuffer dst);
+  Future<Uint8List?> read(int maxLen);
 
 }
 
@@ -163,7 +163,7 @@ abstract interface class WritableByteChannel implements NIOChannel {
   ///         The buffer from which bytes are to be retrieved
   ///
   /// @return The number of bytes written, possibly zero
-  Future<int> write(ByteBuffer src);
+  Future<int> write(Uint8List src);
 
 }
 

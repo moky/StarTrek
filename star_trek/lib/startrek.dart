@@ -3,6 +3,7 @@ library startrek;
 // export 'fsm.dart';
 
 export 'src/type/pair.dart';
+export 'src/type/mapping.dart';
 
 export 'src/nio/address.dart';
 export 'src/nio/channel.dart';
@@ -23,3 +24,4 @@ export 'src/port/gate.dart';
 export 'src/socket/channel.dart';
 export 'src/socket/checker.dart';
 export 'src/socket/connection.dart';
+export 'src/socket/hub.dart';

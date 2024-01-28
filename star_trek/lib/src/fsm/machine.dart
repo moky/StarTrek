@@ -31,7 +31,7 @@
 import 'ticker.dart';
 
 
-class Status {
+abstract class Status {
 
   static const int kStopped = (0);
   static const int kRunning = (1);

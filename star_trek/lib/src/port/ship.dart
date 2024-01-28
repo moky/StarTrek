@@ -55,22 +55,22 @@ abstract interface class Ship {
 
 }
 
-class ShipStatus {
+abstract class ShipStatus {
 
   //
   //  Arrival Status
   //
-  static final int kAssembling = 0x00;  // waiting for more fragments
-  static final int kExpired    = 0x01;  // failed to received all fragments
+  static const int kAssembling = 0x00;  // waiting for more fragments
+  static const int kExpired    = 0x01;  // failed to received all fragments
 
   //
   //  Departure Status
   //
-  static final int kNew        = 0x10;  // not try yet
-  static final int kWaiting    = 0x11;  // sent, waiting for responses
-  static final int kTimeout    = 0x12;  // waiting to send again
-  static final int kDone       = 0x13;  // all fragments responded (or no need respond)
-  static final int kFailed     = 0x14;  // tried 3 times and missed response(s)
+  static const int kNew        = 0x10;  // not try yet
+  static const int kWaiting    = 0x11;  // sent, waiting for responses
+  static const int kTimeout    = 0x12;  // waiting to send again
+  static const int kDone       = 0x13;  // all fragments responded (or no need respond)
+  static const int kFailed     = 0x14;  // tried 3 times and missed response(s)
 
 }
 
@@ -116,10 +116,10 @@ abstract interface class Departure implements Ship {
 
 }
 
-class DeparturePriority {
+abstract class DeparturePriority {
 
-  static final int kUrgent = -1;
-  static final int kNormal = 0;
-  static final int kSlower = 1;
+  static const int kUrgent = -1;
+  static const int kNormal = 0;
+  static const int kSlower = 1;
 
 }

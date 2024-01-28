@@ -30,6 +30,8 @@
  */
 import 'dart:typed_data';
 
+import 'package:object_key/object_key.dart';
+
 import 'address.dart';
 import 'channel.dart';
 import 'selectable.dart';
@@ -208,7 +210,7 @@ abstract class DatagramChannel extends AbstractSelectableChannel
   /// @return  The datagram's source address,
   ///          or <tt>null</tt> if this channel is in non-blocking mode
   ///          and no datagram was immediately available
-  Future<SocketAddress?> receive(ByteBuffer dst);
+  Future<Pair<Uint8List?, SocketAddress?>> receive(int maxLen);
 
   /// Sends a datagram via this channel.
   ///
@@ -250,11 +252,11 @@ abstract class DatagramChannel extends AbstractSelectableChannel
   ///           method was invoked or, if this channel is non-blocking, may be
   ///           zero if there was insufficient room for the datagram in the
   ///           underlying output buffer
-  Future<int> send(ByteBuffer src, SocketAddress target);
+  Future<int> send(Uint8List src, SocketAddress target);
 
-  // Future<int> read(ByteBuffer dst);
+  // Future<Uint8List?> read(int maxLen);
 
-  // Future<int> write(ByteBuffer src);
+  // Future<int> write(Uint8List src);
 
   /// {@inheritDoc}
   /// <p>

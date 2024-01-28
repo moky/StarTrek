@@ -163,9 +163,9 @@ abstract class SocketChannel extends AbstractSelectableChannel
   ///          connected
   SocketAddress? get remoteAddress;
 
-  // Future<int> read(ByteBuffer dst);
+  // Future<Uint8List?> read(int maxLen);
 
-  // Future<int> write(ByteBuffer src);
+  // Future<int> write(Uint8List src);
 
   /// {@inheritDoc}
   /// <p>

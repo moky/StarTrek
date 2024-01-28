@@ -30,6 +30,8 @@
  */
 import 'dart:typed_data';
 
+import 'package:object_key/object_key.dart';
+
 import '../net/channel.dart';
 import '../nio/address.dart';
 import '../nio/channel.dart';
@@ -43,18 +45,10 @@ import '../type/pair.dart';
 abstract interface class SocketReader {
 
   ///  Read data from socket
-  ///
-  /// @param dst - buffer to save data
-  /// @return data length
-  /// @throws IOException on socket error
-  Future<int> read(ByteBuffer dst);
+  Future<Uint8List?> read(int maxLen);
 
   ///  Receive data via socket, and return remote address
-  ///
-  /// @param dst - buffer to save data
-  /// @return remote address
-  /// @throws IOException on socket error
-  Future<SocketAddress?> receive(ByteBuffer dst);
+  Future<Pair<Uint8List?, SocketAddress?>> receive(int maxLen);
 
 }
 
@@ -64,16 +58,14 @@ abstract interface class SocketWriter {
   ///
   /// @param src - data to send
   /// @return sent length
-  /// @throws IOException on socket error
-  Future<int> write(ByteBuffer src);
+  Future<int> write(Uint8List src);
 
   ///  Send data via socket with remote address
   ///
   /// @param src - data to send
   /// @param target - remote address
   /// @return sent length
-  /// @throws IOException on socket error
-  Future<int> send(ByteBuffer src, SocketAddress target);
+  Future<int> send(Uint8List src, SocketAddress target);
 
 }
 
@@ -261,9 +253,9 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   @override
-  Future<int> read(ByteBuffer dst) async {
+  Future<Uint8List?> read(int maxLen) async {
     try {
-      return await reader.read(dst);
+      return await reader.read(maxLen);
     } catch (e) {
       await close();
       rethrow;
@@ -271,7 +263,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   @override
-  Future<int> write(ByteBuffer src) async {
+  Future<int> write(Uint8List src) async {
     try {
       return await writer.write(src);
     } catch (e) {
@@ -281,9 +273,9 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   @override
-  Future<SocketAddress?> receive(ByteBuffer dst) async {
+  Future<Pair<Uint8List?, SocketAddress?>> receive(int maxLen) async {
     try {
-      return await reader.receive(dst);
+      return await reader.receive(maxLen);
     } catch (e) {
       await close();
       rethrow;
@@ -291,7 +283,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   @override
-  Future<int> send(ByteBuffer src, SocketAddress target) async {
+  Future<int> send(Uint8List src, SocketAddress target) async {
     try {
       return await writer.send(src, target);
     } catch (e) {

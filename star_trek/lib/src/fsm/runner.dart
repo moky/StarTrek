@@ -68,7 +68,7 @@ abstract class Runner implements Runnable, Handler, Processor {
 
   bool get isRunning => _running;
 
-  void stop() => _running = false;
+  Future<void> stop() async => _running = false;
 
   @override
   Future<void> run() async {
@@ -109,7 +109,7 @@ abstract class Runner implements Runnable, Handler, Processor {
   Future<void> idle() async =>
       await sleep(Duration.millisecondsPerSecond ~/ 60);
 
-  Future<void> sleep(int millis) async =>
+  static Future<void> sleep(int millis) async =>
       await Future.delayed(Duration(milliseconds: millis));
 
 }

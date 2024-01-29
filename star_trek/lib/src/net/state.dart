@@ -99,17 +99,17 @@ class StateTransition extends BaseTransition<StateMachine> {
   final StateEvaluate eval;
 
   @override
-  bool evaluate(StateMachine ctx, DateTime now) => eval(ctx, now);
+  Future<bool> evaluate(StateMachine ctx, DateTime now) async => eval(ctx, now);
 
 }
 
-typedef StateEvaluate = bool Function(StateMachine ctx, DateTime now);
+typedef StateEvaluate = Future<bool> Function(StateMachine ctx, DateTime now);
 
 class StateTransitionBuilder {
 
   // Default -> Preparing
   StateTransition getDefaultPreparingTransition() => StateTransition(
-    ConnectionStateOrder.kPreparing, (ctx, now) {
+    ConnectionStateOrder.kPreparing, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connection started? change state to 'preparing'
       return !(conn == null || conn.isClosed);
@@ -118,7 +118,7 @@ class StateTransitionBuilder {
 
   // Preparing -> Ready
   StateTransition getPreparingReadyTransition() => StateTransition(
-    ConnectionStateOrder.kReady, (ctx, now) {
+    ConnectionStateOrder.kReady, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connected or bound, change state to 'ready'
       return conn != null && conn.isAlive;
@@ -127,7 +127,7 @@ class StateTransitionBuilder {
 
   // Preparing -> Default
   StateTransition getPreparingDefaultTransition() => StateTransition(
-    ConnectionStateOrder.kDefault, (ctx, now) {
+    ConnectionStateOrder.kDefault, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connection stopped, change state to 'not_connect'
       return conn == null || conn.isClosed;
@@ -136,7 +136,7 @@ class StateTransitionBuilder {
 
   // Ready -> Expired
   StateTransition getReadyExpiredTransition() => StateTransition(
-    ConnectionStateOrder.kExpired, (ctx, now) {
+    ConnectionStateOrder.kExpired, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
         return false;
@@ -150,7 +150,7 @@ class StateTransitionBuilder {
 
   // Ready -> Error
   StateTransition getReadyErrorTransition() => StateTransition(
-    ConnectionStateOrder.kError, (ctx, now) {
+    ConnectionStateOrder.kError, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connection lost, change state to 'error'
       return conn == null || !conn.isAlive;
@@ -159,7 +159,7 @@ class StateTransitionBuilder {
 
   // Expired -> Maintaining
   StateTransition getExpiredMaintainingTransition() => StateTransition(
-    ConnectionStateOrder.kMaintaining, (ctx, now) {
+    ConnectionStateOrder.kMaintaining, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
         return false;
@@ -173,7 +173,7 @@ class StateTransitionBuilder {
 
   // Expired -> Error
   StateTransition getExpiredErrorTransition() => StateTransition(
-    ConnectionStateOrder.kError, (ctx, now) {
+    ConnectionStateOrder.kError, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
         return true;
@@ -187,7 +187,7 @@ class StateTransitionBuilder {
 
   // Maintaining -> Ready
   StateTransition getMaintainingReadyTransition() => StateTransition(
-    ConnectionStateOrder.kReady, (ctx, now) {
+    ConnectionStateOrder.kReady, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
         return false;
@@ -201,7 +201,7 @@ class StateTransitionBuilder {
 
   // Maintaining -> Expired
   StateTransition getMaintainingExpiredTransition() => StateTransition(
-    ConnectionStateOrder.kExpired, (ctx, now) {
+    ConnectionStateOrder.kExpired, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
         return false;
@@ -215,7 +215,7 @@ class StateTransitionBuilder {
 
   // Maintaining -> Error
   StateTransition getMaintainingErrorTransition() => StateTransition(
-    ConnectionStateOrder.kError, (ctx, now) {
+    ConnectionStateOrder.kError, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
         return true;
@@ -229,7 +229,7 @@ class StateTransitionBuilder {
 
   // Error -> Default
   StateTransition getErrorDefaultTransition() => StateTransition(
-    ConnectionStateOrder.kDefault, (ctx, now) {
+    ConnectionStateOrder.kDefault, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
         return false;
@@ -312,22 +312,24 @@ class ConnectionState extends BaseState<StateMachine, StateTransition> {
   int get hashCode => index;
 
   @override
-  void onEnter(State<StateMachine, StateTransition>? previous, StateMachine ctx, DateTime now) {
+  Future<void> onEnter(State<StateMachine, StateTransition>? previous,
+      StateMachine ctx, DateTime now) async {
     _enterTime = now;
   }
 
   @override
-  void onExit(State<StateMachine, StateTransition>? next, StateMachine ctx, DateTime now) {
+  Future<void> onExit(State<StateMachine, StateTransition>? next,
+      StateMachine ctx, DateTime now) async {
     _enterTime = null;
   }
 
   @override
-  void onPause(StateMachine ctx, DateTime now) {
+  Future<void> onPause(StateMachine ctx, DateTime now) async {
 
   }
 
   @override
-  void onResume(StateMachine ctx, DateTime now) {
+  Future<void> onResume(StateMachine ctx, DateTime now) async {
 
   }
 

@@ -45,14 +45,14 @@ abstract interface class KeyPairMap<K, V> {
   /// @param remote - remote address
   /// @param local  - local address
   /// @return mapped value
-  V? getItem(K? remote, K? local);
+  V? getItem({K? remote, K? local});
 
   ///  Set value by key pair (remote, local)
   ///
   /// @param remote - remote address
   /// @param local  - local address
   /// @param value  - mapping value
-  void setItem(K? remote, K? local, V? value);
+  void setItem(V? value, {K? remote, K? local});
 
   ///  Remove mapping by key pair (remote, local)
   ///
@@ -60,7 +60,7 @@ abstract interface class KeyPairMap<K, V> {
   /// @param local  - local address
   /// @param value  - mapped value (Optional)
   /// @return removed value
-  V? removeItem(K? remote, K? local, V? value);
+  V? removeItem(V? value, {K? remote, K? local});
 
 }
 
@@ -81,7 +81,7 @@ abstract class WeakKeyPairMap<K, V> implements KeyPairMap<K, V> {
   late final Map<K, Map<K, V>> _map;
 
   @override
-  V? getItem(K? remote, K? local) {
+  V? getItem({K? remote, K? local}) {
     K? key1, key2;
     if (remote == null) {
       assert(local != null, 'local & remote addresses should not empty at the same time');
@@ -122,7 +122,7 @@ abstract class WeakKeyPairMap<K, V> implements KeyPairMap<K, V> {
   }
 
   @override
-  void setItem(K? remote, K? local, V? value) {
+  void setItem(V? value, {K? remote, K? local}) {
     // create indexes with key pair (remote, local)
     K? key1, key2;
     if (remote == null) {
@@ -151,7 +151,7 @@ abstract class WeakKeyPairMap<K, V> implements KeyPairMap<K, V> {
   }
 
   @override
-  V? removeItem(K? remote, K? local, V? value) {
+  V? removeItem(V? value, {K? remote, K? local}) {
     // remove indexes with key pair (remote, local)
     K? key1, key2;
     if (remote == null) {
@@ -181,7 +181,7 @@ class HashKeyPairMap<K, V> extends WeakKeyPairMap<K, V> {
   Set<V> get items => _values.toSet();
 
   @override
-  void setItem(K? remote, K? local, V? value) {
+  void setItem(V? value, {K? remote, K? local}) {
     if (value != null) {
       // the caller may create different values with same pair (remote, local)
       // so here we should try to remove it first to make sure it's clean
@@ -190,13 +190,13 @@ class HashKeyPairMap<K, V> extends WeakKeyPairMap<K, V> {
       _values.add(value);
     }
     // create indexes
-    super.setItem(remote, local, value);
+    super.setItem(value, remote: remote, local: local);
   }
 
   @override
-  V? removeItem(K? remote, K? local, V? value) {
+  V? removeItem(V? value, {K? remote, K? local}) {
     // remove indexes
-    V? old = super.removeItem(remote, local, value);
+    V? old = super.removeItem(value, remote: remote, local: local);
     if (old != null) {
       _values.remove(old);
     }

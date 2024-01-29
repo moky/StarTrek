@@ -56,6 +56,7 @@ class BaseConnection extends AddressPairObject
   // connection state machine
   StateMachine? _fsm;
 
+  // protected
   void finalize() {
     // make sure the relative channel is closed
     channel = null;
@@ -125,13 +126,13 @@ class BaseConnection extends AddressPairObject
     stateMachine = null;
   }
 
-  void start() {
+  Future<void> start() async {
     StateMachine machine = createStateMachine();
-    machine.start();
     stateMachine = machine;
+    await machine.start();
   }
 
-  void stop() {
+  Future<void> stop() async {
     channel = null;
     stateMachine = null;
   }
@@ -227,12 +228,12 @@ class BaseConnection extends AddressPairObject
   //
 
   @override
-  void enterState(ConnectionState? next, StateMachine ctx, DateTime now) {
+  Future<void> enterState(ConnectionState? next, StateMachine ctx, DateTime now) async {
 
   }
 
   @override
-  void exitState(ConnectionState? previous, StateMachine ctx, DateTime now) {
+  Future<void> exitState(ConnectionState? previous, StateMachine ctx, DateTime now) async {
     ConnectionState? current = ctx.currentState;
     // if current == 'ready'
     if (current?.index == ConnectionStateOrder.kReady.index) {
@@ -252,16 +253,16 @@ class BaseConnection extends AddressPairObject
       }
     }
     // callback
-    delegate?.onConnectionStateChanged(previous, current, this);
+    await delegate?.onConnectionStateChanged(previous, current, this);
   }
 
   @override
-  void pauseState(ConnectionState? current, StateMachine ctx, DateTime now) {
+  Future<void> pauseState(ConnectionState? current, StateMachine ctx, DateTime now) async {
 
   }
 
   @override
-  void resumeState(ConnectionState? current, StateMachine ctx, DateTime now) {
+  Future<void> resumeState(ConnectionState? current, StateMachine ctx, DateTime now) async {
 
   }
 
@@ -291,7 +292,7 @@ class ActiveConnection extends BaseConnection {
         return null;
       }
       // get new channel via hub
-      sock = hub?.open(remoteAddress, localAddress);
+      sock = hub?.open(remote: remoteAddress, local: localAddress);
       // assert(sock != null, 'failed to open channel: $remoteAddress, $localAddress');
       channel = sock;
     }

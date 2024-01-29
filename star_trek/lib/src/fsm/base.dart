@@ -57,9 +57,9 @@ abstract class BaseState<C extends Context, T extends Transition<C>>
   }
 
   @override
-  T? evaluate(C ctx, DateTime now) {
+  Future<T?> evaluate(C ctx, DateTime now) async {
     for (T trans in _transitions) {
-      if (trans.evaluate(ctx, now)) {
+      if (await trans.evaluate(ctx, now)) {
         // OK, get target state from this transition
         return trans;
       }
@@ -128,7 +128,7 @@ abstract class BaseMachine<C extends Context, T extends BaseTransition<C>, S ext
   ///
   /// @param newState - next state
   /// @param now     - current time (milliseconds, from Jan 1, 1970 UTC)
-  bool _changeState(S? newState, DateTime now) {
+  Future<bool> _changeState(S? newState, DateTime now) async {
     S? oldState = currentState;
     if (oldState == null) {
       if (newState == null) {
@@ -141,18 +141,18 @@ abstract class BaseMachine<C extends Context, T extends BaseTransition<C>, S ext
     }
 
     C ctx = context;
-    Delegate<C, T, S>? handler = delegate;
+    Delegate<C, T, S>? callback = delegate;
 
     //
     //  Events before state changed
     //
-    if (handler != null) {
+    if (callback != null) {
       // prepare for changing current state to the new one,
       // the delegate can get old state via ctx if need
-      handler.enterState(newState, ctx, now);
+      await callback.enterState(newState, ctx, now);
     }
     if (oldState != null) {
-      oldState.onExit(newState, ctx, now);
+      await oldState.onExit(newState, ctx, now);
     }
 
     //
@@ -164,12 +164,12 @@ abstract class BaseMachine<C extends Context, T extends BaseTransition<C>, S ext
     //  Events after state changed
     //
     if (newState != null) {
-      newState.onEnter(oldState, ctx, now);
+      await newState.onEnter(oldState, ctx, now);
     }
-    if (handler != null) {
+    if (callback != null) {
       // handle after the current state changed,
       // the delegate can get new state via ctx if need
-      handler.exitState(oldState, ctx, now);
+      await callback.exitState(oldState, ctx, now);
     }
 
     return true;
@@ -180,33 +180,33 @@ abstract class BaseMachine<C extends Context, T extends BaseTransition<C>, S ext
   //
 
   @override
-  void start() {
+  Future<void> start() async {
     ///  start machine from default state
     DateTime now = DateTime.now();
-    bool ok = _changeState(getDefaultState(), now);
+    bool ok = await _changeState(getDefaultState(), now);
     assert(ok, 'failed to change default state');
     _status = Status.kRunning;
   }
 
   @override
-  void stop() {
+  Future<void> stop() async {
     ///  stop machine and set current state to null
     _status = Status.kStopped;
     DateTime now = DateTime.now();
-    _changeState(null, now);  // force current state to null
+    await _changeState(null, now);  // force current state to null
   }
 
   @override
-  void pause() {
+  Future<void> pause() async {
     ///  pause machine, current state not change
     DateTime now = DateTime.now();
     C ctx = context;
     S? current = currentState;
-    Delegate<C, T, S>? handler = delegate;
+    Delegate<C, T, S>? callback = delegate;
     //
     //  Events before state paused
     //
-    current?.onPause(ctx, now);
+    await current?.onPause(ctx, now);
     //
     //  Pause current state
     //
@@ -214,20 +214,20 @@ abstract class BaseMachine<C extends Context, T extends BaseTransition<C>, S ext
     //
     //  Events after state paused
     //
-    handler?.pauseState(current, ctx, now);
+    await callback?.pauseState(current, ctx, now);
   }
 
   @override
-  void resume() {
+  Future<void> resume() async {
     ///  resume machine with current state
     DateTime now = DateTime.now();
     C ctx = context;
     S? current = currentState;
-    Delegate<C, T, S>? handler = delegate;
+    Delegate<C, T, S>? callback = delegate;
     //
     //  Events before state resumed
     //
-    handler?.resumeState(current, ctx, now);
+    await callback?.resumeState(current, ctx, now);
     //
     //  Resume current state
     //
@@ -235,7 +235,7 @@ abstract class BaseMachine<C extends Context, T extends BaseTransition<C>, S ext
     //
     //  Events after state resumed
     //
-    current?.onResume(ctx, now);
+    await current?.onResume(ctx, now);
   }
 
   //
@@ -248,11 +248,11 @@ abstract class BaseMachine<C extends Context, T extends BaseTransition<C>, S ext
     C ctx = context;
     S? state = currentState;
     if (state != null && _status == Status.kRunning) {
-      T? trans = state.evaluate(ctx, now);
+      T? trans = await state.evaluate(ctx, now);
       if (trans != null) {
         state = getTargetState(trans);
         assert(state != null, 'state error: $trans');
-        _changeState(state, now);
+        await _changeState(state, now);
       }
     }
   }

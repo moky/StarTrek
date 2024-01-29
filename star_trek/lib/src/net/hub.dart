@@ -43,13 +43,13 @@ abstract interface class Hub implements Processor {
   /// @param remote - remote address
   /// @param local  - local address
   /// @return null on socket closed
-  Channel? open(SocketAddress? remote, SocketAddress? local);
+  Channel? open({SocketAddress? remote, SocketAddress? local});
 
   ///  Get connection with direction (remote, local)
   ///
   /// @param remote - remote address
   /// @param local  - local address
   /// @return null on connection not found
-  Connection? connect(SocketAddress remote, SocketAddress? local);
+  Connection? connect({required SocketAddress remote, SocketAddress? local});
 
 }

@@ -58,7 +58,7 @@ abstract interface class Transition<C extends Context> {
   /// @param ctx     - context (machine)
   /// @param now     - current time
   /// @return true when current state should be changed
-  bool evaluate(C ctx, DateTime now);
+  Future<bool> evaluate(C ctx, DateTime now);
 
 }
 
@@ -75,33 +75,33 @@ abstract interface class State<C extends Context, T extends Transition<C>> {
   /// @param previous - old state
   /// @param ctx      - context (machine)
   /// @param now      - current time
-  void onEnter(State<C, T>? previous, C ctx, DateTime now);
+  Future<void> onEnter(State<C, T>? previous, C ctx, DateTime now);
 
   ///  Called before old state exited
   ///
   /// @param next    - new state
   /// @param ctx     - context (machine)
   /// @param now     - current time
-  void onExit(State<C, T>? next, C ctx, DateTime now);
+  Future<void> onExit(State<C, T>? next, C ctx, DateTime now);
 
   ///  Called before current state paused
   ///
   /// @param ctx - context (machine)
   /// @param now - current time
-  void onPause(C ctx, DateTime now);
+  Future<void> onPause(C ctx, DateTime now);
 
   ///  Called after current state resumed
   ///
   /// @param ctx - context (machine)
   /// @param now - current time
-  void onResume(C ctx, DateTime now);
+  Future<void> onResume(C ctx, DateTime now);
 
   ///  Called by machine.tick() to evaluate each transitions
   ///
   /// @param ctx     - context (machine)
   /// @param now     - current time
   /// @return success transition, or null to stay the current state
-  T? evaluate(C ctx, DateTime now);
+  Future<T?> evaluate(C ctx, DateTime now);
 
 }
 
@@ -120,7 +120,7 @@ abstract interface class Delegate<C extends Context, T extends Transition<C>, S 
   /// @param next     - new state
   /// @param ctx      - context (machine)
   /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
-  void enterState(S? next, C ctx, DateTime now);
+  Future<void> enterState(S? next, C ctx, DateTime now);
 
   ///  Called after old state exited
   ///  (get current state from context)
@@ -128,21 +128,21 @@ abstract interface class Delegate<C extends Context, T extends Transition<C>, S 
   /// @param previous - old state
   /// @param ctx      - context (machine)
   /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
-  void exitState(S? previous, C ctx, DateTime now);
+  Future<void> exitState(S? previous, C ctx, DateTime now);
 
   ///  Called after current state paused
   ///
   /// @param current  - current state
   /// @param ctx      - context (machine)
   /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
-  void pauseState(S? current, C ctx, DateTime now);
+  Future<void> pauseState(S? current, C ctx, DateTime now);
 
   ///  Called before current state resumed
   ///
   /// @param current  - current state
   /// @param ctx      - context (machine)
   /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
-  void resumeState(S? current, C ctx, DateTime now);
+  Future<void> resumeState(S? current, C ctx, DateTime now);
 
 }
 
@@ -159,15 +159,15 @@ abstract interface class Machine<C extends Context, T extends Transition<C>, S e
   S? get currentState;
 
   ///  Change current state to 'default'
-  void start();
+  Future<void> start();
 
   ///  Change current state to null
-  void stop();
+  Future<void> stop();
 
   ///  Pause machine, current state not change
-  void pause();
+  Future<void> pause();
 
   ///  Resume machine with current state
-  void resume();
+  Future<void> resume();
 
 }

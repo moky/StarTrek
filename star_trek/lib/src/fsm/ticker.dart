@@ -63,7 +63,7 @@ class Metronome extends Runner {
 
   void removeTicker(Ticker ticker) => _allTickers.remove(ticker);
 
-  void start() => run();
+  Future<void> start() async => await run();
 
   @override
   Future<void> setup() async {
@@ -87,7 +87,7 @@ class Metronome extends Runner {
     if (waiting < minInterval) {
       waiting = minInterval;
     }
-    await sleep(waiting);
+    await Runner.sleep(waiting);
     now = now.add(Duration(milliseconds: waiting));
     elapsed += waiting;
     // 2. drive tickers
@@ -95,7 +95,7 @@ class Metronome extends Runner {
       try {
         await item.tick(now, elapsed);
       } catch (e, st) {
-        onError(e, st, item);
+        await onError(e, st, item);
       }
     }
     // 3. update last time
@@ -104,7 +104,7 @@ class Metronome extends Runner {
   }
 
   // protected
-  void onError(dynamic error, dynamic stacktrace, Ticker ticker) {}
+  Future<void> onError(dynamic error, dynamic stacktrace, Ticker ticker) async {}
 
 }
 

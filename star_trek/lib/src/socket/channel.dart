@@ -129,10 +129,11 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   C? get socketChannel => _impl;
 
+  // protected
   void finalize() {
     _removeSocketChannel();
   }
-  void _removeSocketChannel() {
+  Future<void> _removeSocketChannel() async {
     // 1. clear inner channel
     C? old = _impl;
     _impl = null;
@@ -140,7 +141,7 @@ abstract class BaseChannel<C extends SelectableChannel>
     refreshFlags();
     // 3. close old channel
     if (old == null || old.isClosed) {} else {
-      old.close();
+      await old.close();
     }
   }
 
@@ -193,7 +194,7 @@ abstract class BaseChannel<C extends SelectableChannel>
       return null;
     }
     NetworkChannel nc = sock as NetworkChannel;
-    nc.bind(local);
+    await nc.bind(local);
     localAddress = local;
     _bound = true;
     _opened = true;
@@ -241,7 +242,7 @@ abstract class BaseChannel<C extends SelectableChannel>
         }
       }
     } else {
-      _removeSocketChannel();
+      await _removeSocketChannel();
     }
     return sock is ByteChannel ? sock as ByteChannel : null;
   }
@@ -249,7 +250,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   @override
   Future<void> close() async {
     // close inner socket and refresh flags
-    _removeSocketChannel();
+    await _removeSocketChannel();
   }
 
   @override

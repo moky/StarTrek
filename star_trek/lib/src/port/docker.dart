@@ -54,22 +54,22 @@ abstract interface class Docker implements Processor {
   ///
   /// @param payload  - data to be sent
   /// @return false on error
-  bool sendData(Uint8List payload);
+  Future<bool> sendData(Uint8List payload);
 
   ///  Append outgo ship (carrying data package, with priority)
   ///  to the waiting queue for sending out
   ///
   /// @param ship - outgo ship carrying data package/fragment
   /// @return false on duplicated
-  bool sendShip(Departure ship);
+  Future<bool> sendShip(Departure ship);
 
   ///  Called when received data
   ///
   /// @param data   - received data package
-  void processReceived(Uint8List data);
+  Future<void> processReceived(Uint8List data);
 
   ///  Send 'PING' for keeping connection alive
-  void heartbeat();
+  Future<void> heartbeat();
 
   ///  Clear all expired tasks
   void purge([DateTime? now]);
@@ -111,33 +111,33 @@ abstract interface class DockerDelegate {
   ///
   /// @param arrival     - income data package container
   /// @param docker      - connection docker
-  void onDockerReceived(Arrival arrival, Docker docker);
+  Future<void> onDockerReceived(Arrival arrival, Docker docker);
 
   ///  Callback when package sent
   ///
   /// @param departure   - outgo data package container
   /// @param docker      - connection docker
-  void onDockerSent(Departure departure, Docker docker);
+  Future<void> onDockerSent(Departure departure, Docker docker);
 
   ///  Callback when failed to send package
   ///
   /// @param error       - error message
   /// @param departure   - outgo data package container
   /// @param docker      - connection docker
-  void onDockerFailed(IOError error, Departure departure, Docker docker);
+  Future<void> onDockerFailed(IOError error, Departure departure, Docker docker);
 
   ///  Callback when connection error
   ///
   /// @param error       - error message
   /// @param departure   - outgo data package container
   /// @param docker      - connection docker
-  void onDockerError(IOError error, Departure departure, Docker docker);
+  Future<void> onDockerError(IOError error, Departure departure, Docker docker);
 
   ///  Callback when connection status changed
   ///
   /// @param previous    - old status
   /// @param current     - new status
   /// @param docker      - connection docker
-  void onDockerStatusChanged(int previous, int current, Docker docker);
+  Future<void> onDockerStatusChanged(int previous, int current, Docker docker);
 
 }

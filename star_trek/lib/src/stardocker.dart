@@ -57,19 +57,20 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   Departure? _lastOutgo;
   late List<Uint8List> _lastFragments;
 
+  // protected
   void finalize() {
     // make sure the relative connection is closed
     _removeConnection();
     _dock = null;
   }
 
-  // override for user-customized dock
-  Dock createDock() => Dock();
+  // protected
+  Dock createDock() => Dock();  // override for user-customized dock
 
   // delegate for handling docker events
   DockerDelegate? get delegate => _delegateRef?.target;
-  set delegate(DockerDelegate? handler) =>
-      _delegateRef = handler == null ? null : WeakReference(handler);
+  set delegate(DockerDelegate? keeper) =>
+      _delegateRef = keeper == null ? null : WeakReference(keeper);
 
   // protected
   Connection? get connection => _connectionRef?.target;
@@ -106,11 +107,11 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   }
 
   @override
-  bool sendShip(Departure ship) =>
+  Future<bool> sendShip(Departure ship) async =>
       _dock?.addDeparture(ship) ?? false;
 
   @override
-  void processReceived(Uint8List data) {
+  Future<void> processReceived(Uint8List data) async {
     // 1. get income ship from received data
     Arrival? income = getArrival(data);
     if (income == null) {
@@ -124,7 +125,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       return;
     }
     // 3. callback for processing income ship with completed data package
-    delegate?.onDockerReceived(income, this);
+    await delegate?.onDockerReceived(income, this);
   }
 
   ///  Get income Ship from received data
@@ -144,7 +145,8 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   ///  Check and remove linked departure ship with same SN (and page index for fragment)
   ///
   /// @param income - income ship with SN
-  void checkResponse(Arrival income) {
+  // protected
+  Future<void> checkResponse(Arrival income) async {
     // check response for linked departure ship (same SN)
     Departure? linked = _dock?.checkResponse(income);
     if (linked == null) {
@@ -152,13 +154,14 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       return;
     }
     // all fragments responded, task finished
-    delegate?.onDockerSent(linked, this);
+    await delegate?.onDockerSent(linked, this);
   }
 
   /// Check received ship for completed package
   ///
   /// @param income - income ship carrying data package (fragment)
   /// @return ship carrying completed data package
+  // protected
   Arrival? assembleArrival(Arrival income) =>
       _dock?.assembleArrival(income);
 
@@ -166,6 +169,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   ///
   /// @param now - current time
   /// @return next new or timeout task
+  // protected
   Departure? getNextDeparture(DateTime now) =>
       _dock?.getNextDeparture(now);
 
@@ -206,7 +210,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
         return false;
       } else if (outgo.getStatus(now) == ShipStatus.kFailed) {
         // callback for mission failed
-        delegate?.onDockerFailed(IOError('Request timeout'), outgo, this);
+        await delegate?.onDockerFailed(IOError('Request timeout'), outgo, this);
         // task timeout, return true to process next one
         return true;
       } else {
@@ -258,10 +262,8 @@ abstract class StarDocker extends AddressPairObject implements Docker {
     _lastOutgo = outgo;
     _lastFragments = fragments;
     // 6. callback for error
-    if (delegate != null) {
-      //delegate?.onDockerFailed(error, outgo, this);
-      delegate?.onDockerError(error, outgo, this);
-    }
+    //await delegate?.onDockerFailed(error, outgo, this);
+    await delegate?.onDockerError(error, outgo, this);
     return false;
   }
 

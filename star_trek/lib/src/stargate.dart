@@ -42,17 +42,17 @@ import 'type/mapping.dart';
 class DockerPool extends AddressPairMap<Docker> {
 
   @override
-  void setItem(SocketAddress? remote, SocketAddress? local, Docker? value) {
-    Docker? old = getItem(remote, local);
+  void setItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
+    Docker? old = getItem(remote: remote, local: local);
     if (old != null && old != value) {
-      removeItem(remote, local, old);
+      removeItem(old, remote: remote, local: local);
     }
-    super.setItem(remote, local, value);
+    super.setItem(value, remote: remote, local: local);
   }
 
   @override
-  Docker? removeItem(SocketAddress? remote, SocketAddress? local, Docker? value) {
-    Docker? cached = super.removeItem(remote, local, value);
+  Docker? removeItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
+    Docker? cached = super.removeItem(value, remote: remote, local: local);
     if (cached == null || cached.isClosed) {} else {
       cached.close();
     }
@@ -62,8 +62,8 @@ class DockerPool extends AddressPairMap<Docker> {
 
 
 abstract class StarGate implements Gate, ConnectionDelegate {
-  StarGate(DockerDelegate delegate) {
-    _delegateRef = WeakReference(delegate);
+  StarGate(DockerDelegate keeper) {
+    _delegateRef = WeakReference(keeper);
     _dockerPool = createDockerPool();
   }
 
@@ -77,21 +77,21 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   late final WeakReference<DockerDelegate> _delegateRef;
 
   @override
-  bool sendData(Uint8List payload, SocketAddress remote, SocketAddress local) {
-    Docker? docker = getDocker(remote, local);
+  Future<bool> sendData(Uint8List payload, {required SocketAddress remote, SocketAddress? local}) async {
+    Docker? docker = getDocker(remote: remote, local: local);
     if (docker == null || docker.isClosed) {
       return false;
     }
-    return docker.sendData(payload);
+    return await docker.sendData(payload);
   }
 
   @override
-  bool sendShip(Departure outgo, SocketAddress remote, SocketAddress local) {
-    Docker? docker = getDocker(remote, local);
+  Future<bool> sendShip(Departure outgo, {required SocketAddress remote, SocketAddress? local}) async {
+    Docker? docker = getDocker(remote: remote, local: local);
     if (docker == null || docker.isClosed) {
       return false;
     }
-    return docker.sendShip(outgo);
+    return await docker.sendShip(outgo);
   }
 
   //
@@ -110,16 +110,16 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   Set<Docker> allDockers() => _dockerPool.items;
 
   // protected
-  Docker? getDocker(SocketAddress remote, SocketAddress? local) =>
-      _dockerPool.getItem(remote, local);
+  Docker? getDocker({required SocketAddress remote, SocketAddress? local}) =>
+      _dockerPool.getItem(remote: remote, local: local);
 
   // protected
-  void setDocker(SocketAddress remote, SocketAddress? local, Docker docker) =>
-      _dockerPool.setItem(remote, local, docker);
+  void setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
+      _dockerPool.setItem(docker, remote: remote, local: local);
 
   // protected
-  void removeDocker(SocketAddress remote, SocketAddress? local, Docker? docker) =>
-      _dockerPool.removeItem(remote, local, docker);
+  void removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
+      _dockerPool.removeItem(docker, remote: remote, local: local);
 
   //
   //  Processor
@@ -151,7 +151,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     for (Docker worker in dockers) {
       if (worker.isClosed) {
         // remove docker when connection closed
-        removeDocker(worker.remoteAddress!, worker.localAddress, worker);
+        removeDocker(worker, remote: worker.remoteAddress!, local: worker.localAddress);
       } else {
         // clear expired tasks
         worker.purge(now);
@@ -161,12 +161,12 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   ///  Send a heartbeat package('PING') to remote address
   // protected
-  void heartbeat(Connection connection) {
+  Future<void> heartbeat(Connection connection) async {
     SocketAddress remote = connection.remoteAddress!;
     SocketAddress? local = connection.localAddress;
-    Docker? worker = getDocker(remote, local);
+    Docker? worker = getDocker(remote: remote, local: local);
     if (worker != null) {
-      worker.heartbeat();
+      await worker.heartbeat();
     }
   }
 
@@ -177,26 +177,26 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   @override
   Future<void> onConnectionStateChanged(ConnectionState? previous, ConnectionState? current, Connection connection) async {
     // 1. callback when status changed
-    DockerDelegate? delegate = this.delegate;
-    if (delegate != null) {
+    DockerDelegate? keeper = delegate;
+    if (keeper != null) {
       int s1 = DockerStatus.getStatus(previous);
       int s2 = DockerStatus.getStatus(current);
       if (s1 != s2) {
         // callback
         SocketAddress remote = connection.remoteAddress!;
         SocketAddress? local = connection.localAddress;
-        Docker? docker = getDocker(remote, local);
+        Docker? docker = getDocker(remote: remote, local: local);
         // NOTICE: if the previous state is null, the docker maybe not
         //         created yet, this situation means the docker status
         //         not changed too, so no need to callback here.
         if (docker != null) {
-          delegate.onDockerStatusChanged(s1, s2, docker);
+          await keeper.onDockerStatusChanged(s1, s2, docker);
         }
       }
     }
     // 2. heartbeat when connection expired
     if (current?.index == ConnectionStateOrder.kExpired.index) {
-      heartbeat(connection);
+      await heartbeat(connection);
     }
   }
 
@@ -205,10 +205,10 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     SocketAddress remote = connection.remoteAddress!;
     SocketAddress? local = connection.localAddress;
     // get docker by (remote, local)
-    Docker? worker = getDocker(remote, local);
+    Docker? worker = getDocker(remote: remote, local: local);
     if (worker != null) {
       // docker exists, call docker.onReceived(data);
-      worker.processReceived(data);
+      await worker.processReceived(data);
       return;
     }
 
@@ -220,10 +220,10 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     worker = createDocker(connection, advanceParty);
     if (worker != null) {
       // cache docker for (remote, local)
-      setDocker(worker.remoteAddress!, worker.localAddress, worker);
+      setDocker(worker, remote: worker.remoteAddress!, local: worker.localAddress);
       // process advance parties one by one
       for (Uint8List part in advanceParty) {
-        worker.processReceived(part);
+        await worker.processReceived(part);
       }
       // remove advance party
       clearAdvanceParty(connection);

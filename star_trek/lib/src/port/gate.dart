@@ -79,7 +79,7 @@ abstract interface class Gate implements Processor {
   /// @param remote  - remote address
   /// @param local   - local address
   /// @return false on error
-  bool sendData(Uint8List payload, SocketAddress remote, SocketAddress local);
+  Future<bool> sendData(Uint8List payload, {required SocketAddress remote, SocketAddress? local});
 
   ///  Append outgo ship (carrying data package, with priority)
   ///  to the waiting queue of docker for remote address
@@ -88,6 +88,6 @@ abstract interface class Gate implements Processor {
   /// @param remote - remote address
   /// @param local  - local address
   /// @return false on error
-  bool sendShip(Departure outgo, SocketAddress remote, SocketAddress local);
+  Future<bool> sendShip(Departure outgo, {required SocketAddress remote, SocketAddress? local});
 
 }

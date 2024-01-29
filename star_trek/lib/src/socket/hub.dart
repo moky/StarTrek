@@ -42,17 +42,17 @@ import '../type/mapping.dart';
 class ConnectionPool extends AddressPairMap<Connection> {
 
   @override
-  void setItem(SocketAddress? remote, SocketAddress? local, Connection? value) {
-    Connection? old = getItem(remote, local);
+  void setItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
+    Connection? old = getItem(remote: remote, local: local);
     if (old != null && old != value) {
-      removeItem(remote, local, old);
+      removeItem(old, remote: remote, local: local);
     }
-    super.setItem(remote, local, value);
+    super.setItem(value, remote: remote, local: local);
   }
 
   @override
-  Connection? removeItem(SocketAddress? remote, SocketAddress? local, Connection? value) {
-    Connection? cached = super.removeItem(remote, local, value);
+  Connection? removeItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
+    Connection? cached = super.removeItem(value, remote: remote, local: local);
     if (cached == null || cached.isClosed) {} else {
       cached.close();
     }
@@ -104,7 +104,7 @@ abstract class BaseHub implements Hub {
   /// @param local  - local address
   /// @param channel - socket channel
   // protected
-  void removeChannel(SocketAddress? remote, SocketAddress? local, Channel? channel);
+  void removeChannel(Channel? channel, {SocketAddress? remote, SocketAddress? local});
 
   //
   //  Connection
@@ -117,26 +117,26 @@ abstract class BaseHub implements Hub {
   /// @param local  - local address
   /// @return null on channel not exists
   // protected
-  Connection? createConnection(SocketAddress remote, SocketAddress? local, Channel channel);
+  Connection? createConnection(Channel channel, {required SocketAddress remote, SocketAddress? local});
 
   // protected
   Set<Connection> get allConnections => _connectionPool.items;
 
   // protected
-  Connection? getConnection(SocketAddress remote, SocketAddress? local) =>
-      _connectionPool.getItem(remote, local);
+  Connection? getConnection({required SocketAddress remote, SocketAddress? local}) =>
+      _connectionPool.getItem(remote: remote, local: local);
 
   // protected
-  void setConnection(SocketAddress remote, SocketAddress? local, Connection conn) =>
-      _connectionPool.setItem(remote, local, conn);
+  void setConnection(Connection conn, {required SocketAddress remote, SocketAddress? local}) =>
+      _connectionPool.setItem(conn, remote: remote, local: local);
 
   // protected
-  void removeConnection(SocketAddress remote, SocketAddress? local, Connection? conn) =>
-      _connectionPool.removeItem(remote, local, conn);
+  void removeConnection(Connection? conn, {required SocketAddress remote, SocketAddress? local}) =>
+      _connectionPool.removeItem(conn, remote: remote, local: local);
 
   @override
-  Connection? connect(SocketAddress remote, SocketAddress? local) {
-    Connection? conn = getConnection(remote, local);
+  Connection? connect({required SocketAddress remote, SocketAddress? local}) {
+    Connection? conn = getConnection(remote: remote, local: local);
     if (conn != null) {
       // check local address
       if (local == null) {
@@ -149,15 +149,15 @@ abstract class BaseHub implements Hub {
       // local address not matched? ignore this connection
     }
     // try to open channel with direction (remote, local)
-    Channel? sock = open(remote, local);
+    Channel? sock = open(remote: remote, local: local);
     if (sock == null || sock.isClosed) {
       return null;
     }
     // create with channel
-    conn = createConnection(remote, local, sock);
+    conn = createConnection(sock, remote: remote, local: local);
     if (conn != null) {
       // NOTICE: local address in the connection may be set to None
-      setConnection(conn.remoteAddress!, conn.localAddress, conn);
+      setConnection(conn, remote: conn.remoteAddress!, local: conn.localAddress);
     }
     return conn;
   }
@@ -189,11 +189,11 @@ abstract class BaseHub implements Hub {
       if (gate == null || remote == null) {
         // UDP channel may not connected,
         // so no connection for it
-        removeChannel(remote, local, sock);
+        removeChannel(sock, remote: remote, local: local);
       } else {
         // remove channel and callback with connection
-        Connection? conn = getConnection(remote, local);
-        removeChannel(remote, local, sock);
+        Connection? conn = getConnection(remote: remote, local: local);
+        removeChannel(sock, remote: remote, local: local);
         if (conn != null) {
           await gate.onConnectionError(IOError(e), conn);
         }
@@ -208,7 +208,7 @@ abstract class BaseHub implements Hub {
       local = sock.localAddress;
     }
     // get connection for processing received data
-    Connection? conn = connect(remote, local);
+    Connection? conn = connect(remote: remote, local: local);
     if (conn != null) {
       await conn.onReceivedData(data!);
     }
@@ -233,7 +233,7 @@ abstract class BaseHub implements Hub {
       if (sock.isClosed) {
         // if channel not connected (TCP) and not bound (UDP),
         // means it's closed, remove it from the hub
-        removeChannel(sock.remoteAddress, sock.localAddress, sock);
+        removeChannel(sock, remote: sock.remoteAddress, local: sock.localAddress);
       }
     }
   }
@@ -260,7 +260,7 @@ abstract class BaseHub implements Hub {
         // if connection closed, remove it from the hub; notice that
         // ActiveConnection can reconnect, it'll be not connected
         // but still open, don't remove it in this situation.
-        removeConnection(conn.remoteAddress!, conn.localAddress, conn);
+        removeConnection(conn, remote: conn.remoteAddress!, local: conn.localAddress);
       }
     }
   }

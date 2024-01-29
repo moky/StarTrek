@@ -40,7 +40,7 @@ import '../type/pair.dart';
 
 class BaseConnection extends AddressPairObject
     implements Connection, TimedConnection, ConnectionStateDelegate {
-  BaseConnection(super.remoteAddress, super.localAddress, Channel sock) {
+  BaseConnection(Channel sock, {super.remote, super.local}) {
     _channelRef = WeakReference(sock);
   }
 
@@ -271,7 +271,7 @@ class BaseConnection extends AddressPairObject
 
 /// Active connection for client
 class ActiveConnection extends BaseConnection {
-  ActiveConnection(super.remoteAddress, super.localAddress, super.sock, Hub hub) {
+  ActiveConnection(Hub hub, super.sock, {super.remote, super.local}) {
     _hubRef = WeakReference(hub);
   }
 

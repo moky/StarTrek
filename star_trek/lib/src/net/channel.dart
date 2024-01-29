@@ -72,7 +72,7 @@ abstract interface class Channel implements ByteChannel {
   |*          Network Channel                       *|
   \*================================================*/
 
-  Future<NetworkChannel?> bind(SocketAddress? local);
+  Future<NetworkChannel?> bind(SocketAddress local);
 
   SocketAddress? get localAddress;
 
@@ -82,7 +82,7 @@ abstract interface class Channel implements ByteChannel {
 
   bool get isConnected;
 
-  Future<NetworkChannel?> connect(SocketAddress? remote);
+  Future<NetworkChannel?> connect(SocketAddress remote);
 
   SocketAddress? get remoteAddress;
 

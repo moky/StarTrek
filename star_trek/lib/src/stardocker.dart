@@ -39,7 +39,7 @@ import 'dock.dart';
 
 
 abstract class StarDocker extends AddressPairObject implements Docker {
-  StarDocker(Connection conn) : super(conn.remoteAddress, conn.localAddress) {
+  StarDocker(Connection conn) : super(remote: conn.remoteAddress, local: conn.localAddress) {
     _connectionRef = WeakReference(conn);
     _delegateRef = null;
     _dock = createDock();

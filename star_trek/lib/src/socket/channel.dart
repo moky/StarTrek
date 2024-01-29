@@ -72,7 +72,7 @@ abstract interface class SocketWriter {
 
 abstract class BaseChannel<C extends SelectableChannel>
     extends AddressPairObject implements Channel {
-  BaseChannel(super.remoteAddress, super.localAddress, C sock) {
+  BaseChannel(C sock, {super.remote, super.local}) {
     reader = createReader();
     writer = createWriter();
     _impl = sock;
@@ -180,14 +180,14 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   @override
-  Future<NetworkChannel?> bind(SocketAddress? local) async {
-    if (local == null) {
-      local = localAddress;
-      if (local == null) {
-        assert(false, 'local address not set');
-        return null;
-      }
-    }
+  Future<NetworkChannel?> bind(SocketAddress local) async {
+    // if (local == null) {
+    //   local = localAddress;
+    //   if (local == null) {
+    //     assert(false, 'local address not set');
+    //     return null;
+    //   }
+    // }
     C? sock = socketChannel;
     if (sock == null) {
       assert(false, 'socket closed');
@@ -203,14 +203,14 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   @override
-  Future<NetworkChannel?> connect(SocketAddress? remote) async {
-    if (remote == null) {
-      remote = remoteAddress;
-      if (remote == null) {
-        assert(false, 'remote address not set');
-        return null;
-      }
-    }
+  Future<NetworkChannel?> connect(SocketAddress remote) async {
+    // if (remote == null) {
+    //   remote = remoteAddress;
+    //   if (remote == null) {
+    //     assert(false, 'remote address not set');
+    //     return null;
+    //   }
+    // }
     C? sock = socketChannel;
     if (sock == null) {
       assert(false, 'socket closed');

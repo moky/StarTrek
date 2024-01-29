@@ -32,7 +32,8 @@ import '../nio/address.dart';
 
 
 class AddressPairObject {
-  AddressPairObject(this.remoteAddress, this.localAddress);
+  AddressPairObject({SocketAddress? remote, SocketAddress? local})
+      : remoteAddress = remote, localAddress = local;
 
   SocketAddress? remoteAddress;
   SocketAddress? localAddress;

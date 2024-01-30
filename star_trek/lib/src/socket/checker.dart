@@ -68,7 +68,7 @@ class BaseChecker<C extends SelectableChannel> extends ChannelChecker<C> {
   @override
   IOException? checkData(Uint8List? data, C sock) {
     // TODO: check Timeout for received nothing
-    if (data == null) {
+    if (data == null && sock.isClosed) {
       return IOException('channel closed');
     }
     return null;

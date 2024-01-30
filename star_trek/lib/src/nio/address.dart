@@ -42,6 +42,29 @@ class InetSocketAddress implements SocketAddress {
   final String host;
   final int port;
 
+  @override
+  String toString() => '("$host", $port)';
+
+  static InetSocketAddress? parse(String string) {
+    string = string.replaceAll("'", '');
+    string = string.replaceAll('"', '');
+    string = string.replaceAll(' ', '');
+    string = string.replaceAll('/', '');
+    string = string.replaceAll('(', '');
+    string = string.replaceAll(')', '');
+    List<String> pair = string.split(',');
+    if (pair.length == 1) {
+      pair = string.split(':');
+    }
+    if (pair.length == 2) {
+      int port = int.parse(pair.last);
+      if (port > 0) {
+        return InetSocketAddress(pair.first, port);
+      }
+    }
+    return null;
+  }
+
 }
 
 

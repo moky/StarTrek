@@ -14,10 +14,10 @@ abstract class BaseGate<H extends Hub>
   //  Docker
   //
 
-  Docker? fetchDocker(List<Uint8List> data, {required SocketAddress remote, SocketAddress? local}) {
+  Future<Docker?> fetchDocker(List<Uint8List> data, {required SocketAddress remote, SocketAddress? local}) async {
     Docker? docker = getDocker(remote: remote, local: local);
     if (docker == null) {
-      Connection? conn = hub?.connect(remote: remote, local: local);
+      Connection? conn = await hub?.connect(remote: remote, local: local);
       if (conn != null) {
         docker = createDocker(conn, data);
         if (docker == null) {
@@ -49,7 +49,6 @@ abstract class BaseGate<H extends Hub>
   //     super.heartbeat(connection);
   //   }
   // }
-
 
   @override
   List<Uint8List> cacheAdvanceParty(Uint8List data, Connection connection) {

@@ -135,7 +135,7 @@ abstract class BaseHub implements Hub {
       _connectionPool.removeItem(conn, remote: remote, local: local);
 
   @override
-  Connection? connect({required SocketAddress remote, SocketAddress? local}) {
+  Future<Connection?> connect({required SocketAddress remote, SocketAddress? local}) async {
     Connection? conn = getConnection(remote: remote, local: local);
     if (conn != null) {
       // check local address
@@ -149,7 +149,7 @@ abstract class BaseHub implements Hub {
       // local address not matched? ignore this connection
     }
     // try to open channel with direction (remote, local)
-    Channel? sock = open(remote: remote, local: local);
+    Channel? sock = await open(remote: remote, local: local);
     if (sock == null || sock.isClosed) {
       return null;
     }
@@ -208,7 +208,7 @@ abstract class BaseHub implements Hub {
       local = sock.localAddress;
     }
     // get connection for processing received data
-    Connection? conn = connect(remote: remote, local: local);
+    Connection? conn = await connect(remote: remote, local: local);
     if (conn != null) {
       await conn.onReceivedData(data!);
     }

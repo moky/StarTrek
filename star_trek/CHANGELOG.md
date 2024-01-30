@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Async connect for hub.
+
 ## 0.1.1
 
 - Socket Address.

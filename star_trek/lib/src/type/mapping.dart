@@ -68,7 +68,7 @@ abstract interface class KeyPairMap<K, V> {
 abstract class WeakKeyPairMap<K, V> implements KeyPairMap<K, V> {
   WeakKeyPairMap(K any) {
     _defaultKey = any;
-    _map = WeakValueMap();
+    _map = {};
   }
 
   late final K _defaultKey;

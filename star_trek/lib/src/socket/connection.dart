@@ -59,12 +59,15 @@ class BaseConnection extends AddressPairObject
   // protected
   void finalize() {
     // make sure the relative channel is closed
-    channel = null;
-    stateMachine = null;
+    setChannel(null);
+    setStateMachine(null);
   }
 
-  Channel? get channel => _channelRef?.target;
-  set channel(Channel? newChannel) {
+  Future<Channel?> get channel async => getChannel();
+  // protected
+  Channel? getChannel() => _channelRef?.target;
+  // protected
+  void setChannel(Channel? newChannel) {
     // 1. replace with new channel
     Channel? oldChannel = _channelRef?.target;
     _channelRef = newChannel == null ? null : WeakReference(newChannel);
@@ -84,7 +87,7 @@ class BaseConnection extends AddressPairObject
   // protected
   StateMachine? get stateMachine => _fsm;
   // private
-  set stateMachine(StateMachine? newMachine) {
+  void setStateMachine(StateMachine? newMachine) {
     // 1. replace with new machine
     StateMachine? oldMachine = _fsm;
     _fsm = newMachine;
@@ -101,17 +104,17 @@ class BaseConnection extends AddressPairObject
   }
 
   @override
-  bool get isClosed => channel?.isClosed != false;
+  bool get isClosed => getChannel()?.isClosed != false;
 
   @override
-  bool get isBound => channel?.isBound == true;
+  bool get isBound => getChannel()?.isBound == true;
 
   @override
-  bool get isConnected => channel?.isConnected == true;
+  bool get isConnected => getChannel()?.isConnected == true;
 
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
-  // bool get isAlive => channel?.isAlive == true;
+  // bool get isAlive => getChannel()?.isAlive == true;
 
   @override
   String toString() {
@@ -122,19 +125,19 @@ class BaseConnection extends AddressPairObject
 
   @override
   Future<void> close() async {
-    channel = null;
-    stateMachine = null;
+    setChannel(null);
+    setStateMachine(null);
   }
 
   Future<void> start() async {
     StateMachine machine = createStateMachine();
-    stateMachine = machine;
+    setStateMachine(machine);
     await machine.start();
   }
 
   Future<void> stop() async {
-    channel = null;
-    stateMachine = null;
+    setChannel(null);
+    setStateMachine(null);
   }
 
   //
@@ -149,7 +152,7 @@ class BaseConnection extends AddressPairObject
 
   // protected
   Future<int> doSend(Uint8List src, SocketAddress? destination) async {
-    Channel? sock = channel;
+    Channel? sock = await channel;
     if (sock == null || !sock.isAlive) {
       assert(false, 'socket channel lost: $sock');
       return -1;
@@ -179,7 +182,7 @@ class BaseConnection extends AddressPairObject
       // print(e);
       error = IOError(e);
       // socket error, close current channel
-      channel = null;
+      setChannel(null);
     }
     // callback
     if (error == null) {
@@ -281,10 +284,10 @@ class ActiveConnection extends BaseConnection {
   Hub? get hub => _hubRef.target;
 
   @override
-  bool get isClosed => stateMachine != null;
+  bool get isClosed => stateMachine == null;
 
   @override
-  Channel? get channel {
+  Future<Channel?> get channel async {
     Channel? sock = _channelRef?.target;
     if (sock == null || sock.isClosed) {
       if (stateMachine == null) {
@@ -292,9 +295,9 @@ class ActiveConnection extends BaseConnection {
         return null;
       }
       // get new channel via hub
-      sock = hub?.open(remote: remoteAddress, local: localAddress);
+      sock = await hub?.open(remote: remoteAddress, local: localAddress);
       // assert(sock != null, 'failed to open channel: $remoteAddress, $localAddress');
-      channel = sock;
+      setChannel(sock);
     }
     return sock;
   }

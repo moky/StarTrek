@@ -76,6 +76,7 @@ abstract class BaseChannel<C extends SelectableChannel>
     reader = createReader();
     writer = createWriter();
     _impl = sock;
+    refreshFlags();
   }
 
   SocketReader createReader();

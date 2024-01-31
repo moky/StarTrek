@@ -33,7 +33,7 @@ import 'machine.dart';
 import 'ticker.dart';
 
 
-abstract class AutoMachine<C extends Context, T extends BaseTransition<C>, S extends BaseState<C, T>>
+abstract class AutoMachine<C extends MachineContext, T extends BaseTransition<C>, S extends BaseState<C, T>>
     extends BaseMachine<C, T, S> {
 
   @override

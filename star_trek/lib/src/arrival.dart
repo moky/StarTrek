@@ -52,7 +52,7 @@ abstract class ArrivalShip implements Arrival {
   }
 
   @override
-  int getStatus(DateTime now) {
+  ShipStatus getStatus(DateTime now) {
     if (now.isAfter(_expired)) {
       return ShipStatus.kExpired;
     } else {

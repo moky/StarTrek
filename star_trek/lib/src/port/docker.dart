@@ -42,9 +42,9 @@ import 'ship.dart';
 ///  Processor for Star Ships
 abstract interface class Docker implements Processor {
 
-  bool get isClosed;  // connection.isClosed
-  bool get isAlive;   // connection.isAlive
-  int get status;     // connection.state
+  bool get isClosed;        // connection.isClosed
+  bool get isAlive;         // connection.isAlive
+  DockerStatus get status;  // connection.state
 
   SocketAddress? get remoteAddress;
   SocketAddress? get localAddress;
@@ -79,14 +79,30 @@ abstract interface class Docker implements Processor {
 
 }
 
-abstract class DockerStatus {
+class DockerStatus {
+  DockerStatus(this.index, this.name);
 
-  static const int kError     = -1;
-  static const int kInit      =  0;
-  static const int kPreparing =  1;
-  static const int kReady     =  2;
+  final int index;
+  final String name;
 
-  static int getStatus(ConnectionState? state) {
+  @override
+  String toString() => '<$runtimeType index="$index" name="$name"/>';
+
+  static int _next = 0;
+  static _create(String name) => DockerStatus(_next++, name);
+
+  //
+  //  Docker Status
+  //
+  static final kInit      = _create('INIT');
+  static final kPreparing = _create('PREPARING');
+  static final kReady     = _create('READY');
+  static final kError     = _create('ERROR');
+
+  //
+  //  State Convert
+  //
+  static DockerStatus getStatus(ConnectionState? state) {
     if (state == null) {
       return kError;
     } else if (state.index == ConnectionStateOrder.kReady.index
@@ -138,6 +154,6 @@ abstract interface class DockerDelegate {
   /// @param previous    - old status
   /// @param current     - new status
   /// @param docker      - connection docker
-  Future<void> onDockerStatusChanged(int previous, int current, Docker docker);
+  Future<void> onDockerStatusChanged(DockerStatus previous, DockerStatus current, Docker docker);
 
 }

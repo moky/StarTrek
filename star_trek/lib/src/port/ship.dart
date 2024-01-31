@@ -51,26 +51,36 @@ abstract interface class Ship {
   ///
   /// @param now - current time
   /// @return current status
-  int getStatus(DateTime now);
+  ShipStatus getStatus(DateTime now);
 
 }
 
-abstract class ShipStatus {
+class ShipStatus {
+  ShipStatus(this.index, this.name);
+
+  final int index;
+  final String name;
+
+  @override
+  String toString() => '<$runtimeType index="$index" name="$name"/>';
+
+  static int _next = 0;
+  static _create(String name) => ShipStatus(_next++, name);
 
   //
-  //  Arrival Status
+  //  Arrival Ship Status
   //
-  static const int kAssembling = 0x00;  // waiting for more fragments
-  static const int kExpired    = 0x01;  // failed to received all fragments
+  static final kAssembling = _create('ASSEMBLING');  // waiting for more fragments
+  static final kExpired    = _create('EXPIRED');     // failed to received all fragments
 
   //
-  //  Departure Status
+  //  Departure Ship Status
   //
-  static const int kNew        = 0x10;  // not try yet
-  static const int kWaiting    = 0x11;  // sent, waiting for responses
-  static const int kTimeout    = 0x12;  // waiting to send again
-  static const int kDone       = 0x13;  // all fragments responded (or no need respond)
-  static const int kFailed     = 0x14;  // tried 3 times and missed response(s)
+  static final kNew        = _create('NEW');      // not try yet
+  static final kWaiting    = _create('WAITING');  // sent, waiting for responses
+  static final kTimeout    = _create('TIMEOUT');  // waiting to send again
+  static final kDone       = _create('DONE');     // all fragments responded (or no need respond)
+  static final kFailed     = _create('FAILED');   // tried 3 times and missed response(s)
 
 }
 

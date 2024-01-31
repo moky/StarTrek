@@ -31,18 +31,9 @@
 import 'ticker.dart';
 
 
-abstract class Status {
-
-  static const int kStopped = (0);
-  static const int kRunning = (1);
-  static const int kPaused  = (2);
-
-}
-
-
 ///  State Machine Context
 ///  ~~~~~~~~~~~~~~~~~~~~~
-abstract interface class Context {
+abstract interface class MachineContext {
 
 }
 
@@ -51,7 +42,7 @@ abstract interface class Context {
 ///  ~~~~~~~~~~~~~~~~
 ///
 /// @param <C> - context
-abstract interface class Transition<C extends Context> {
+abstract interface class StateTransition<C extends MachineContext> {
 
   ///  Evaluate the current state
   ///
@@ -68,7 +59,7 @@ abstract interface class Transition<C extends Context> {
 ///
 /// @param <C> - context
 /// @param <T> - transition
-abstract interface class State<C extends Context, T extends Transition<C>> {
+abstract interface class State<C extends MachineContext, T extends StateTransition<C>> {
 
   ///  Called after new state entered
   ///
@@ -112,7 +103,7 @@ abstract interface class State<C extends Context, T extends Transition<C>> {
 /// @param <S> - state
 /// @param <C> - context
 /// @param <T> - transition
-abstract interface class Delegate<C extends Context, T extends Transition<C>, S extends State<C, T>> {
+abstract interface class MachineDelegate<C extends MachineContext, T extends StateTransition<C>, S extends State<C, T>> {
 
   ///  Called before new state entered
   ///  (get current state from context)
@@ -153,7 +144,7 @@ abstract interface class Delegate<C extends Context, T extends Transition<C>, S 
 /// @param <S> - state
 /// @param <C> - context
 /// @param <T> - transition
-abstract interface class Machine<C extends Context, T extends Transition<C>, S extends State<C, T>>
+abstract interface class Machine<C extends MachineContext, T extends StateTransition<C>, S extends State<C, T>>
     implements Ticker {
 
   S? get currentState;

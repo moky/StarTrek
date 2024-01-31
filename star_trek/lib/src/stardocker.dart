@@ -91,7 +91,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   bool get isAlive => connection?.isAlive == true;
 
   @override
-  int get status => DockerStatus.getStatus(connection?.state);
+  DockerStatus get status => DockerStatus.getStatus(connection?.state);
 
   // @override
   // SocketAddress? get localAddress {

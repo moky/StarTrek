@@ -65,8 +65,12 @@ import 'connection.dart';
  */
 
 
-class StateMachine extends BaseMachine<StateMachine, StateTransition, ConnectionState> implements Context {
-  StateMachine(Connection connection) : _connectionRef = WeakReference(connection) {
+///  Connection State Machine
+///  ~~~~~~~~~~~~~~~~~~~~~~~~
+class ConnectionStateMachine
+    extends BaseMachine<ConnectionStateMachine, ConnectionStateTransition, ConnectionState>
+    implements MachineContext {
+  ConnectionStateMachine(Connection connection) : _connectionRef = WeakReference(connection) {
     // init states
     ConnectionStateBuilder builder = createStateBuilder();
     addState(builder.getDefaultState());
@@ -82,7 +86,7 @@ class StateMachine extends BaseMachine<StateMachine, StateTransition, Connection
   Connection? get connection => _connectionRef.target;
 
   @override
-  StateMachine get context => this;
+  ConnectionStateMachine get context => this;
 
   // protected
   ConnectionStateBuilder createStateBuilder() =>
@@ -93,22 +97,22 @@ class StateMachine extends BaseMachine<StateMachine, StateTransition, Connection
 
 ///  Connection State Transition
 ///  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class StateTransition extends BaseTransition<StateMachine> {
-  StateTransition(ConnectionStateOrder order, this.eval) : super(order.index);
+class ConnectionStateTransition extends BaseTransition<ConnectionStateMachine> {
+  ConnectionStateTransition(ConnectionStateOrder order, this.eval) : super(order.index);
 
   final StateEvaluate eval;
 
   @override
-  Future<bool> evaluate(StateMachine ctx, DateTime now) async => eval(ctx, now);
+  Future<bool> evaluate(ConnectionStateMachine ctx, DateTime now) async => eval(ctx, now);
 
 }
 
-typedef StateEvaluate = Future<bool> Function(StateMachine ctx, DateTime now);
+typedef StateEvaluate = Future<bool> Function(ConnectionStateMachine ctx, DateTime now);
 
 class StateTransitionBuilder {
 
   // Default -> Preparing
-  StateTransition getDefaultPreparingTransition() => StateTransition(
+  getDefaultPreparingTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kPreparing, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connection started? change state to 'preparing'
@@ -117,7 +121,7 @@ class StateTransitionBuilder {
   );
 
   // Preparing -> Ready
-  StateTransition getPreparingReadyTransition() => StateTransition(
+  getPreparingReadyTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kReady, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connected or bound, change state to 'ready'
@@ -126,7 +130,7 @@ class StateTransitionBuilder {
   );
 
   // Preparing -> Default
-  StateTransition getPreparingDefaultTransition() => StateTransition(
+  getPreparingDefaultTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kDefault, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connection stopped, change state to 'not_connect'
@@ -135,7 +139,7 @@ class StateTransitionBuilder {
   );
 
   // Ready -> Expired
-  StateTransition getReadyExpiredTransition() => StateTransition(
+  getReadyExpiredTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kExpired, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
@@ -149,7 +153,7 @@ class StateTransitionBuilder {
   );
 
   // Ready -> Error
-  StateTransition getReadyErrorTransition() => StateTransition(
+  getReadyErrorTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kError, (ctx, now) async {
       Connection? conn = ctx.connection;
       // connection lost, change state to 'error'
@@ -158,7 +162,7 @@ class StateTransitionBuilder {
   );
 
   // Expired -> Maintaining
-  StateTransition getExpiredMaintainingTransition() => StateTransition(
+  getExpiredMaintainingTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kMaintaining, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
@@ -172,7 +176,7 @@ class StateTransitionBuilder {
   );
 
   // Expired -> Error
-  StateTransition getExpiredErrorTransition() => StateTransition(
+  getExpiredErrorTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kError, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
@@ -186,7 +190,7 @@ class StateTransitionBuilder {
   );
 
   // Maintaining -> Ready
-  StateTransition getMaintainingReadyTransition() => StateTransition(
+  getMaintainingReadyTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kReady, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
@@ -200,7 +204,7 @@ class StateTransitionBuilder {
   );
 
   // Maintaining -> Expired
-  StateTransition getMaintainingExpiredTransition() => StateTransition(
+  getMaintainingExpiredTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kExpired, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
@@ -214,7 +218,7 @@ class StateTransitionBuilder {
   );
 
   // Maintaining -> Error
-  StateTransition getMaintainingErrorTransition() => StateTransition(
+  getMaintainingErrorTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kError, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
@@ -228,7 +232,7 @@ class StateTransitionBuilder {
   );
 
   // Error -> Default
-  StateTransition getErrorDefaultTransition() => StateTransition(
+  getErrorDefaultTransition() => ConnectionStateTransition(
     ConnectionStateOrder.kDefault, (ctx, now) async {
       Connection? conn = ctx.connection;
       if (conn == null || !conn.isAlive) {
@@ -252,7 +256,7 @@ class StateTransitionBuilder {
 ///
 ///  callback when connection state changed
 abstract interface class ConnectionStateDelegate
-    implements Delegate<StateMachine, StateTransition, ConnectionState> {}
+    implements MachineDelegate<ConnectionStateMachine, ConnectionStateTransition, ConnectionState> {}
 
 class ConnectionStateOrder {
   ConnectionStateOrder(this.index, this.name);
@@ -260,12 +264,21 @@ class ConnectionStateOrder {
   final int index;
   final String name;
 
-  static final kDefault     = ConnectionStateOrder(0, 'DEFAULT');
-  static final kPreparing   = ConnectionStateOrder(1, 'PREPARING');
-  static final kReady       = ConnectionStateOrder(2, 'READY');
-  static final kMaintaining = ConnectionStateOrder(3, 'MAINTAINING');
-  static final kExpired     = ConnectionStateOrder(4, 'EXPIRED');
-  static final kError       = ConnectionStateOrder(5, 'ERROR');
+  @override
+  String toString() => '<$runtimeType index="$index" name="$name"/>';
+
+  static int _next = 0;
+  static _create(String name) => ConnectionStateOrder(_next++, name);
+
+  //
+  //  Connection State Orders
+  //
+  static final kDefault     = _create('DEFAULT');
+  static final kPreparing   = _create('PREPARING');
+  static final kReady       = _create('READY');
+  static final kMaintaining = _create('MAINTAINING');
+  static final kExpired     = _create('EXPIRED');
+  static final kError       = _create('ERROR');
 
 }
 
@@ -280,7 +293,7 @@ class ConnectionStateOrder {
 ///      EXPIRED     - long time, needs maintaining (still connected/bound)
 ///      MAINTAINING - sent 'PING', waiting for response
 ///      ERROR       - long long time no response, connection lost
-class ConnectionState extends BaseState<StateMachine, StateTransition> {
+class ConnectionState extends BaseState<ConnectionStateMachine, ConnectionStateTransition> {
   ConnectionState(ConnectionStateOrder order) : super(order.index) {
     name = order.name;
   }
@@ -312,24 +325,24 @@ class ConnectionState extends BaseState<StateMachine, StateTransition> {
   int get hashCode => index;
 
   @override
-  Future<void> onEnter(State<StateMachine, StateTransition>? previous,
-      StateMachine ctx, DateTime now) async {
+  Future<void> onEnter(State<ConnectionStateMachine, ConnectionStateTransition>? previous,
+      ConnectionStateMachine ctx, DateTime now) async {
     _enterTime = now;
   }
 
   @override
-  Future<void> onExit(State<StateMachine, StateTransition>? next,
-      StateMachine ctx, DateTime now) async {
+  Future<void> onExit(State<ConnectionStateMachine, ConnectionStateTransition>? next,
+      ConnectionStateMachine ctx, DateTime now) async {
     _enterTime = null;
   }
 
   @override
-  Future<void> onPause(StateMachine ctx, DateTime now) async {
+  Future<void> onPause(ConnectionStateMachine ctx, DateTime now) async {
 
   }
 
   @override
-  Future<void> onResume(StateMachine ctx, DateTime now) async {
+  Future<void> onResume(ConnectionStateMachine ctx, DateTime now) async {
 
   }
 
@@ -343,7 +356,7 @@ class ConnectionStateBuilder {
   final StateTransitionBuilder stb;
 
   // Connection not started yet
-  ConnectionState getDefaultState() {
+  getDefaultState() {
     ConnectionState state = ConnectionState(ConnectionStateOrder.kDefault);
     // Default -> Preparing
     state.addTransition(stb.getDefaultPreparingTransition());
@@ -351,7 +364,7 @@ class ConnectionStateBuilder {
   }
 
   // Connection started, preparing to connect/bind
-  ConnectionState getPreparingState() {
+  getPreparingState() {
     ConnectionState state = ConnectionState(ConnectionStateOrder.kPreparing);
     // Preparing -> Ready
     state.addTransition(stb.getPreparingReadyTransition());
@@ -361,7 +374,7 @@ class ConnectionStateBuilder {
   }
 
   // Normal state of connection
-  ConnectionState getReadyState() {
+  getReadyState() {
     ConnectionState state = ConnectionState(ConnectionStateOrder.kReady);
     // Ready -> Expired
     state.addTransition(stb.getReadyExpiredTransition());
@@ -371,7 +384,7 @@ class ConnectionStateBuilder {
   }
 
   // Long time no response, need maintaining
-  ConnectionState getExpiredState() {
+  getExpiredState() {
     ConnectionState state = ConnectionState(ConnectionStateOrder.kExpired);
     // Expired -> Maintaining
     state.addTransition(stb.getExpiredMaintainingTransition());
@@ -381,7 +394,7 @@ class ConnectionStateBuilder {
   }
 
   // Heartbeat sent, waiting response
-  ConnectionState getMaintainingState() {
+  getMaintainingState() {
     ConnectionState state = ConnectionState(ConnectionStateOrder.kMaintaining);
     // Maintaining -> Ready
     state.addTransition(stb.getMaintainingReadyTransition());
@@ -393,7 +406,7 @@ class ConnectionStateBuilder {
   }
 
   // Connection lost
-  ConnectionState getErrorState() {
+  getErrorState() {
     ConnectionState state = ConnectionState(ConnectionStateOrder.kError);
     // Error -> Default
     state.addTransition(stb.getErrorDefaultTransition());

@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Enumeration.
+
 ## 0.1.2
 
 - Async connect for hub.

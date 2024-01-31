@@ -54,7 +54,7 @@ class BaseConnection extends AddressPairObject
   DateTime? _lastReceivedTime;
 
   // connection state machine
-  StateMachine? _fsm;
+  ConnectionStateMachine? _fsm;
 
   // protected
   void finalize() {
@@ -85,11 +85,11 @@ class BaseConnection extends AddressPairObject
       _delegateRef = gate == null ? null : WeakReference(gate);
 
   // protected
-  StateMachine? get stateMachine => _fsm;
+  ConnectionStateMachine? get stateMachine => _fsm;
   // private
-  void setStateMachine(StateMachine? newMachine) {
+  void setStateMachine(ConnectionStateMachine? newMachine) {
     // 1. replace with new machine
-    StateMachine? oldMachine = _fsm;
+    ConnectionStateMachine? oldMachine = _fsm;
     _fsm = newMachine;
     // 2. stop old machine
     if (oldMachine != null && oldMachine != newMachine) {
@@ -97,8 +97,8 @@ class BaseConnection extends AddressPairObject
     }
   }
   // protected
-  StateMachine createStateMachine() {
-    StateMachine machine = StateMachine(this);
+  ConnectionStateMachine createStateMachine() {
+    ConnectionStateMachine machine = ConnectionStateMachine(this);
     machine.delegate = this;
     return machine;
   }
@@ -130,7 +130,7 @@ class BaseConnection extends AddressPairObject
   }
 
   Future<void> start() async {
-    StateMachine machine = createStateMachine();
+    ConnectionStateMachine machine = createStateMachine();
     setStateMachine(machine);
     await machine.start();
   }
@@ -231,12 +231,12 @@ class BaseConnection extends AddressPairObject
   //
 
   @override
-  Future<void> enterState(ConnectionState? next, StateMachine ctx, DateTime now) async {
+  Future<void> enterState(ConnectionState? next, ConnectionStateMachine ctx, DateTime now) async {
 
   }
 
   @override
-  Future<void> exitState(ConnectionState? previous, StateMachine ctx, DateTime now) async {
+  Future<void> exitState(ConnectionState? previous, ConnectionStateMachine ctx, DateTime now) async {
     ConnectionState? current = ctx.currentState;
     // if current == 'ready'
     if (current?.index == ConnectionStateOrder.kReady.index) {
@@ -260,12 +260,12 @@ class BaseConnection extends AddressPairObject
   }
 
   @override
-  Future<void> pauseState(ConnectionState? current, StateMachine ctx, DateTime now) async {
+  Future<void> pauseState(ConnectionState? current, ConnectionStateMachine ctx, DateTime now) async {
 
   }
 
   @override
-  Future<void> resumeState(ConnectionState? current, StateMachine ctx, DateTime now) async {
+  Future<void> resumeState(ConnectionState? current, ConnectionStateMachine ctx, DateTime now) async {
 
   }
 

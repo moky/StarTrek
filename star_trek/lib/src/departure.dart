@@ -68,7 +68,7 @@ abstract class DepartureShip implements Departure {
   }
 
   @override
-  int getStatus(DateTime now) {
+  ShipStatus getStatus(DateTime now) {
     DateTime? expired = _expired;
     if (fragments.isEmpty) {
       return ShipStatus.kDone;
@@ -242,7 +242,7 @@ class DepartureHall {
   Departure? _getNextTimeoutDeparture(DateTime now) {
     List<Departure> departures;
     List<Departure>? fleet;
-    int status;
+    ShipStatus status;
     dynamic sn;
     List<int> priorityList = _priorities.toList();  // copy
     for (int prior in priorityList) {

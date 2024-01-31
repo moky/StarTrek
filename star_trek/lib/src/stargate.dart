@@ -179,8 +179,8 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     // 1. callback when status changed
     DockerDelegate? keeper = delegate;
     if (keeper != null) {
-      int s1 = DockerStatus.getStatus(previous);
-      int s2 = DockerStatus.getStatus(current);
+      DockerStatus s1 = DockerStatus.getStatus(previous);
+      DockerStatus s2 = DockerStatus.getStatus(current);
       if (s1 != s2) {
         // callback
         SocketAddress remote = connection.remoteAddress!;

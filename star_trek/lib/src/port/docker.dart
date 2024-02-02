@@ -79,42 +79,28 @@ abstract interface class Docker implements Processor {
 
 }
 
-class DockerStatus {
-  DockerStatus(this.index, this.name);
-
-  final int index;
-  final String name;
-
-  @override
-  String toString() => '<$runtimeType index="$index" name="$name"/>';
-
-  static int _next = 0;
-  static _create(String name) => DockerStatus(_next++, name);
-
-  //
-  //  Docker Status
-  //
-  static final kInit      = _create('INIT');
-  static final kPreparing = _create('PREPARING');
-  static final kReady     = _create('READY');
-  static final kError     = _create('ERROR');
+enum DockerStatus {
+  init,
+  preparing,
+  ready,
+  error;
 
   //
   //  State Convert
   //
   static DockerStatus getStatus(ConnectionState? state) {
     if (state == null) {
-      return kError;
-    } else if (state.index == ConnectionStateOrder.kReady.index
-        || state.index == ConnectionStateOrder.kExpired.index
-        || state.index == ConnectionStateOrder.kMaintaining.index) {
-      return kReady;
-    } else if (state.index == ConnectionStateOrder.kPreparing.index) {
-      return kPreparing;
-    } else if (state.index == ConnectionStateOrder.kError.index) {
-      return kError;
+      return error;
+    } else if (state.index == ConnectionStateOrder.ready.index
+        || state.index == ConnectionStateOrder.expired.index
+        || state.index == ConnectionStateOrder.maintaining.index) {
+      return ready;
+    } else if (state.index == ConnectionStateOrder.preparing.index) {
+      return preparing;
+    } else if (state.index == ConnectionStateOrder.error.index) {
+      return error;
     } else {
-      return kInit;
+      return init;
     }
   }
 

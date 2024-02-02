@@ -63,7 +63,13 @@ class Metronome extends Runner {
 
   void removeTicker(Ticker ticker) => _allTickers.remove(ticker);
 
-  Future<void> start() async => await run();
+  Future<void> start() async {
+    if (isRunning) {
+      await stop();
+      await idle();
+    }
+    /*await */run();
+  }
 
   @override
   Future<void> setup() async {
@@ -87,7 +93,7 @@ class Metronome extends Runner {
     if (waiting < minInterval) {
       waiting = minInterval;
     }
-    await Runner.sleep(waiting);
+    await Runner.sleep(milliseconds: waiting);
     now = now.add(Duration(milliseconds: waiting));
     elapsed += waiting;
     // 2. drive tickers

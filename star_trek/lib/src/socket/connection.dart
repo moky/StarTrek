@@ -120,7 +120,7 @@ class BaseConnection extends AddressPairObject
   String toString() {
     Type clazz = runtimeType;
     return '<$clazz remote="$remoteAddress" local="$localAddress">\n\t'
-        '$channel\n</$clazz>';
+        '${getChannel()}\n</$clazz>';
   }
 
   @override
@@ -239,9 +239,9 @@ class BaseConnection extends AddressPairObject
   Future<void> exitState(ConnectionState? previous, ConnectionStateMachine ctx, DateTime now) async {
     ConnectionState? current = ctx.currentState;
     // if current == 'ready'
-    if (current?.index == ConnectionStateOrder.kReady.index) {
+    if (current?.index == ConnectionStateOrder.ready.index) {
       // if preparing == 'preparing'
-      if (previous?.index == ConnectionStateOrder.kPreparing.index) {
+      if (previous?.index == ConnectionStateOrder.preparing.index) {
         // connection state changed from 'preparing' to 'ready',
         // set times to expired soon.
         int soon = now.millisecondsSinceEpoch - (kExpires >> 1);

@@ -176,26 +176,34 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   @override
   Future<void> onConnectionStateChanged(ConnectionState? previous, ConnectionState? current, Connection connection) async {
+    // convert status
+    DockerStatus s1 = DockerStatus.getStatus(previous);
+    DockerStatus s2 = DockerStatus.getStatus(current);
     // 1. callback when status changed
-    DockerDelegate? keeper = delegate;
-    if (keeper != null) {
-      DockerStatus s1 = DockerStatus.getStatus(previous);
-      DockerStatus s2 = DockerStatus.getStatus(current);
-      if (s1 != s2) {
-        // callback
-        SocketAddress remote = connection.remoteAddress!;
-        SocketAddress? local = connection.localAddress;
-        Docker? docker = getDocker(remote: remote, local: local);
-        // NOTICE: if the previous state is null, the docker maybe not
-        //         created yet, this situation means the docker status
-        //         not changed too, so no need to callback here.
-        if (docker != null) {
-          await keeper.onDockerStatusChanged(s1, s2, docker);
+    if (s1 != s2) {
+      SocketAddress remote = connection.remoteAddress!;
+      SocketAddress? local = connection.localAddress;
+      Docker? docker = getDocker(remote: remote, local: local);
+      if (docker == null) {
+        if (s2 == DockerStatus.error) {
+          // connection closed and docker removed
+          return;
+        }
+        docker = createDocker(connection, []);
+        if (docker == null) {
+          assert(false, 'failed to create docker: $remote, $local');
+          return;
+        } else {
+          setDocker(docker, remote: remote, local: local);
         }
       }
+      // NOTICE: if the previous state is null, the docker maybe not
+      //         created yet, this situation means the docker status
+      //         not changed too, so no need to callback here.
+      await delegate?.onDockerStatusChanged(s1, s2, docker);
     }
     // 2. heartbeat when connection expired
-    if (current?.index == ConnectionStateOrder.kExpired.index) {
+    if (current?.index == ConnectionStateOrder.expired.index) {
       await heartbeat(connection);
     }
   }

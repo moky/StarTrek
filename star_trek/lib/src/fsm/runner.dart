@@ -107,9 +107,9 @@ abstract class Runner implements Runnable, Handler, Processor {
 
   // protected
   Future<void> idle() async =>
-      await sleep(Duration.millisecondsPerSecond ~/ 60);
+      await sleep(milliseconds: 16);  // Duration.millisecondsPerSecond ~/ 60
 
-  static Future<void> sleep(int millis) async =>
-      await Future.delayed(Duration(milliseconds: millis));
+  static Future<void> sleep({required int milliseconds}) async =>
+      await Future.delayed(Duration(milliseconds: milliseconds));
 
 }

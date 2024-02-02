@@ -55,32 +55,22 @@ abstract interface class Ship {
 
 }
 
-class ShipStatus {
-  ShipStatus(this.index, this.name);
-
-  final int index;
-  final String name;
-
-  @override
-  String toString() => '<$runtimeType index="$index" name="$name"/>';
-
-  static int _next = 0;
-  static _create(String name) => ShipStatus(_next++, name);
-
-  //
-  //  Arrival Ship Status
-  //
-  static final kAssembling = _create('ASSEMBLING');  // waiting for more fragments
-  static final kExpired    = _create('EXPIRED');     // failed to received all fragments
+enum ShipStatus {
 
   //
   //  Departure Ship Status
   //
-  static final kNew        = _create('NEW');      // not try yet
-  static final kWaiting    = _create('WAITING');  // sent, waiting for responses
-  static final kTimeout    = _create('TIMEOUT');  // waiting to send again
-  static final kDone       = _create('DONE');     // all fragments responded (or no need respond)
-  static final kFailed     = _create('FAILED');   // tried 3 times and missed response(s)
+  init,        // not try yet
+  waiting,     // sent, waiting for responses
+  timeout,     // waiting to send again
+  done,        // all fragments responded (or no need respond)
+  failed,      // tried 3 times and missed response(s)
+
+  //
+  //  Arrival Ship Status
+  //
+  assembling,  // waiting for more fragments
+  expired,     // failed to received all fragments
 
 }
 

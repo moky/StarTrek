@@ -72,25 +72,10 @@ abstract class BaseState<C extends MachineContext, T extends StateTransition<C>>
 
 ///  Machine Status
 ///  ~~~~~~~~~~~~~~
-class _Status {
-  _Status(this.index, this.name);
-
-  final int index;
-  final String name;
-
-  @override
-  String toString() => '<$runtimeType index="$index" name="$name"/>';
-
-  static int _next = 0;
-  static _create(String name) => _Status(_next++, name);
-
-  //
-  //  Machine Status
-  //
-  static final kStopped = _create('STOPPED');
-  static final kRunning = _create('RUNNING');
-  static final kPaused  = _create('PAUSED');
-
+enum _Status {
+  stopped,
+  running,
+  paused,
 }
 
 abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>, S extends BaseState<C, T>>
@@ -99,7 +84,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   final List<S?> _states = [];
   int _current = -1;  // current state index
 
-  _Status _status = _Status.kStopped;
+  _Status _status = _Status.stopped;
 
   WeakReference<MachineDelegate<C, T, S>>? _delegateRef;
 
@@ -135,7 +120,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   S? getState(int index) => _states[index];
 
   // protected
-  S? getDefaultState() => _states[0];
+  S? get defaultState => _states[0];
 
   // protected
   S? getTargetState(T trans) =>
@@ -206,15 +191,15 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   Future<void> start() async {
     ///  start machine from default state
     DateTime now = DateTime.now();
-    bool ok = await _changeState(getDefaultState(), now);
+    bool ok = await _changeState(defaultState, now);
     assert(ok, 'failed to change default state');
-    _status = _Status.kRunning;
+    _status = _Status.running;
   }
 
   @override
   Future<void> stop() async {
     ///  stop machine and set current state to null
-    _status = _Status.kStopped;
+    _status = _Status.stopped;
     DateTime now = DateTime.now();
     await _changeState(null, now);  // force current state to null
   }
@@ -233,7 +218,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     //
     //  Pause current state
     //
-    _status = _Status.kPaused;
+    _status = _Status.paused;
     //
     //  Events after state paused
     //
@@ -254,7 +239,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     //
     //  Resume current state
     //
-    _status = _Status.kRunning;
+    _status = _Status.running;
     //
     //  Events after state resumed
     //
@@ -270,7 +255,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     ///  Drive the machine running forward
     C ctx = context;
     S? state = currentState;
-    if (state != null && _status == _Status.kRunning) {
+    if (state != null && _status == _Status.running) {
       T? trans = await state.evaluate(ctx, now);
       if (trans != null) {
         state = getTargetState(trans);

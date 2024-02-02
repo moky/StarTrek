@@ -71,17 +71,17 @@ abstract class DepartureShip implements Departure {
   ShipStatus getStatus(DateTime now) {
     DateTime? expired = _expired;
     if (fragments.isEmpty) {
-      return ShipStatus.kDone;
+      return ShipStatus.done;
     } else if (expired == null) {
-      return ShipStatus.kNew;
+      return ShipStatus.init;
     // } else if (!isImportant) {
-    //   return ShipStatus.kDone;
+    //   return ShipStatus.done;
     } else if (now.isBefore(expired)) {
-      return ShipStatus.kWaiting;
+      return ShipStatus.waiting;
     } else if (_tries > 0) {
-      return ShipStatus.kTimeout;
+      return ShipStatus.timeout;
     } else {
-      return ShipStatus.kFailed;
+      return ShipStatus.failed;
     }
   }
 
@@ -257,7 +257,7 @@ class DepartureHall {
         sn = ship.sn;
         assert(sn != null, 'Ship ID should not be empty here');
         status = ship.getStatus(now);
-        if (status == ShipStatus.kTimeout) {
+        if (status == ShipStatus.timeout) {
           // response timeout, needs retry now.
           // move to next priority
           fleet.remove(ship);
@@ -265,7 +265,7 @@ class DepartureHall {
           // update expired time
           ship.touch(now);
           return ship;
-        } else if (status == ShipStatus.kFailed) {
+        } else if (status == ShipStatus.failed) {
           // try too many times and still missing response,
           // task failed, remove this ship.
           fleet.remove(ship);
@@ -297,7 +297,7 @@ class DepartureHall {
       }
       departures = fleet.toList();  // copy
       for (Departure ship in departures) {
-        if (ship.getStatus(now) == ShipStatus.kDone) {
+        if (ship.getStatus(now) == ShipStatus.done) {
           // task done, remove if from memory cache
           fleet.remove(ship);
           sn = ship.sn;

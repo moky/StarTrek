@@ -54,9 +54,9 @@ abstract class ArrivalShip implements Arrival {
   @override
   ShipStatus getStatus(DateTime now) {
     if (now.isAfter(_expired)) {
-      return ShipStatus.kExpired;
+      return ShipStatus.expired;
     } else {
-      return ShipStatus.kAssembling;
+      return ShipStatus.assembling;
     }
   }
 
@@ -127,7 +127,7 @@ class ArrivalHall {
     // 1. seeking expired tasks
     dynamic sn;
     _arrivals.removeWhere((ship) {
-      if (ship.getStatus(now!) == ShipStatus.kExpired) {
+      if (ship.getStatus(now!) == ShipStatus.expired) {
         // remove mapping with SN
         sn = ship.sn;
         if (sn != null) {

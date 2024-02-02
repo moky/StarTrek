@@ -14,22 +14,6 @@ abstract class BaseGate<H extends Hub>
   //  Docker
   //
 
-  Future<Docker?> fetchDocker(List<Uint8List> data, {required SocketAddress remote, SocketAddress? local}) async {
-    Docker? docker = getDocker(remote: remote, local: local);
-    if (docker == null) {
-      Connection? conn = await hub?.connect(remote: remote, local: local);
-      if (conn != null) {
-        docker = createDocker(conn, data);
-        if (docker == null) {
-          assert(false, 'failed to create docker: $remote, $local');
-        } else {
-          setDocker(docker, remote: remote, local: local);
-        }
-      }
-    }
-    return docker;
-  }
-
   @override
   Docker? getDocker({required SocketAddress remote, SocketAddress? local}) =>
       super.getDocker(remote: remote);
@@ -77,10 +61,11 @@ abstract class AutoGate <H extends Hub>
   bool get isRunning => _running;
 
   Future<void> start() async {
-    await stop();
-    await idle();
-    _running = true;
-    await run();
+    if (isRunning) {
+      await stop();
+      await idle();
+    }
+    /*await */run();
   }
 
   Future<void> stop() async => _running = false;
@@ -102,7 +87,7 @@ abstract class AutoGate <H extends Hub>
   }
 
   // protected
-  Future<void> idle() async => await Runner.sleep(128);
+  Future<void> idle() async => await Runner.sleep(milliseconds: 128);
 
   @override
   Future<bool> process() async {

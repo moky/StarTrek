@@ -208,7 +208,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       if (outgo == null) {
         // nothing to do now, return false to let the thread have a rest
         return false;
-      } else if (outgo.getStatus(now) == ShipStatus.kFailed) {
+      } else if (outgo.getStatus(now) == ShipStatus.failed) {
         // callback for mission failed
         await delegate?.onDockerFailed(IOError('Request timeout'), outgo, this);
         // task timeout, return true to process next one

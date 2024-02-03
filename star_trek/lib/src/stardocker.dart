@@ -28,6 +28,7 @@
  * SOFTWARE.
  * =============================================================================
  */
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'net/connection.dart';

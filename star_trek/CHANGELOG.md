@@ -1,3 +1,7 @@
+## 0.2.1
+
+- IO Exception.
+
 ## 0.2.0
 
 - Socket Exception.

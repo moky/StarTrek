@@ -28,6 +28,7 @@
  * SOFTWARE.
  * =============================================================================
  */
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:object_key/object_key.dart';

@@ -28,27 +28,7 @@
  * SOFTWARE.
  * =============================================================================
  */
-
-
-/// Signals that an I/O exception of some sort has occurred. This
-/// class is the general class of exceptions produced by failed or
-/// interrupted I/O operations.
-class IOException implements Exception {
-  IOException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'IOException: $message';
-
-}
-
-
-/// Thrown to indicate that there is an error creating or accessing a Socket.
-class SocketException extends IOException {
-  SocketException(super.message);
-
-}
+import 'dart:io';
 
 
 /// Checked exception thrown when an attempt is made to invoke or complete an
@@ -57,7 +37,10 @@ class SocketException extends IOException {
 /// the channel is completely closed.  A socket channel whose write half has
 /// been shut down, for example, may still be open for reading.
 class ClosedChannelException extends IOException {
-  ClosedChannelException() : super('channel closed');
+  ClosedChannelException();
+
+  @override
+  String toString() => 'IOException: channel closed';
 
 }
 

@@ -28,6 +28,7 @@
  * SOFTWARE.
  * =============================================================================
  */
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:object_key/object_key.dart';
@@ -36,7 +37,6 @@ import '../net/channel.dart';
 import '../nio/address.dart';
 import '../nio/channel.dart';
 import '../nio/datagram.dart';
-import '../nio/exception.dart';
 import '../nio/network.dart';
 import '../nio/selectable.dart';
 import '../nio/socket.dart';

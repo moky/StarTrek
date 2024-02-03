@@ -28,6 +28,7 @@
  * SOFTWARE.
  * =============================================================================
  */
+import 'dart:io';
 import 'dart:typed_data';
 
 import '../net/channel.dart';
@@ -177,7 +178,7 @@ class BaseConnection extends AddressPairObject
     try {
       sent = await doSend(data, remoteAddress);
       if (sent < 0) { // == -1
-        throw IOException('failed to send data: ${data.length} byte(s) to $remoteAddress');
+        throw SocketException('failed to send data: ${data.length} byte(s) to $remoteAddress');
       }
     } on IOException catch (ex) {
       // print(e);

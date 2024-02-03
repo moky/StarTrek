@@ -36,6 +36,7 @@ import '../net/channel.dart';
 import '../nio/address.dart';
 import '../nio/channel.dart';
 import '../nio/datagram.dart';
+import '../nio/exception.dart';
 import '../nio/network.dart';
 import '../nio/selectable.dart';
 import '../nio/socket.dart';
@@ -150,8 +151,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   SelectableChannel? configureBlocking(bool block) {
     C? sock = socketChannel;
     if (sock == null) {
-      assert(false, 'socket closed');
-      return null;
+      throw SocketException('socket closed');
     }
     sock.configureBlocking(block);
     _blocking = block;
@@ -191,8 +191,7 @@ abstract class BaseChannel<C extends SelectableChannel>
     // }
     C? sock = socketChannel;
     if (sock == null) {
-      assert(false, 'socket closed');
-      return null;
+      throw SocketException('socket closed');
     }
     NetworkChannel nc = sock as NetworkChannel;
     await nc.bind(local);
@@ -214,15 +213,14 @@ abstract class BaseChannel<C extends SelectableChannel>
     // }
     C? sock = socketChannel;
     if (sock == null) {
-      assert(false, 'socket closed');
-      return null;
-    } else if (sock is SocketChannel) {
+      throw SocketException('socket closed');
+    }
+    if (sock is SocketChannel) {
       await sock.connect(remote);
     } else if (sock is DatagramChannel) {
       await sock.connect(remote);
     } else {
-      assert(false, 'unknown datagram channel: $sock');
-      return null;
+      throw SocketException('unknown datagram channel: $sock');
     }
     remoteAddress = remote;
     _connected = true;
@@ -237,7 +235,7 @@ abstract class BaseChannel<C extends SelectableChannel>
     if (sock is DatagramChannel) {
       if (sock.isConnected) {
         try {
-          await sock.disconnect();
+          return await sock.disconnect();
         } finally {
           refreshFlags();
         }
@@ -258,7 +256,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   Future<Uint8List?> read(int maxLen) async {
     try {
       return await reader.read(maxLen);
-    } catch (e) {
+    } on IOException {
       await close();
       rethrow;
     }
@@ -268,7 +266,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   Future<int> write(Uint8List src) async {
     try {
       return await writer.write(src);
-    } catch (e) {
+    } on IOException {
       await close();
       rethrow;
     }
@@ -278,7 +276,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   Future<Pair<Uint8List?, SocketAddress?>> receive(int maxLen) async {
     try {
       return await reader.receive(maxLen);
-    } catch (e) {
+    } on IOException {
       await close();
       rethrow;
     }
@@ -288,7 +286,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   Future<int> send(Uint8List src, SocketAddress target) async {
     try {
       return await writer.send(src, target);
-    } catch (e) {
+    } on IOException {
       await close();
       rethrow;
     }

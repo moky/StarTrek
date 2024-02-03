@@ -33,6 +33,7 @@ import 'dart:typed_data';
 import 'net/connection.dart';
 import 'net/state.dart';
 import 'nio/address.dart';
+import 'nio/exception.dart';
 import 'port/docker.dart';
 import 'port/gate.dart';
 import 'port/ship.dart';
@@ -165,9 +166,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     SocketAddress remote = connection.remoteAddress!;
     SocketAddress? local = connection.localAddress;
     Docker? worker = getDocker(remote: remote, local: local);
-    if (worker != null) {
-      await worker.heartbeat();
-    }
+    await worker?.heartbeat();
   }
 
   //

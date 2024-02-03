@@ -30,11 +30,28 @@
  */
 
 
+/// This class represents a Socket Address with no protocol attachment.
+/// As an abstract class, it is meant to be subclassed with a specific,
+/// protocol dependent, implementation.
+/// <p>
+/// It provides an immutable object used by sockets for binding, connecting, or
+/// as returned values.
 abstract interface class SocketAddress {
 
 }
 
 
+/// This class implements an IP Socket Address (IP address + port number)
+/// It can also be a pair (hostname + port number), in which case an attempt
+/// will be made to resolve the hostname. If resolution fails then the address
+/// is said to be <I>unresolved</I> but can still be used on some circumstances
+/// like connecting through a proxy.
+/// <p>
+/// It provides an immutable object used by sockets for binding, connecting, or
+/// as returned values.
+/// <p>
+/// The <i>wildcard</i> is a special local IP address. It usually means "any"
+/// and can only be used for {@code bind} operations.
 class InetSocketAddress implements SocketAddress {
 
   InetSocketAddress(this.host, this.port);
@@ -64,27 +81,5 @@ class InetSocketAddress implements SocketAddress {
     }
     return null;
   }
-
-}
-
-
-class IOException implements Exception {
-  IOException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'IOException: $message';
-
-}
-
-
-class IOError extends Error {
-  IOError(this.cause);
-
-  final dynamic cause;
-
-  @override
-  String toString() => 'IOError: $cause';
 
 }

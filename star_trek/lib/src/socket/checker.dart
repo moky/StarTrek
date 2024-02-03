@@ -32,6 +32,7 @@ import 'dart:typed_data';
 
 import '../nio/address.dart';
 import '../nio/channel.dart';
+import '../nio/exception.dart';
 import '../nio/selectable.dart';
 import 'channel.dart';
 
@@ -57,7 +58,7 @@ abstract interface class ChannelChecker<C extends SelectableChannel> {
 
 }
 
-class BaseChecker<C extends SelectableChannel> extends ChannelChecker<C> {
+class BaseChannelChecker<C extends SelectableChannel> extends ChannelChecker<C> {
 
   @override
   IOException? checkError(IOException error, C sock) {
@@ -69,7 +70,7 @@ class BaseChecker<C extends SelectableChannel> extends ChannelChecker<C> {
   IOException? checkData(Uint8List? data, C sock) {
     // TODO: check Timeout for received nothing
     if (data == null && sock.isClosed) {
-      return IOException('channel closed');
+      return ClosedChannelException();
     }
     return null;
   }
@@ -111,7 +112,7 @@ abstract class ChannelController<C extends SelectableChannel>
       _checker.checkData(data, sock);
 
   // protected
-  ChannelChecker<C> createChecker() => BaseChecker<C>();
+  ChannelChecker<C> createChecker() => BaseChannelChecker<C>();
 
 }
 
@@ -128,10 +129,10 @@ abstract class ChannelReader<C extends SelectableChannel>
       ReadableByteChannel channel = sock as ReadableByteChannel;
       return await channel.read(maxLen);
     } on IOException catch (error) {
-      IOException? e = checkError(error, sock);
-      if (e != null) {
+      IOException? ex = checkError(error, sock);
+      if (ex != null) {
         // connection lost?
-        throw e;
+        throw ex;
       }
       // received nothing
       return null;
@@ -142,16 +143,16 @@ abstract class ChannelReader<C extends SelectableChannel>
   Future<Uint8List?> read(int maxLen) async {
     C? sock = socket;
     if (sock == null) {
-      return null;
+      throw ClosedChannelException();
     } else {
       assert(sock is ReadableByteChannel, 'socket error, cannot read data: $sock');
     }
     Uint8List? data = await tryRead(maxLen, sock);
     // check data
-    IOException? e = checkData(data, sock);
-    if (e != null) {
+    IOException? ex = checkData(data, sock);
+    if (ex != null) {
       // connection lost?
-      throw e;
+      throw ex;
     }
     // OK
     return data;
@@ -171,10 +172,10 @@ abstract class ChannelWriter<C extends SelectableChannel>
       WritableByteChannel channel = sock as WritableByteChannel;
       return await channel.write(data);
     } on IOException catch (error) {
-      IOException? e = checkError(error, sock);
-      if (e != null) {
+      IOException? ex = checkError(error, sock);
+      if (ex != null) {
         // connection lost?
-        throw e;
+        throw ex;
       }
       // buffer overflow!
       return 0;
@@ -185,7 +186,7 @@ abstract class ChannelWriter<C extends SelectableChannel>
   Future<int> write(Uint8List src) async {
     C? sock = socket;
     if (sock == null) {
-      return -1;
+      throw ClosedChannelException();
     } else {
       assert(sock is WritableByteChannel, 'socket error, cannot write data: ${src.lengthInBytes} byte(s)');
     }
@@ -210,7 +211,15 @@ abstract class ChannelWriter<C extends SelectableChannel>
         src = src.sublist(cnt);
       }
     }
-    return sent;
+    // OK
+    if (sent > 0) {
+      return sent;
+    } else  if (cnt < 0) {
+      assert(cnt == -1, 'sent error: $cnt');
+      return -1;
+    } else {
+      return  0;
+    }
   }
 
 }

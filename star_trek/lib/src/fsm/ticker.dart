@@ -120,7 +120,7 @@ class PrimeMetronome {
   static final PrimeMetronome _instance = PrimeMetronome._internal();
   PrimeMetronome._internal() {
     _metronome = Metronome(200);
-    _metronome.start();
+    /*await */_metronome.start();
   }
 
   late final Metronome _metronome;

@@ -1,6 +1,6 @@
 /* license: https://mit-license.org
  *
- *  Finite State Machine
+ *  Star Trek: Interstellar Transport
  *
  *                               Written in 2024 by Moky <albert.moky@gmail.com>
  *
@@ -28,40 +28,47 @@
  * SOFTWARE.
  * =============================================================================
  */
-import 'base.dart';
-import 'machine.dart';
-import 'ticker.dart';
 
 
-abstract class AutoMachine<C extends MachineContext, T extends BaseTransition<C>, S extends BaseState<C, T>>
-    extends BaseMachine<C, T, S> {
+/// Signals that an I/O exception of some sort has occurred. This
+/// class is the general class of exceptions produced by failed or
+/// interrupted I/O operations.
+class IOException implements Exception {
+  IOException(this.message);
 
-  @override
-  Future<void> start() async {
-    await super.start();
-    PrimeMetronome timer = PrimeMetronome();
-    timer.addTicker(this);
-  }
+  final String message;
 
   @override
-  Future<void> stop() async {
-    PrimeMetronome timer = PrimeMetronome();
-    timer.removeTicker(this);
-    await super.stop();
-  }
+  String toString() => 'IOException: $message';
+
+}
+
+
+/// Thrown to indicate that there is an error creating or accessing a Socket.
+class SocketException extends IOException {
+  SocketException(super.message);
+
+}
+
+
+/// Checked exception thrown when an attempt is made to invoke or complete an
+/// I/O operation upon channel that is closed, or at least closed to that
+/// operation.  That this exception is thrown does not necessarily imply that
+/// the channel is completely closed.  A socket channel whose write half has
+/// been shut down, for example, may still be open for reading.
+class ClosedChannelException extends IOException {
+  ClosedChannelException() : super('channel closed');
+
+}
+
+
+/// Thrown when a serious I/O error has occurred.
+class IOError extends Error {
+  IOError(this.cause);
+
+  final dynamic cause;
 
   @override
-  Future<void> pause() async {
-    PrimeMetronome timer = PrimeMetronome();
-    timer.removeTicker(this);
-    await super.pause();
-  }
-
-  @override
-  Future<void> resume() async {
-    await super.resume();
-    PrimeMetronome timer = PrimeMetronome();
-    timer.addTicker(this);
-  }
+  String toString() => 'IOError: $cause';
 
 }

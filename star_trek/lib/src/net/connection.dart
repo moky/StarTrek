@@ -32,6 +32,7 @@ import 'dart:typed_data';
 
 import '../fsm/ticker.dart';
 import '../nio/address.dart';
+import '../nio/exception.dart';
 import 'state.dart';
 
 

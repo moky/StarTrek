@@ -52,8 +52,11 @@ abstract class BaseState<C extends MachineContext, T extends StateTransition<C>>
   final List<T> _transitions = [];
 
   void addTransition(T trans) {
-    assert(!_transitions.contains(trans), 'transition exists: $trans');
-    _transitions.add(trans);
+    if (_transitions.contains(trans)) {
+      assert(false, 'transition exists: $trans');
+    } else {
+      _transitions.add(trans);
+    }
   }
 
   @override
@@ -130,7 +133,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   S? get currentState => _current < 0 ? null : _states[_current];
 
   // private
-  set currentState(S? newState) => _current = newState == null ? -1 : newState.index;
+  set currentState(S? newState) => _current = newState?.index ?? -1;
 
   ///  Exit current state, and enter new state
   ///

@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Socket Exception.
+
 ## 0.1.3
 
 - Enumeration.

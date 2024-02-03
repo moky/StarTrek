@@ -35,6 +35,7 @@ import '../net/connection.dart';
 import '../net/hub.dart';
 import '../net/state.dart';
 import '../nio/address.dart';
+import '../nio/exception.dart';
 import '../type/pair.dart';
 
 
@@ -69,7 +70,7 @@ class BaseConnection extends AddressPairObject
   // protected
   void setChannel(Channel? newChannel) {
     // 1. replace with new channel
-    Channel? oldChannel = _channelRef?.target;
+    Channel? oldChannel = getChannel();
     _channelRef = newChannel == null ? null : WeakReference(newChannel);
     // 2. close old channel
     if (oldChannel != null && oldChannel != newChannel) {
@@ -178,9 +179,9 @@ class BaseConnection extends AddressPairObject
       if (sent < 0) { // == -1
         throw IOException('failed to send data: ${data.length} byte(s) to $remoteAddress');
       }
-    } on IOException catch (e) {
+    } on IOException catch (ex) {
       // print(e);
-      error = IOError(e);
+      error = IOError(ex);
       // socket error, close current channel
       setChannel(null);
     }
@@ -209,22 +210,28 @@ class BaseConnection extends AddressPairObject
   //
 
   @override
-  DateTime? get lastReceivedTime => _lastSentTime;
+  DateTime? get lastSentTime => _lastSentTime;
 
   @override
-  DateTime? get lastSentTime => _lastReceivedTime;
+  DateTime? get lastReceivedTime => _lastReceivedTime;
 
   @override
-  bool isSentRecently(DateTime now) =>
-      now.millisecondsSinceEpoch <= (_lastSentTime?.millisecondsSinceEpoch ?? 0) + kExpires;
+  bool isSentRecently(DateTime now) {
+    int last = _lastSentTime?.millisecondsSinceEpoch ?? 0;
+    return now.millisecondsSinceEpoch <= last + kExpires;
+  }
 
   @override
-  bool isReceivedRecently(DateTime now) =>
-      now.millisecondsSinceEpoch <= (_lastReceivedTime?.millisecondsSinceEpoch ?? 0) + kExpires;
+  bool isReceivedRecently(DateTime now) {
+    int last = _lastReceivedTime?.millisecondsSinceEpoch ?? 0;
+    return now.millisecondsSinceEpoch <= last + kExpires;
+  }
 
   @override
-  bool isNotReceivedLongTimeAgo(DateTime now) =>
-      now.millisecondsSinceEpoch > (_lastReceivedTime?.millisecondsSinceEpoch ?? 0) + (kExpires << 3);
+  bool isNotReceivedLongTimeAgo(DateTime now) {
+    int last = _lastReceivedTime?.millisecondsSinceEpoch ?? 0;
+    return now.millisecondsSinceEpoch > last + (kExpires << 3);
+  }
 
   //
   //  Events
@@ -288,7 +295,7 @@ class ActiveConnection extends BaseConnection {
 
   @override
   Future<Channel?> get channel async {
-    Channel? sock = _channelRef?.target;
+    Channel? sock = getChannel();
     if (sock == null || sock.isClosed) {
       if (stateMachine == null) {
         // closed (not start yet)

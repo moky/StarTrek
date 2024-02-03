@@ -31,7 +31,7 @@
 import 'dart:typed_data';
 
 import 'net/connection.dart';
-import 'nio/address.dart';
+import 'nio/exception.dart';
 import 'port/docker.dart';
 import 'port/ship.dart';
 import 'type/pair.dart';
@@ -240,14 +240,14 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       }
       if (index < fragments.length) {
         // task failed
-        error = IOError('only $index/${fragments.length} fragments sent.');
+        throw SocketException('only $index/${fragments.length} fragments sent.');
       } else {
         // task done
         return true;
       }
-    } catch (e) {
+    } on IOException catch (ex) {
       // socket error, callback
-      error = IOError(e);
+      error = IOError(ex);
     }
     // 4. remove sent fragments
     for (; index > 0; --index) {

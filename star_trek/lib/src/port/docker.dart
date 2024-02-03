@@ -33,6 +33,7 @@ import 'dart:typed_data';
 import '../fsm/runner.dart';
 import '../net/state.dart';
 import '../nio/address.dart';
+import '../nio/exception.dart';
 import 'ship.dart';
 
 

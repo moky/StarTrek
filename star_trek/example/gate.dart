@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:startrek/fsm.dart';
+import 'package:startrek/nio.dart';
 import 'package:startrek/startrek.dart';
 
 

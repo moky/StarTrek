@@ -36,6 +36,7 @@ import '../net/channel.dart';
 import '../net/connection.dart';
 import '../net/hub.dart';
 import '../nio/address.dart';
+import '../nio/exception.dart';
 import '../type/mapping.dart';
 
 
@@ -230,7 +231,7 @@ abstract class BaseHub implements Hub {
   // protected
   void cleanupChannels(Set<Channel> channels) {
     for (Channel sock in channels) {
-      if (sock.isClosed) {
+      if (!sock.isAlive) {
         // if channel not connected (TCP) and not bound (UDP),
         // means it's closed, remove it from the hub
         removeChannel(sock, remote: sock.remoteAddress, local: sock.localAddress);

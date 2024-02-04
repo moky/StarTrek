@@ -166,16 +166,25 @@ abstract class WeakKeyPairMap<K, V> implements KeyPairMap<K, V> {
       key2 = local;
     }
     Map<K, V>? table = _map[key1];
-    return table?.remove(key2);
+    if (table == null) {
+      return value;
+    }
+    V? old = table.remove(key2);
+    if (table.isEmpty) {
+      _map.remove(key1);
+    }
+    return old ?? value;
   }
 
 }
 
 
 class HashKeyPairMap<K, V> extends WeakKeyPairMap<K, V> {
-  HashKeyPairMap(super.any);
+  HashKeyPairMap(super.any) {
+    _values = {};
+  }
 
-  final Set<V> _values = {};
+  late final Set<V> _values;
 
   @override
   Set<V> get items => _values.toSet();

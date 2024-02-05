@@ -97,3 +97,23 @@ class Dock {
   }
 
 }
+
+
+class LockedDock extends Dock {
+
+  int _nextPurgeTime = 0;
+
+  @override
+  void purge([DateTime? now]) {
+    now ??= DateTime.now();
+    int ts = now.millisecondsSinceEpoch;
+    if (ts < _nextPurgeTime) {
+      return;
+    } else {
+      // next purge after half a minute
+      _nextPurgeTime = ts + 30000;
+    }
+    super.purge(now);
+  }
+
+}

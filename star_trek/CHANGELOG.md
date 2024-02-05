@@ -1,3 +1,7 @@
+## 0.2.3
+
+- Locked Dock.
+
 ## 0.2.2
 
 - Get arrival ships.

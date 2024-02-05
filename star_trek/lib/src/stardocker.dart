@@ -66,7 +66,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   }
 
   // protected
-  Dock createDock() => Dock();  // override for user-customized dock
+  Dock createDock() => LockedDock();  // override for user-customized dock
 
   // delegate for handling docker events
   DockerDelegate? get delegate => _delegateRef?.target;
@@ -125,7 +125,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       income = checkArrival(item);
       if (income == null) {
         // waiting for more fragment
-        return;
+        continue;
       }
       // 3. callback for processing income ship with completed data package
       await delegate?.onDockerReceived(income, this);

@@ -60,6 +60,22 @@ class InetSocketAddress implements SocketAddress {
   final int port;
 
   @override
+  bool operator ==(Object other) {
+    if (other is InetSocketAddress) {
+      if (identical(this, other)) {
+        // same object
+        return true;
+      }
+      return other.port == port && other.host == host;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  int get hashCode => 13 * port + host.hashCode;
+
+  @override
   String toString() => '("$host", $port)';
 
   static InetSocketAddress? parse(String string) {

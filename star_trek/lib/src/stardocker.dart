@@ -119,6 +119,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       // waiting for more data
       return;
     }
+    DockerDelegate? keeper = delegate;
     Arrival? income;
     for (Arrival item in ships) {
       // 2. check income ship for response
@@ -128,7 +129,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
         continue;
       }
       // 3. callback for processing income ship with completed data package
-      await delegate?.onDockerReceived(income, this);
+      await keeper?.onDockerReceived(income, this);
     }
   }
 

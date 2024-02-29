@@ -91,9 +91,11 @@ class Dock {
   }
 
   /// Clear all expired tasks
-  void purge([DateTime? now]) {
-    _arrivalHall.purge(now);
-    _departureHall.purge(now);
+  int purge([DateTime? now]) {
+    int count = 0;
+    count += _arrivalHall.purge(now);
+    count += _departureHall.purge(now);
+    return count;
   }
 
 }
@@ -104,16 +106,16 @@ class LockedDock extends Dock {
   int _nextPurgeTime = 0;
 
   @override
-  void purge([DateTime? now]) {
+  int purge([DateTime? now]) {
     now ??= DateTime.now();
     int ts = now.millisecondsSinceEpoch;
     if (ts < _nextPurgeTime) {
-      return;
+      return -1;
     } else {
       // next purge after half a minute
-      _nextPurgeTime = ts + 30000;
+      _nextPurgeTime = ts + 30 * 1000;
     }
-    super.purge(now);
+    return super.purge(now);
   }
 
 }

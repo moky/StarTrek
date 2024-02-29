@@ -36,10 +36,8 @@ import 'package:object_key/object_key.dart';
 import '../net/channel.dart';
 import '../nio/address.dart';
 import '../nio/channel.dart';
-import '../nio/datagram.dart';
 import '../nio/network.dart';
 import '../nio/selectable.dart';
-import '../nio/socket.dart';
 import '../type/pair.dart';
 
 
@@ -92,7 +90,7 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   // flags
   bool _blocking = false;
-  bool _opened = false;
+  // bool _closed = false;
   bool _connected = false;
   bool _bound = false;
 
@@ -101,59 +99,50 @@ abstract class BaseChannel<C extends SelectableChannel>
     C? sock = _impl;
     if (sock == null) {
       _blocking = false;
-      _opened = false;
+      // _closed = false;
       _connected = false;
       _bound = false;
     } else {
-      _blocking = sock.isBlocking;
-      _opened = !sock.isClosed;
-      _connected = _isConnected(sock);
-      _bound = _isBound(sock);
+      _blocking = socketIsBlocking(sock);
+      // _closed = socketIsClosed(sock);
+      _connected = socketIsConnected(sock);
+      _bound = socketIsBound(sock);
     }
   }
 
-  static bool _isConnected(SelectableChannel channel) {
-    if (channel is SocketChannel) {
-      return channel.isConnected;
-    } else if (channel is DatagramChannel) {
-      return channel.isConnected;
-    }
-    return false;
-  }
-  static bool _isBound(SelectableChannel channel) {
-    if (channel is SocketChannel) {
-      return channel.isBound;
-    } else if (channel is DatagramChannel) {
-      return channel.isBound;
-    }
-    return false;
-  }
-
-  C? get socketChannel => _impl;
-
+  C? get socket => getSocket();
   // protected
-  void finalize() {
-    _removeSocketChannel();
-  }
-  Future<void> _removeSocketChannel() async {
+  C? getSocket() => _impl;
+  // protected
+  Future<void> setSocket(C? sock) async {
     // 1. clear inner channel
     C? old = _impl;
     _impl = null;
     // 2. refresh flags
     refreshFlags();
     // 3. close old channel
-    if (old == null || old.isClosed) {} else {
-      await old.close();
+    if (old == null || identical(old, sock)) {} else {
+      await closeSocket(old);
     }
+  }
+
+  // protected
+  Future<void> closeSocket(C sock) async => await socketShutdown(sock);
+
+  // protected
+  void finalize() {
+    // make sure the relative socket is removed
+    setSocket(null);
   }
 
   @override
   SelectableChannel? configureBlocking(bool block) {
-    C? sock = socketChannel;
+    C? sock = socket;
     if (sock == null) {
       throw SocketException('socket closed');
+    } else {
+      sock.configureBlocking(block);
     }
-    sock.configureBlocking(block);
     _blocking = block;
     return sock;
   }
@@ -162,7 +151,11 @@ abstract class BaseChannel<C extends SelectableChannel>
   bool get isBlocking => _blocking;
 
   @override
-  bool get isClosed => !_opened;
+  bool get isClosed {
+    // return _closed;
+    C? sock = getSocket();
+    return sock == null || socketIsClosed(sock);
+  }
 
   @override
   bool get isConnected => _connected;
@@ -172,6 +165,30 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
+
+  // @override
+  // SocketAddress? get remoteAddress {
+  //   SocketAddress? address = super.remoteAddress;
+  //   if (address == null) {
+  //     C? sock = getSocket();
+  //     if (sock != null) {
+  //       address = socketGetRemoteAddress(sock);
+  //     }
+  //   }
+  //   return address;
+  // }
+  //
+  // @override
+  // SocketAddress? get localAddress {
+  //   SocketAddress? address = super.localAddress;
+  //   if (address == null) {
+  //     C? sock = getSocket();
+  //     if (sock != null) {
+  //       address = socketGetLocalAddress(sock);
+  //     }
+  //   }
+  //   return address;
+  // }
 
   @override
   String toString() {
@@ -189,16 +206,17 @@ abstract class BaseChannel<C extends SelectableChannel>
     //     return null;
     //   }
     // }
-    C? sock = socketChannel;
+    C? sock = socket;
     if (sock == null) {
       throw SocketException('socket closed');
     }
+    // _closed = false;
+    _blocking = socketIsBlocking(sock);
     NetworkChannel nc = sock as NetworkChannel;
-    await nc.bind(local);
+    bool ok = await socketBind(nc, local);
+    assert(ok, 'failed to bind socket: $local');
     localAddress = local;
     _bound = true;
-    _opened = true;
-    _blocking = sock.isBlocking;
     return nc;
   }
 
@@ -211,37 +229,31 @@ abstract class BaseChannel<C extends SelectableChannel>
     //     return null;
     //   }
     // }
-    C? sock = socketChannel;
+    C? sock = socket;
     if (sock == null) {
       throw SocketException('socket closed');
     }
-    if (sock is SocketChannel) {
-      await sock.connect(remote);
-    } else if (sock is DatagramChannel) {
-      await sock.connect(remote);
-    } else {
-      throw SocketException('unknown datagram channel: $sock');
-    }
+    // _closed = true;
+    _blocking = socketIsBlocking(sock);
+    NetworkChannel nc = sock as NetworkChannel;
+    bool ok = await socketConnect(nc, remote);
+    assert(ok, 'failed to connect socket: $remote');
     remoteAddress = remote;
     _connected = true;
-    _opened = true;
-    _blocking = sock.isBlocking;
-    return sock as NetworkChannel;
+    return nc;
   }
 
   @override
   Future<ByteChannel?> disconnect() async {
+    // 1. clear inner socket
     C? sock = _impl;
-    if (sock is DatagramChannel) {
-      if (sock.isConnected) {
-        try {
-          return await sock.disconnect();
-        } finally {
-          refreshFlags();
-        }
-      }
-    } else {
-      await _removeSocketChannel();
+    _impl = null;
+    // 2. refresh flags
+    refreshFlags();
+    // 3. close connected socket
+    if (sock != null && socketIsConnected(sock)) {
+      bool ok = await socketDisconnect(sock);
+      assert(ok, 'failed to disconnect socket: $sock');
     }
     return sock is ByteChannel ? sock as ByteChannel : null;
   }
@@ -249,7 +261,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   @override
   Future<void> close() async {
     // close inner socket and refresh flags
-    await _removeSocketChannel();
+    await setSocket(null);
   }
 
   @override

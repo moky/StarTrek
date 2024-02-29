@@ -122,8 +122,9 @@ class ArrivalHall {
   }
 
   ///  Clear all expired tasks
-  void purge([DateTime? now]) {
+  int purge([DateTime? now]) {
     now ??= DateTime.now();
+    int count = 0;
     // 1. seeking expired tasks
     dynamic sn;
     _arrivals.removeWhere((ship) {
@@ -134,6 +135,7 @@ class ArrivalHall {
           _arrivalMap.remove(sn);
           // TODO: callback?
         }
+        ++count;
         return true;
       } else {
         return false;
@@ -144,6 +146,7 @@ class ArrivalHall {
         now.millisecondsSinceEpoch - 3600 * 1000
     );
     _arrivalFinished.removeWhere((sn, when) => when.isBefore(ago));
+    return count;
   }
 
 }

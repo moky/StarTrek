@@ -64,6 +64,28 @@ abstract interface class Runnable {
 
 abstract class Runner implements Runnable, Handler, Processor {
 
+  // Frames Per Second
+  // ~~~~~~~~~~~~~~~~~
+  // (1) The human eye can process 10-12 still images per second,
+  //     and the dynamic compensation function can also deceive us.
+  // (2) At a frame rate of 12fps or lower, we can quickly distinguish between
+  //     a pile of still images and not animations.
+  // (3) Once the playback rate (frames per second) of the images reaches 16-24 fps,
+  //     our brain will assume that these images are a continuously moving scene
+  //     and will appear like the effect of a movie.
+  // (4) At 24fps, there is a feeling of 'motion blur',
+  //     while at 60fps, the image is the smoothest and cleanest.
+  static int intervalSlow   = Duration.millisecondsPerSecond ~/ 10;  // 100 ms
+  static int intervalNormal = Duration.millisecondsPerSecond ~/ 25;  //  40 ms
+  static int intervalFast   = Duration.millisecondsPerSecond ~/ 60;  //  16 ms
+
+  Runner(int millis) {
+    assert(millis > 0, 'interval error: $millis');
+    interval = millis;
+  }
+
+  late final int interval;
+
   bool _running = false;
 
   bool get isRunning => _running;
@@ -107,7 +129,7 @@ abstract class Runner implements Runnable, Handler, Processor {
 
   // protected
   Future<void> idle() async =>
-      await sleep(milliseconds: 16);  // Duration.millisecondsPerSecond ~/ 60
+      await sleep(milliseconds: interval);  // Duration.millisecondsPerSecond ~/ 60
 
   static Future<void> sleep({required int milliseconds}) async =>
       await Future.delayed(Duration(milliseconds: milliseconds));

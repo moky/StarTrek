@@ -72,11 +72,11 @@ abstract interface class Docker implements Processor {
   ///  Send 'PING' for keeping connection alive
   Future<void> heartbeat();
 
-  ///  Clear all expired tasks
-  void purge([DateTime? now]);
-
   ///  Close connection for this docker
-  void close();
+  Future<void> close();
+
+  ///  Clear all expired tasks
+  int purge([DateTime? now]);
 
 }
 

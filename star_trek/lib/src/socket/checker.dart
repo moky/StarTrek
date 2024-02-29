@@ -98,7 +98,7 @@ abstract class ChannelController<C extends SelectableChannel>
   SocketAddress? get remoteAddress => channel?.remoteAddress;
   SocketAddress? get localAddress => channel?.localAddress;
 
-  C? get socket => channel?.socketChannel;
+  C? get socket => channel?.socket;
 
   //
   //  Checker

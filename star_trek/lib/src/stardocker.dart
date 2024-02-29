@@ -61,7 +61,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   // protected
   void finalize() {
     // make sure the relative connection is closed
-    _removeConnection();
+    setConnection(null);
     _dock = null;
   }
 
@@ -74,30 +74,53 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       _delegateRef = keeper == null ? null : WeakReference(keeper);
 
   // protected
-  Connection? get connection => _connectionRef?.target;
-  void _removeConnection() {
-    // 1. clear connection reference
-    Connection? old = _connectionRef?.target;
-    _connectionRef = null;
+  Connection? get connection => getConnection();
+  // protected
+  Connection? getConnection() => _connectionRef?.target;
+  // protected
+  Future<void> setConnection(Connection? conn) async {
+    // 1. replace with new connection
+    Connection? old = getConnection();
+    _connectionRef = conn == null ? null : WeakReference(conn);
     // 2. close old connection
-    if (old == null || old.isClosed) {} else {
-      old.close();
+    if (old == null || identical(old, conn)) {} else {
+      if (old.isClosed) {} else {
+        await old.close();
+      }
     }
   }
 
   @override
-  bool get isClosed => connection?.isClosed != false;
+  bool get isClosed => getConnection()?.isClosed != false;
 
   @override
-  bool get isAlive => connection?.isAlive == true;
+  bool get isAlive => getConnection()?.isAlive == true;
 
   @override
-  DockerStatus get status => DockerStatus.getStatus(connection?.state);
+  DockerStatus get status => DockerStatus.getStatus(getConnection()?.state);
 
   // @override
+  // SocketAddress? get remoteAddress {
+  //   SocketAddress? address = super.remoteAddress;
+  //   if (address == null) {
+  //     var conn = getConnection();
+  //     if (conn != null) {
+  //       address = conn.remoteAddress;
+  //     }
+  //   }
+  //   return address;
+  // }
+  //
+  // @override
   // SocketAddress? get localAddress {
-  //   Connection? conn = connection;
-  //   return conn == null ? super.localAddress : conn.localAddress;
+  //   SocketAddress? address = super.localAddress;
+  //   if (address == null) {
+  //     var conn = getConnection();
+  //     if (conn != null) {
+  //       address = conn.localAddress;
+  //     }
+  //   }
+  //   return address;
   // }
 
   @override
@@ -151,15 +174,16 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   ///
   /// @param income - income ship with SN
   // protected
-  Future<void> checkResponse(Arrival income) async {
+  Future<Departure?> checkResponse(Arrival income) async {
     // check response for linked departure ship (same SN)
     Departure? linked = _dock?.checkResponse(income);
     if (linked == null) {
       // linked departure task not found, or not finished yet
-      return;
+      return null;
     }
     // all fragments responded, task finished
     await delegate?.onDockerSent(linked, this);
+    return linked;
   }
 
   /// Check received ship for completed package
@@ -179,11 +203,11 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       _dock?.getNextDeparture(now);
 
   @override
-  void purge([DateTime? now]) => _dock?.purge(now);
+  int purge([DateTime? now]) => _dock?.purge(now) ?? -1;
 
   @override
-  void close() {
-    _removeConnection();
+  Future<void> close() async {
+    setConnection(null);
     _dock = null;
   }
 

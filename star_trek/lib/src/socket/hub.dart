@@ -46,7 +46,7 @@ class ConnectionPool extends AddressPairMap<Connection> {
   @override
   void setItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
     Connection? old = getItem(remote: remote, local: local);
-    if (old != null && old != value) {
+    if (old == null || identical(old, value)) {} else {
       removeItem(old, remote: remote, local: local);
     }
     super.setItem(value, remote: remote, local: local);
@@ -56,7 +56,7 @@ class ConnectionPool extends AddressPairMap<Connection> {
   Connection? removeItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
     Connection? cached = super.removeItem(value, remote: remote, local: local);
     if (cached == null || cached.isClosed) {} else {
-      cached.close();
+      /*await */cached.close();
     }
     return cached;
   }
@@ -98,7 +98,7 @@ abstract class BaseHub implements Hub {
   ///
   /// @return copy of channels
   // protected
-  Set<Channel> get allChannels;
+  Iterable<Channel> get allChannels;
 
   ///  Remove socket channel
   ///
@@ -119,10 +119,10 @@ abstract class BaseHub implements Hub {
   /// @param local  - local address
   /// @return null on channel not exists
   // protected
-  Connection? createConnection(Channel channel, {required SocketAddress remote, SocketAddress? local});
+  Connection? createConnection(Channel? channel, {required SocketAddress remote, SocketAddress? local});
 
   // protected
-  Set<Connection> get allConnections => _connectionPool.items;
+  Iterable<Connection> get allConnections => _connectionPool.items;
 
   // protected
   Connection? getConnection({required SocketAddress remote, SocketAddress? local}) =>
@@ -152,9 +152,9 @@ abstract class BaseHub implements Hub {
     }
     // try to open channel with direction (remote, local)
     Channel? sock = await open(remote: remote, local: local);
-    if (sock == null || sock.isClosed) {
-      return null;
-    }
+    // if (sock == null || sock.isClosed) {
+    //   return null;
+    // }
     // create with channel
     conn = createConnection(sock, remote: remote, local: local);
     if (conn != null) {
@@ -170,7 +170,7 @@ abstract class BaseHub implements Hub {
 
   // protected
   Future<bool> driveChannel(Channel sock) async {
-    if (sock.isClosed) {
+    if (sock.isAlive) {} else {
       // cannot drive closed channel
       return false;
     }
@@ -218,7 +218,7 @@ abstract class BaseHub implements Hub {
   }
 
   // protected
-  Future<int> driveChannels(Set<Channel> channels) async {
+  Future<int> driveChannels(Iterable<Channel> channels) async {
     int count = 0;
     for (Channel sock in channels) {
       // drive channel to receive data
@@ -230,9 +230,9 @@ abstract class BaseHub implements Hub {
   }
 
   // protected
-  void cleanupChannels(Set<Channel> channels) {
+  void cleanupChannels(Iterable<Channel> channels) {
     for (Channel sock in channels) {
-      if (!sock.isAlive) {
+      if (sock.isClosed) {
         // if channel not connected (TCP) and not bound (UDP),
         // means it's closed, remove it from the hub
         removeChannel(sock, remote: sock.remoteAddress, local: sock.localAddress);
@@ -243,7 +243,7 @@ abstract class BaseHub implements Hub {
   DateTime _last = DateTime.now();
 
   // protected
-  Future<void> driveConnections(Set<Connection> connections) async {
+  Future<void> driveConnections(Iterable<Connection> connections) async {
     DateTime now = DateTime.now();
     int delta = now.millisecondsSinceEpoch - _last.millisecondsSinceEpoch;
     for (Connection conn in connections) {
@@ -256,7 +256,7 @@ abstract class BaseHub implements Hub {
   }
 
   // protected
-  void cleanupConnections(Set<Connection> connections) {
+  void cleanupConnections(Iterable<Connection> connections) {
     for (Connection conn in connections) {
       if (conn.isClosed) {
         // if connection closed, remove it from the hub; notice that
@@ -270,10 +270,10 @@ abstract class BaseHub implements Hub {
   @override
   Future<bool> process() async {
     // 1. drive all channels to receive data
-    Set<Channel> channels = allChannels;
+    Iterable<Channel> channels = allChannels;
     int count = await driveChannels(channels);
     // 2. drive all connections to move on
-    Set<Connection> connections = allConnections;
+    Iterable<Connection> connections = allConnections;
     await driveConnections(connections);
     // 3. cleanup closed channels and connections
     cleanupChannels(channels);

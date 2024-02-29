@@ -281,8 +281,9 @@ class DepartureHall {
   }
 
   ///  Clear all expired tasks
-  void purge([DateTime? now]) {
+  int purge([DateTime? now]) {
     now ??= DateTime.now();
+    int count = 0;
     // 1. seeking finished tasks
     List<Departure> departures;
     List<Departure>? fleet;
@@ -306,6 +307,7 @@ class DepartureHall {
           _departureLevel.remove(sn);
           // mark finished time
           _departureFinished[sn] = now;
+          ++count;
         }
       }
       // remove array when empty
@@ -319,6 +321,7 @@ class DepartureHall {
         now.millisecondsSinceEpoch - 3600 * 1000
     );
     _departureFinished.removeWhere((sn, when) => when.isBefore(ago));
+    return count;
   }
 
 }

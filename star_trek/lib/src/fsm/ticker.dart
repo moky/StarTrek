@@ -47,14 +47,12 @@ abstract interface class Ticker {
 class Metronome extends Runner {
 
   // at least wait 1/60 of a second
-  static int minInterval = Duration.millisecondsPerSecond ~/ 60;
+  static int minInterval = Duration.millisecondsPerSecond ~/ 60;  //  16 ms
 
-  Metronome(int millis) : _interval = millis, _lastTime = 0 {
-    assert(millis > 0, 'interval error: $millis');
+  Metronome(super.millis) : _lastTime = 0 {
     _allTickers = WeakSet();
   }
 
-  final int _interval;
   int _lastTime;
 
   late final Set<Ticker> _allTickers;
@@ -89,7 +87,7 @@ class Metronome extends Runner {
     DateTime now = DateTime.now();
     int current = now.millisecondsSinceEpoch;
     int elapsed = current - _lastTime;
-    int waiting = _interval - elapsed;
+    int waiting = interval - elapsed;
     if (waiting < minInterval) {
       waiting = minInterval;
     }
@@ -119,7 +117,7 @@ class PrimeMetronome {
   factory PrimeMetronome() => _instance;
   static final PrimeMetronome _instance = PrimeMetronome._internal();
   PrimeMetronome._internal() {
-    _metronome = Metronome(200);
+    _metronome = Metronome(Runner.intervalSlow);
     /*await */_metronome.start();
   }
 

@@ -1,3 +1,7 @@
+## 0.3.0
+
+- Active Connection.
+
 ## 0.2.3
 
 - Locked Dock.

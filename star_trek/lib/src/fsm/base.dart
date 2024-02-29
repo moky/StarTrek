@@ -52,11 +52,8 @@ abstract class BaseState<C extends MachineContext, T extends StateTransition<C>>
   final List<T> _transitions = [];
 
   void addTransition(T trans) {
-    if (_transitions.contains(trans)) {
-      assert(false, 'transition exists: $trans');
-    } else {
-      _transitions.add(trans);
-    }
+    assert(!_transitions.contains(trans), 'transition exists: $trans');
+    _transitions.add(trans);
   }
 
   @override
@@ -213,7 +210,6 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     DateTime now = DateTime.now();
     C ctx = context;
     S? current = currentState;
-    MachineDelegate<C, T, S>? callback = delegate;
     //
     //  Events before state paused
     //
@@ -225,7 +221,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     //
     //  Events after state paused
     //
-    await callback?.pauseState(current, ctx, now);
+    await delegate?.pauseState(current, ctx, now);
   }
 
   @override
@@ -234,11 +230,10 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     DateTime now = DateTime.now();
     C ctx = context;
     S? current = currentState;
-    MachineDelegate<C, T, S>? callback = delegate;
     //
     //  Events before state resumed
     //
-    await callback?.resumeState(current, ctx, now);
+    await delegate?.resumeState(current, ctx, now);
     //
     //  Resume current state
     //

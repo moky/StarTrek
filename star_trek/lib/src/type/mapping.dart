@@ -38,7 +38,7 @@ abstract interface class KeyPairMap<K, V> {
   ///  Get all mapped values
   ///
   /// @return values
-  Set<V> get items;
+  Iterable<V> get items;
 
   ///  Get value by key pair (remote, local)
   ///
@@ -187,7 +187,7 @@ class HashKeyPairMap<K, V> extends WeakKeyPairMap<K, V> {
   late final Set<V> _values;
 
   @override
-  Set<V> get items => _values.toSet();
+  Iterable<V> get items => Set<V>.from(_values);  // copy
 
   @override
   void setItem(V? value, {K? remote, K? local}) {
@@ -210,7 +210,7 @@ class HashKeyPairMap<K, V> extends WeakKeyPairMap<K, V> {
       _values.remove(old);
     }
     // clear cached value
-    if (value != null && value != old) {
+    if (value == null || identical(value, old)) {} else {
       _values.remove(value);
     }
     return old ?? value;

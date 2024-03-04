@@ -49,7 +49,8 @@ class BaseConnection extends AddressPairObject
 
   WeakReference<ConnectionDelegate>? _delegateRef;
 
-  Channel? _channel;
+  WeakReference<Channel>? _channelRef;
+  bool _closed = false;
 
   // active times
   DateTime? _lastSentTime;
@@ -67,13 +68,19 @@ class BaseConnection extends AddressPairObject
   //  Channel
   //
 
-  Channel? get channel => _channel;
+  Channel? get channel => _channelRef?.target;
 
   // protected
   Future<void> setChannel(Channel? sock) async {
     // 1. replace with new channel
-    Channel? old = _channel;
-    _channel = sock;
+    Channel? old = _channelRef?.target;
+    if (sock == null) {
+      _channelRef = null;
+      _closed = true;
+    } else {
+      _channelRef = WeakReference(sock);
+      _closed = false;  // sock.isClosed;
+    }
     // 2. close old channel
     if (old == null || identical(old, sock)) {} else {
       await old.close();
@@ -108,17 +115,17 @@ class BaseConnection extends AddressPairObject
   //
 
   @override
-  bool get isClosed => _channel?.isClosed != false;
+  bool get isClosed => channel?.isClosed ?? _closed;
 
   @override
-  bool get isBound => _channel?.isBound == true;
+  bool get isBound => channel?.isBound == true;
 
   @override
-  bool get isConnected => _channel?.isConnected == true;
+  bool get isConnected => channel?.isConnected == true;
 
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
-  // bool get isAlive => _channel?.isAlive == true;
+  // bool get isAlive => channel?.isAlive == true;
 
   @override
   String toString() {
@@ -169,7 +176,7 @@ class BaseConnection extends AddressPairObject
 
   // protected
   Future<int> doSend(Uint8List src, SocketAddress? destination) async {
-    Channel? sock = _channel;
+    Channel? sock = channel;
     if (sock == null || !sock.isAlive) {
       assert(false, 'socket channel lost: $sock');
       return -1;

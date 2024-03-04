@@ -41,14 +41,14 @@ import 'dock.dart';
 
 /// Base Docker
 abstract class StarDocker extends AddressPairObject implements Docker {
-  StarDocker(Connection conn)
-      : super(remote: conn.remoteAddress, local: conn.localAddress) {
-    connection = conn;
+  StarDocker({super.remote, super.local}) {
     _dock = createDock();
   }
 
-  late final Connection connection;
   late final Dock _dock;
+
+  WeakReference<Connection>? _connectionRef;
+  bool _closed = false;
 
   // remaining data to be sent
   Departure? _lastOutgo;
@@ -65,17 +65,40 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       _delegateRef = keeper == null ? null : WeakReference(keeper);
 
   //
+  //  Connection
+  //
+
+  Connection? get connection => _connectionRef?.target;
+
+  @override
+  Future<void> setConnection(Connection? conn) async {
+    // 1. replace with new connection
+    Connection? old = _connectionRef?.target;
+    if (conn == null) {
+      _connectionRef = null;
+      _closed = true;
+    } else {
+      _connectionRef = WeakReference(conn);
+      _closed = false;  // conn.isClosed;
+    }
+    // 2. close old connection
+    if (old == null || identical(old, conn)) {} else {
+      await old.close();
+    }
+  }
+
+  //
   //  Flags
   //
 
   @override
-  bool get isClosed => connection.isClosed != false;
+  bool get isClosed => connection?.isClosed ?? _closed;
 
   @override
-  bool get isAlive => connection.isAlive == true;
+  bool get isAlive => connection?.isAlive == true;
 
   @override
-  DockerStatus get status => DockerStatus.getStatus(connection.state);
+  DockerStatus get status => DockerStatus.getStatus(connection?.state);
 
   @override
   String toString() {
@@ -159,7 +182,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   int purge([DateTime? now]) => _dock.purge(now);
 
   @override
-  Future<void> close() async => await connection.close();
+  Future<void> close() async => await connection?.close();
 
   //
   //  Processor
@@ -167,8 +190,9 @@ abstract class StarDocker extends AddressPairObject implements Docker {
 
   @override
   Future<bool> process() async {
+    Connection? conn = connection;
     // 1. get connection which is ready for sending data
-    if (!connection.isAlive) {
+    if (conn == null || !conn.isAlive) {
       // connection not ready now
       return false;
     }
@@ -206,7 +230,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
     int index = 0, sent = 0;
     try {
       for (Uint8List fra in fragments) {
-        sent = await connection.sendData(fra);
+        sent = await conn.sendData(fra);
         if (sent < fra.length) {
           // buffer overflow?
           break;

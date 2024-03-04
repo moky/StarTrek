@@ -83,7 +83,11 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   @override
   Future<bool> sendData(Uint8List payload, {required SocketAddress remote, SocketAddress? local}) async {
     Docker? worker = getDocker(remote: remote, local: local);
-    if (worker == null || worker.isClosed) {
+    if (worker == null) {
+      assert(false, 'docker not found: $local -> $remote');
+      return false;
+    } else if (!worker.isAlive) {
+      assert(false, 'docker not alive: $local -> $remote');
       return false;
     }
     return await worker.sendData(payload);
@@ -92,7 +96,11 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   @override
   Future<bool> sendShip(Departure outgo, {required SocketAddress remote, SocketAddress? local}) async {
     Docker? worker = getDocker(remote: remote, local: local);
-    if (worker == null || worker.isClosed) {
+    if (worker == null) {
+      assert(false, 'docker not found: $local -> $remote');
+      return false;
+    } else if (!worker.isAlive) {
+      assert(false, 'docker not alive: $local -> $remote');
       return false;
     }
     return await worker.sendShip(outgo);
@@ -104,14 +112,19 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   ///  Create new docker for received data
   ///
-  /// @param conn   - current connection
   /// @param data   - advance party
-  /// @return docker
+  /// @param remote - remote address
+  /// @param local  - local address
+  /// @return Docker
   // protected
-  Docker? createDocker(Connection conn, List<Uint8List> data);
+  Docker createDocker(List<Uint8List> data, {required SocketAddress remote, SocketAddress? local});
 
   // protected
   Iterable<Docker> allDockers() => _dockerPool.items;
+
+  // protected
+  Docker? removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
+      _dockerPool.removeItem(docker, remote: remote, local: local);
 
   // protected
   Docker? getDocker({required SocketAddress remote, SocketAddress? local}) =>
@@ -120,10 +133,6 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   // protected
   void setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
       _dockerPool.setItem(docker, remote: remote, local: local);
-
-  // protected
-  Docker? removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
-      _dockerPool.removeItem(docker, remote: remote, local: local);
 
   //
   //  Processor
@@ -191,13 +200,11 @@ abstract class StarGate implements Gate, ConnectionDelegate {
           // connection closed and docker removed
           return;
         }
-        worker = createDocker(connection, []);
-        if (worker == null) {
-          assert(false, 'failed to create docker: $remote, $local');
-          return;
-        } else {
-          setDocker(worker, remote: worker.remoteAddress!, local: worker.localAddress);
-        }
+        // create & cache docker
+        worker = createDocker([], remote: remote, local: local);
+        setDocker(worker, remote: remote, local: local);
+        // set connection for this docker
+        await worker.setConnection(connection);
       }
       // NOTICE: if the previous state is null, the docker maybe not
       //         created yet, this situation means the docker status
@@ -221,23 +228,23 @@ abstract class StarGate implements Gate, ConnectionDelegate {
       await worker.processReceived(data);
       return;
     }
+    // docker not exists, check the data to decide which docker should be created
 
     // cache advance party for this connection
     List<Uint8List> advanceParty = cacheAdvanceParty(data, connection);
     assert(advanceParty.isNotEmpty, 'advance party error');
+    // create & cache docker
+    worker = createDocker(advanceParty, remote: remote, local: local);
+    setDocker(worker, remote: remote, local: local);
+    // set connection for this docker
+    await worker.setConnection(connection);
 
-    // docker not exists, check the data to decide which docker should be created
-    worker = createDocker(connection, advanceParty);
-    if (worker != null) {
-      // cache docker for (remote, local)
-      setDocker(worker, remote: worker.remoteAddress!, local: worker.localAddress);
-      // process advance parties one by one
-      for (Uint8List part in advanceParty) {
-        await worker.processReceived(part);
-      }
-      // remove advance party
-      clearAdvanceParty(connection);
+    // process the advance parties one by one
+    for (Uint8List part in advanceParty) {
+      await worker.processReceived(part);
     }
+    // remove advance party
+    clearAdvanceParty(connection);
   }
 
   /// cache the advance party before decide which docker to use

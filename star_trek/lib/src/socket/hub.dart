@@ -119,12 +119,16 @@ abstract class BaseHub implements Hub {
   ///
   /// @param remote - remote address
   /// @param local  - local address
-  /// @return null on channel not exists
+  /// @return Connection
   // protected
-  Connection? createConnection({required SocketAddress remote, SocketAddress? local});
+  Connection createConnection({required SocketAddress remote, SocketAddress? local});
 
   // protected
   Iterable<Connection> get allConnections => _connectionPool.items;
+
+  // protected
+  Connection? removeConnection(Connection? conn, {required SocketAddress remote, SocketAddress? local}) =>
+      _connectionPool.removeItem(conn, remote: remote, local: local);
 
   // protected
   Connection? getConnection({required SocketAddress remote, SocketAddress? local}) =>
@@ -134,21 +138,15 @@ abstract class BaseHub implements Hub {
   void setConnection(Connection conn, {required SocketAddress remote, SocketAddress? local}) =>
       _connectionPool.setItem(conn, remote: remote, local: local);
 
-  // protected
-  Connection? removeConnection(Connection? conn, {required SocketAddress remote, SocketAddress? local}) =>
-      _connectionPool.removeItem(conn, remote: remote, local: local);
-
   @override
   Future<Connection?> connect({required SocketAddress remote, SocketAddress? local}) async {
     Connection? conn = getConnection(remote: remote, local: local);
     if (conn == null) {
+      // create & cache connection
       conn = createConnection(remote: remote, local: local);
-      if (conn != null) {
-        // NOTICE: local address in the connection may be set to None
-        setConnection(conn, remote: conn.remoteAddress!, local: conn.localAddress);
-        // try to open channel with direction (remote, local)
-        /*await */conn.start(this);
-      }
+      setConnection(conn, remote: remote, local: local);
+      // try to open channel with direction (remote, local)
+      await conn.start(this);
     }
     return conn;
   }

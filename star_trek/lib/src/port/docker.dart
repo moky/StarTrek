@@ -31,9 +31,11 @@
 import 'dart:typed_data';
 
 import '../fsm/runner.dart';
+import '../net/connection.dart';
 import '../net/state.dart';
 import '../nio/address.dart';
 import '../nio/exception.dart';
+
 import 'ship.dart';
 
 
@@ -49,6 +51,11 @@ abstract interface class Docker implements Processor {
 
   SocketAddress? get remoteAddress;
   SocketAddress? get localAddress;
+
+  ///  Set connection for this docker
+  ///
+  /// @param conn - connection
+  Future<void> setConnection(Connection? conn);
 
   ///  Pack data to an outgo ship (with normal priority), and
   ///  append to the waiting queue for sending out

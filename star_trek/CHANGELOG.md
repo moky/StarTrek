@@ -1,3 +1,7 @@
+## 0.3.3
+
+- Set connection for docker after created.
+
 ## 0.3.2
 
 - Bind a connection to a docker.

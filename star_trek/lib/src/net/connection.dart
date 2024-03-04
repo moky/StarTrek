@@ -54,22 +54,24 @@ abstract interface class Connection implements Ticker {
 
   ConnectionState? get state;
 
+  ///  Get channel from hub
+  ///
+  /// @param hub - connection hub
+  Future<void> start(Hub hub);
+
   ///  Send data
   ///
-  /// @param data        - outgo data package
+  /// @param data - outgo data package
   /// @return count of bytes sent, probably zero when it's non-blocking mode
   Future<int> sendData(Uint8List data);
 
   ///  Process received data
   ///
-  /// @param data   - received data
+  /// @param data - received data
   Future<void> onReceivedData(Uint8List data);
 
   ///  Close the connection
   Future<void> close();
-
-  ///  Get channel from hub
-  Future<void> start(Hub hub);
 
 }
 

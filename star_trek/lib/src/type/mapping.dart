@@ -176,11 +176,10 @@ abstract class AbstractPairMap<K, V> implements PairMap<K, V> {
 }
 
 
-class WeakValuePairMap<K, V extends Object>
-    extends AbstractPairMap<K, V> {
-  WeakValuePairMap(super.any);
+class HashPairMap<K, V> extends AbstractPairMap<K, V> {
+  HashPairMap(super.any);
 
-  final Set<V> _values = WeakSet();
+  final Set<V> _values = {};
 
   @override
   Iterable<V> get items => Set<V>.from(_values);  // copy
@@ -215,8 +214,7 @@ class WeakValuePairMap<K, V extends Object>
 }
 
 
-class AddressPairMap<V extends Object>
-    extends WeakValuePairMap<SocketAddress, V> {
+class AddressPairMap<V> extends HashPairMap<SocketAddress, V> {
   AddressPairMap() : super(anyAddress);
 
   static final SocketAddress anyAddress = InetSocketAddress('0.0.0.0', 0);

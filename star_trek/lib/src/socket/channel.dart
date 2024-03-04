@@ -36,6 +36,7 @@ import 'package:object_key/object_key.dart';
 import '../net/channel.dart';
 import '../nio/address.dart';
 import '../nio/channel.dart';
+import '../nio/exception.dart';
 import '../nio/network.dart';
 import '../nio/selectable.dart';
 import '../type/pair.dart';
@@ -69,13 +70,71 @@ abstract interface class SocketWriter {
 }
 
 
+///  Socket Channel Controller
+///  ~~~~~~~~~~~~~~~~~~~~~~~~~
+///
+///  Reader, Writer
+abstract class ChannelController<C extends SelectableChannel> {
+  ChannelController(BaseChannel<C> channel) :
+        _channelRef = WeakReference(channel);
+
+  final WeakReference<BaseChannel<C>> _channelRef;
+
+  BaseChannel<C>? get channel => _channelRef.target;
+
+  SocketAddress? get remoteAddress => channel?.remoteAddress;
+  SocketAddress? get localAddress => channel?.localAddress;
+
+  C? get socket => channel?.socket;
+
+}
+
+abstract class ChannelReader<C extends SelectableChannel>
+    extends ChannelController<C> implements SocketReader {
+  ChannelReader(super.channel);
+
+  @override
+  Future<Uint8List?> read(int maxLen) async {
+    C? sock = socket;
+    if (sock == null || sock.isClosed) {
+      throw ClosedChannelException();
+    } else if (sock is ReadableByteChannel) {
+      return await (sock as ReadableByteChannel).read(maxLen);
+    } else {
+      assert(false, 'socket error, cannot read data: $sock');
+      return null;
+    }
+  }
+
+}
+
+abstract class ChannelWriter<C extends SelectableChannel>
+    extends ChannelController<C> implements SocketWriter {
+  ChannelWriter(super.channel);
+
+  @override
+  Future<int> write(Uint8List src) async {
+    C? sock = socket;
+    if (sock == null || sock.isClosed) {
+      throw ClosedChannelException();
+    } else if (sock is WritableByteChannel) {
+      return await (sock as WritableByteChannel).write(src);
+    } else {
+      assert(false, 'socket error, cannot write data: ${src.lengthInBytes} byte(s)');
+      return -1;
+    }
+  }
+
+}
+
+
 abstract class BaseChannel<C extends SelectableChannel>
     extends AddressPairObject implements Channel {
   BaseChannel(C sock, {super.remote, super.local}) {
+    _sock = sock;
+    // create socket reader & writer
     reader = createReader();
     writer = createWriter();
-    _impl = sock;
-    refreshFlags();
   }
 
   SocketReader createReader();
@@ -86,53 +145,30 @@ abstract class BaseChannel<C extends SelectableChannel>
   late final SocketWriter writer;
 
   // inner socket
-  C? _impl;
+  C? _sock;
 
-  // flags
-  bool _blocking = false;
-  // bool _closed = false;
-  bool _connected = false;
-  bool _bound = false;
+  C? get socket => _sock;
 
-  // protected
-  void refreshFlags() {
-    C? sock = _impl;
-    if (sock == null) {
-      _blocking = false;
-      // _closed = false;
-      _connected = false;
-      _bound = false;
-    } else {
-      _blocking = socketIsBlocking(sock);
-      // _closed = socketIsClosed(sock);
-      _connected = socketIsConnected(sock);
-      _bound = socketIsBound(sock);
-    }
-  }
+  @override
+  bool get isBlocking => socketIsBlocking(_sock);
 
-  C? get socket => getSocket();
-  // protected
-  C? getSocket() => _impl;
-  // protected
-  Future<void> setSocket(C? sock) async {
-    // 1. clear inner channel
-    C? old = _impl;
-    _impl = null;
-    // 2. refresh flags
-    refreshFlags();
-    // 3. close old channel
-    if (old == null || identical(old, sock)) {} else {
-      await closeSocket(old);
-    }
-  }
+  @override
+  bool get isClosed => socketIsClosed(_sock);
 
-  // protected
-  Future<void> closeSocket(C sock) async => await socketShutdown(sock);
+  @override
+  bool get isConnected => socketIsConnected(_sock);
 
-  // protected
-  void finalize() {
-    // make sure the relative socket is removed
-    setSocket(null);
+  @override
+  bool get isBound => socketIsBound(_sock);
+
+  @override
+  bool get isAlive => (!isClosed) && (isConnected || isBound);
+
+  @override
+  String toString() {
+    Type clazz = runtimeType;
+    return '<$clazz remote="$remoteAddress" local="$localAddress">\n\t'
+        '$socket\n</$clazz>';
   }
 
   @override
@@ -143,126 +179,59 @@ abstract class BaseChannel<C extends SelectableChannel>
     } else {
       sock.configureBlocking(block);
     }
-    _blocking = block;
     return sock;
   }
 
   @override
-  bool get isBlocking => _blocking;
-
-  @override
-  bool get isClosed {
-    // return _closed;
-    C? sock = getSocket();
-    return sock == null || socketIsClosed(sock);
-  }
-
-  @override
-  bool get isConnected => _connected;
-
-  @override
-  bool get isBound => _bound;
-
-  @override
-  bool get isAlive => (!isClosed) && (isConnected || isBound);
-
-  // @override
-  // SocketAddress? get remoteAddress {
-  //   SocketAddress? address = super.remoteAddress;
-  //   if (address == null) {
-  //     C? sock = getSocket();
-  //     if (sock != null) {
-  //       address = socketGetRemoteAddress(sock);
-  //     }
-  //   }
-  //   return address;
-  // }
-  //
-  // @override
-  // SocketAddress? get localAddress {
-  //   SocketAddress? address = super.localAddress;
-  //   if (address == null) {
-  //     C? sock = getSocket();
-  //     if (sock != null) {
-  //       address = socketGetLocalAddress(sock);
-  //     }
-  //   }
-  //   return address;
-  // }
-
-  @override
-  String toString() {
-    Type clazz = runtimeType;
-    return '<$clazz remote="$remoteAddress" local="$localAddress">\n\t'
-        '$_impl\n</$clazz>';
-  }
-
-  @override
   Future<NetworkChannel?> bind(SocketAddress local) async {
-    // if (local == null) {
-    //   local = localAddress;
-    //   if (local == null) {
-    //     assert(false, 'local address not set');
-    //     return null;
-    //   }
-    // }
     C? sock = socket;
-    if (sock == null) {
-      throw SocketException('socket closed');
+    if (sock == null || sock.isClosed) {
+      throw SocketException('socket closed: $sock');
+    } else if (socketIsBound(sock)) {
+      SocketAddress? address = socketGetLocalAddress(sock);
+      throw SocketException('socket already bound to: $address');
     }
-    // _closed = false;
-    _blocking = socketIsBlocking(sock);
     NetworkChannel nc = sock as NetworkChannel;
     bool ok = await socketBind(nc, local);
     assert(ok, 'failed to bind socket: $local');
     localAddress = local;
-    _bound = true;
     return nc;
   }
 
   @override
   Future<NetworkChannel?> connect(SocketAddress remote) async {
-    // if (remote == null) {
-    //   remote = remoteAddress;
-    //   if (remote == null) {
-    //     assert(false, 'remote address not set');
-    //     return null;
-    //   }
-    // }
     C? sock = socket;
-    if (sock == null) {
-      throw SocketException('socket closed');
+    if (sock == null || sock.isClosed) {
+      throw SocketException('socket closed: $sock');
+    } else if (socketIsConnected(sock)) {
+      SocketAddress? address = socketGetRemoteAddress(sock);
+      throw SocketException('socket already connected to: $address');
     }
-    // _closed = true;
-    _blocking = socketIsBlocking(sock);
     NetworkChannel nc = sock as NetworkChannel;
     bool ok = await socketConnect(nc, remote);
     assert(ok, 'failed to connect socket: $remote');
     remoteAddress = remote;
-    _connected = true;
     return nc;
   }
 
   @override
   Future<ByteChannel?> disconnect() async {
-    // 1. clear inner socket
-    C? sock = _impl;
-    _impl = null;
-    // 2. refresh flags
-    refreshFlags();
-    // 3. close connected socket
-    if (sock != null && socketIsConnected(sock)) {
-      bool ok = await socketDisconnect(sock);
-      assert(ok, 'failed to disconnect socket: $sock');
+    // 1. clear inner channel
+    C? sock = _sock;
+    _sock = null;
+    // 2. close old channel
+    if (sock != null ) {
+      /*await */socketDisconnect(sock);
     }
     return sock is ByteChannel ? sock as ByteChannel : null;
   }
 
   @override
-  Future<void> close() async {
-    // close inner socket and refresh flags
-    await setSocket(null);
-  }
+  Future<void> close() async => await disconnect();
+
+  //
+  //  Reading, Writing
+  //
 
   @override
   Future<Uint8List?> read(int maxLen) async {

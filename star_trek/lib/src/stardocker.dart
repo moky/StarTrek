@@ -39,31 +39,22 @@ import 'type/pair.dart';
 import 'dock.dart';
 
 
+/// Base Docker
 abstract class StarDocker extends AddressPairObject implements Docker {
   StarDocker(Connection conn) : super(remote: conn.remoteAddress, local: conn.localAddress) {
-    _connectionRef = WeakReference(conn);
-    _delegateRef = null;
+    _conn = conn;
     _dock = createDock();
-    // remaining data to be sent
-    _lastOutgo = null;
-    _lastFragments = [];
   }
 
-  WeakReference<Connection>? _connectionRef;
   WeakReference<DockerDelegate>? _delegateRef;
+
+  Connection? _conn;
 
   Dock? _dock;
 
   // remaining data to be sent
   Departure? _lastOutgo;
-  late List<Uint8List> _lastFragments;
-
-  // protected
-  void finalize() {
-    // make sure the relative connection is closed
-    setConnection(null);
-    _dock = null;
-  }
+  List<Uint8List> _lastFragments = [];
 
   // protected
   Dock createDock() => LockedDock();  // override for user-customized dock
@@ -74,54 +65,16 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       _delegateRef = keeper == null ? null : WeakReference(keeper);
 
   // protected
-  Connection? get connection => getConnection();
-  // protected
-  Connection? getConnection() => _connectionRef?.target;
-  // protected
-  Future<void> setConnection(Connection? conn) async {
-    // 1. replace with new connection
-    Connection? old = getConnection();
-    _connectionRef = conn == null ? null : WeakReference(conn);
-    // 2. close old connection
-    if (old == null || identical(old, conn)) {} else {
-      if (old.isClosed) {} else {
-        await old.close();
-      }
-    }
-  }
+  Connection? get connection => _conn;
 
   @override
-  bool get isClosed => getConnection()?.isClosed != false;
+  bool get isClosed => _conn?.isClosed != false;
 
   @override
-  bool get isAlive => getConnection()?.isAlive == true;
+  bool get isAlive => _conn?.isAlive == true;
 
   @override
-  DockerStatus get status => DockerStatus.getStatus(getConnection()?.state);
-
-  // @override
-  // SocketAddress? get remoteAddress {
-  //   SocketAddress? address = super.remoteAddress;
-  //   if (address == null) {
-  //     var conn = getConnection();
-  //     if (conn != null) {
-  //       address = conn.remoteAddress;
-  //     }
-  //   }
-  //   return address;
-  // }
-  //
-  // @override
-  // SocketAddress? get localAddress {
-  //   SocketAddress? address = super.localAddress;
-  //   if (address == null) {
-  //     var conn = getConnection();
-  //     if (conn != null) {
-  //       address = conn.localAddress;
-  //     }
-  //   }
-  //   return address;
-  // }
+  DockerStatus get status => DockerStatus.getStatus(_conn?.state);
 
   @override
   String toString() {
@@ -207,7 +160,14 @@ abstract class StarDocker extends AddressPairObject implements Docker {
 
   @override
   Future<void> close() async {
-    setConnection(null);
+    // 1. clear inner connection
+    Connection? old = _conn;
+    _conn = null;
+    // 2. close old connection
+    if (old != null) {
+      await old.close();
+    }
+    // 3. clear inner dock
     _dock = null;
   }
 

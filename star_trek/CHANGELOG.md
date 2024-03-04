@@ -1,3 +1,8 @@
+## 0.3.1
+
+- Weak Value Pair Map.
+- Start connection with hub.
+
 ## 0.3.0
 
 - Active Connection.

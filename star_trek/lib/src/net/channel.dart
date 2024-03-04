@@ -109,7 +109,7 @@ abstract interface class Channel implements ByteChannel {
 ///
 
 
-SocketAddress? socketGetLocalAddress(SelectableChannel sock) {
+SocketAddress? socketGetLocalAddress(SelectableChannel? sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.localAddress;
@@ -122,7 +122,7 @@ SocketAddress? socketGetLocalAddress(SelectableChannel sock) {
   }
 }
 
-SocketAddress? socketGetRemoteAddress(SelectableChannel sock) {
+SocketAddress? socketGetRemoteAddress(SelectableChannel? sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.remoteAddress;
@@ -136,11 +136,15 @@ SocketAddress? socketGetRemoteAddress(SelectableChannel sock) {
 }
 
 
-bool socketIsBlocking(SelectableChannel sock) {
+bool socketIsBlocking(SelectableChannel? sock) {
+  if (sock == null) {
+    assert(false, 'socket empty');
+    return false;
+  }
   return sock.isBlocking;
 }
 
-bool socketIsConnected(SelectableChannel sock) {
+bool socketIsConnected(SelectableChannel? sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.isConnected;
@@ -153,7 +157,7 @@ bool socketIsConnected(SelectableChannel sock) {
   }
 }
 
-bool socketIsBound(SelectableChannel sock) {
+bool socketIsBound(SelectableChannel? sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.isBound;
@@ -166,7 +170,11 @@ bool socketIsBound(SelectableChannel sock) {
   }
 }
 
-bool socketIsClosed(SelectableChannel sock) {
+bool socketIsClosed(SelectableChannel? sock) {
+  if (sock == null) {
+    assert(false, 'socket empty');
+    return true;
+  }
   return sock.isClosed;
 }
 
@@ -204,19 +212,23 @@ Future<bool> socketConnect(NetworkChannel sock, SocketAddress remote) async {
   }
 }
 
+///  Close socket
 Future<bool> socketDisconnect(SelectableChannel sock) async {
   try {
     if (sock is SocketChannel) {
       // TCP
-      await sock.close();
-      return sock.isClosed;
+      if (sock.isClosed) {
+        // already closed
+        return true;
+      } else {
+        await sock.close();
+        return sock.isClosed;
+      }
     } else if (sock is DatagramChannel) {
       // UDP
-      if (!sock.isConnected) {
-        // not connect yet
-        return true;
+      if (sock.isConnected) {
+        await sock.disconnect();
       }
-      await sock.disconnect();
       return !sock.isConnected;
     } else {
       assert(false, 'unknown socket channel: $sock');
@@ -224,22 +236,6 @@ Future<bool> socketDisconnect(SelectableChannel sock) async {
     }
   } on IOException catch (e) {
     print('[Socket] cannot disconnect socket: $sock, $e');
-    return false;
-  }
-}
-
-/// safely close socket
-Future<bool> socketShutdown(SelectableChannel sock) async {
-  try {
-    if (sock.isClosed) {
-      // already closed
-      return true;
-    } else {
-      await sock.close();
-      return sock.isClosed;
-    }
-  } on IOException catch (e) {
-    print('[Socket] cannot close socket: $sock, $e');
     return false;
   }
 }

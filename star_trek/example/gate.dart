@@ -24,7 +24,7 @@ abstract class BaseGate<H extends Hub>
       super.setDocker(docker, remote: remote);
 
   @override
-  void removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
+  Docker? removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
       super.removeDocker(docker, remote: remote);
 
   // @override

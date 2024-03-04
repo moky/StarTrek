@@ -33,7 +33,7 @@ import 'package:object_key/object_key.dart';
 import '../nio/address.dart';
 
 
-abstract interface class KeyPairMap<K, V> {
+abstract interface class PairMap<K, V> {
 
   ///  Get all mapped values
   ///
@@ -65,20 +65,17 @@ abstract interface class KeyPairMap<K, V> {
 }
 
 
-abstract class WeakKeyPairMap<K, V> implements KeyPairMap<K, V> {
-  WeakKeyPairMap(K any) {
-    _defaultKey = any;
-    _map = {};
-  }
+abstract class AbstractPairMap<K, V> implements PairMap<K, V> {
+  AbstractPairMap(this._defaultKey);
 
-  late final K _defaultKey;
+  final K _defaultKey;
 
   // because the remote address will always different to local address, so
   // we shared the same map for all directions here:
   //    mapping: (remote, local) => Connection
   //    mapping: (remote, null) => Connection
   //    mapping: (local, null) => Connection
-  late final Map<K, Map<K, V>> _map;
+  final Map<K, Map<K, V>> _map = {};
 
   @override
   V? getItem({K? remote, K? local}) {
@@ -179,12 +176,11 @@ abstract class WeakKeyPairMap<K, V> implements KeyPairMap<K, V> {
 }
 
 
-class HashKeyPairMap<K, V> extends WeakKeyPairMap<K, V> {
-  HashKeyPairMap(super.any) {
-    _values = {};
-  }
+class WeakValuePairMap<K, V extends Object>
+    extends AbstractPairMap<K, V> {
+  WeakValuePairMap(super.any);
 
-  late final Set<V> _values;
+  final Set<V> _values = WeakSet();
 
   @override
   Iterable<V> get items => Set<V>.from(_values);  // copy
@@ -219,7 +215,8 @@ class HashKeyPairMap<K, V> extends WeakKeyPairMap<K, V> {
 }
 
 
-class AddressPairMap<V> extends HashKeyPairMap<SocketAddress, V> {
+class AddressPairMap<V extends Object>
+    extends WeakValuePairMap<SocketAddress, V> {
   AddressPairMap() : super(anyAddress);
 
   static final SocketAddress anyAddress = InetSocketAddress('0.0.0.0', 0);

@@ -55,7 +55,10 @@ class ConnectionPool extends AddressPairMap<Connection> {
   @override
   Connection? removeItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
     Connection? cached = super.removeItem(value, remote: remote, local: local);
-    if (cached == null || cached.isClosed) {} else {
+    if (value == null) {} else {
+      /*await */value.close();
+    }
+    if (cached == null || identical(cached, value)) {} else {
       /*await */cached.close();
     }
     return cached;
@@ -65,8 +68,8 @@ class ConnectionPool extends AddressPairMap<Connection> {
 
 
 abstract class BaseHub implements Hub {
-  BaseHub(ConnectionDelegate delegate) {
-    _delegateRef = WeakReference(delegate);
+  BaseHub(ConnectionDelegate gate) {
+    _delegateRef = WeakReference(gate);
     _connectionPool = createConnectionPool();
   }
 
@@ -106,7 +109,7 @@ abstract class BaseHub implements Hub {
   /// @param local  - local address
   /// @param channel - socket channel
   // protected
-  void removeChannel(Channel? channel, {SocketAddress? remote, SocketAddress? local});
+  Channel? removeChannel(Channel? channel, {SocketAddress? remote, SocketAddress? local});
 
   //
   //  Connection
@@ -114,12 +117,11 @@ abstract class BaseHub implements Hub {
 
   ///  Create connection with sock channel & addresses
   ///
-  /// @param sock   - socket channel
   /// @param remote - remote address
   /// @param local  - local address
   /// @return null on channel not exists
   // protected
-  Connection? createConnection(Channel? channel, {required SocketAddress remote, SocketAddress? local});
+  Connection? createConnection({required SocketAddress remote, SocketAddress? local});
 
   // protected
   Iterable<Connection> get allConnections => _connectionPool.items;
@@ -133,33 +135,20 @@ abstract class BaseHub implements Hub {
       _connectionPool.setItem(conn, remote: remote, local: local);
 
   // protected
-  void removeConnection(Connection? conn, {required SocketAddress remote, SocketAddress? local}) =>
+  Connection? removeConnection(Connection? conn, {required SocketAddress remote, SocketAddress? local}) =>
       _connectionPool.removeItem(conn, remote: remote, local: local);
 
   @override
   Future<Connection?> connect({required SocketAddress remote, SocketAddress? local}) async {
     Connection? conn = getConnection(remote: remote, local: local);
-    if (conn != null) {
-      // check local address
-      if (local == null) {
-        return conn;
+    if (conn == null) {
+      conn = createConnection(remote: remote, local: local);
+      if (conn != null) {
+        // NOTICE: local address in the connection may be set to None
+        setConnection(conn, remote: conn.remoteAddress!, local: conn.localAddress);
+        // try to open channel with direction (remote, local)
+        /*await */conn.start(this);
       }
-      SocketAddress? address = conn.localAddress;
-      if (address == null || address == local) {
-        return conn;
-      }
-      // local address not matched? ignore this connection
-    }
-    // try to open channel with direction (remote, local)
-    Channel? sock = await open(remote: remote, local: local);
-    // if (sock == null || sock.isClosed) {
-    //   return null;
-    // }
-    // create with channel
-    conn = createConnection(sock, remote: remote, local: local);
-    if (conn != null) {
-      // NOTICE: local address in the connection may be set to None
-      setConnection(conn, remote: conn.remoteAddress!, local: conn.localAddress);
     }
     return conn;
   }

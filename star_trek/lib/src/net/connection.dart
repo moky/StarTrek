@@ -33,6 +33,8 @@ import 'dart:typed_data';
 import '../fsm/ticker.dart';
 import '../nio/address.dart';
 import '../nio/exception.dart';
+
+import 'hub.dart';
 import 'state.dart';
 
 
@@ -65,6 +67,9 @@ abstract interface class Connection implements Ticker {
 
   ///  Close the connection
   Future<void> close();
+
+  ///  Get channel from hub
+  Future<void> start(Hub hub);
 
 }
 

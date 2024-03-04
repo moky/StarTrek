@@ -14,7 +14,6 @@ export 'src/port/docker.dart';
 export 'src/port/gate.dart';
 
 export 'src/socket/channel.dart';
-export 'src/socket/checker.dart';
 export 'src/socket/connection.dart';
 export 'src/socket/hub.dart';
 

@@ -246,7 +246,11 @@ class ConnectionStateTransitionBuilder {
       ConnectionState? current = ctx.currentState;
       DateTime? enter = current?.enterTime;
       DateTime? last = timed.lastReceivedTime;
-      return enter != null && last != null && enter.isBefore(last);
+      if (enter == null) {
+        assert(false, 'should not happen');
+        return true;
+      }
+      return last != null && enter.isBefore(last);
     },
   );
 

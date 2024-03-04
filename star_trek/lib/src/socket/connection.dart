@@ -43,14 +43,13 @@ import '../type/pair.dart';
 
 class BaseConnection extends AddressPairObject
     implements Connection, TimedConnection, ConnectionStateDelegate {
-  BaseConnection(Channel? sock, {super.remote, super.local}) {
-    _channelRef = sock == null ? null : WeakReference(sock);
-  }
+  BaseConnection({super.remote, super.local});
 
   static int kExpires = 16 * 1000;  // 16 seconds
 
-  WeakReference<Channel>? _channelRef;
   WeakReference<ConnectionDelegate>? _delegateRef;
+
+  Channel? _channel;
 
   // active times
   DateTime? _lastSentTime;
@@ -59,27 +58,16 @@ class BaseConnection extends AddressPairObject
   // connection state machine
   ConnectionStateMachine? _fsm;
 
-  // protected
-  void finalize() {
-    // make sure the state machine is stopped
-    setStateMachine(null);
-    // make sure the relative channel is closed
-    setChannel(null);
-  }
+  Channel? get channel => _channel;
 
-  Future<Channel?> get channel async => getChannel();
-  // protected
-  Channel? getChannel() => _channelRef?.target;
   // protected
   Future<void> setChannel(Channel? sock) async {
     // 1. replace with new channel
-    Channel? old = getChannel();
-    _channelRef = sock == null ? null : WeakReference(sock);
+    Channel? old = _channel;
+    _channel = sock;
     // 2. close old channel
     if (old == null || identical(old, sock)) {} else {
-      if (old.isConnected) {
-        await old.disconnect();
-      }
+      await old.close();
     }
   }
 
@@ -89,7 +77,7 @@ class BaseConnection extends AddressPairObject
       _delegateRef = gate == null ? null : WeakReference(gate);
 
   // protected
-  ConnectionStateMachine? getStateMachine() => _fsm;
+  ConnectionStateMachine? get stateMachine => _fsm;
   // protected
   Future<void> setStateMachine(ConnectionStateMachine? fsm) async {
     // 1. replace with new machine
@@ -108,47 +96,23 @@ class BaseConnection extends AddressPairObject
   }
 
   @override
-  bool get isClosed => getChannel()?.isClosed != false;
+  bool get isClosed => _channel?.isClosed != false;
 
   @override
-  bool get isBound => getChannel()?.isBound == true;
+  bool get isBound => _channel?.isBound == true;
 
   @override
-  bool get isConnected => getChannel()?.isConnected == true;
+  bool get isConnected => _channel?.isConnected == true;
 
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
-  // bool get isAlive => getChannel()?.isAlive == true;
-
-  // @override
-  // SocketAddress? get remoteAddress {
-  //   SocketAddress? address = super.remoteAddress;
-  //   if (address == null) {
-  //     var sock = getChannel();
-  //     if (sock != null) {
-  //       address = sock.remoteAddress;
-  //     }
-  //   }
-  //   return address;
-  // }
-  //
-  // @override
-  // SocketAddress? get localAddress {
-  //   SocketAddress? address = super.localAddress;
-  //   if (address == null) {
-  //     var sock = getChannel();
-  //     if (sock != null) {
-  //       address = sock.localAddress;
-  //     }
-  //   }
-  //   return address;
-  // }
+  // bool get isAlive => _channel?.isAlive == true;
 
   @override
   String toString() {
     Type clazz = runtimeType;
     return '<$clazz remote="$remoteAddress" local="$localAddress">\n\t'
-        '${getChannel()}\n</$clazz>';
+        '$channel\n</$clazz>';
   }
 
   @override
@@ -159,15 +123,24 @@ class BaseConnection extends AddressPairObject
     setChannel(null);
   }
 
-  Future<void> start() async {
-    ConnectionStateMachine machine = createStateMachine();
-    await machine.start();
-    setStateMachine(machine);
+  @override
+  Future<void> start(Hub hub) async {
+    await startMachine();
+    await openChannel(hub);
   }
 
-  Future<void> stop() async {
-    setStateMachine(null);
-    setChannel(null);
+  // protected
+  Future<void> startMachine() async {
+    ConnectionStateMachine machine = createStateMachine();
+    await setStateMachine(machine);
+    await machine.start();
+  }
+
+  // protected
+  Future<void> openChannel(Hub hub) async {
+    Channel? sock = await hub.open(remote: remoteAddress, local: localAddress);
+    assert(sock != null, 'failed to open channel: remote=$remoteAddress, local=$localAddress');
+    await setChannel(sock);
   }
 
   //
@@ -182,7 +155,7 @@ class BaseConnection extends AddressPairObject
 
   // protected
   Future<int> doSend(Uint8List src, SocketAddress? destination) async {
-    Channel? sock = await channel;
+    Channel? sock = _channel;
     if (sock == null || !sock.isAlive) {
       assert(false, 'socket channel lost: $sock');
       return -1;
@@ -228,11 +201,11 @@ class BaseConnection extends AddressPairObject
   //
 
   @override
-  ConnectionState? get state => getStateMachine()?.currentState;
+  ConnectionState? get state => stateMachine?.currentState;
 
   @override
   Future<void> tick(DateTime now, int elapsed) async =>
-      await getStateMachine()?.tick(now, elapsed);
+      await stateMachine?.tick(now, elapsed);
 
   //
   //  Timed
@@ -310,71 +283,58 @@ class BaseConnection extends AddressPairObject
 
 /// Active connection for client
 class ActiveConnection extends BaseConnection {
-  ActiveConnection(Hub hub, super.sock, {super.remote, super.local}) {
-    _hubRef = WeakReference(hub);
-  }
+  ActiveConnection({super.remote, super.local});
 
-  late final WeakReference<Hub> _hubRef;
-
-  // private
-  Hub? get hub => _hubRef.target;
-
-  bool _running = false;
+  WeakReference<Hub>? _hubRef;
 
   @override
-  Future<void> start() async {
-    await super.start();
-    // start a background thread for calling 'run()'
-    await _forceStop();
-    _running = true;
+  bool get isClosed => stateMachine == null;
+
+  @override
+  Future<void> start(Hub hub) async {
+    _hubRef = WeakReference(hub);
+    await startMachine();
     /*await */run();
   }
 
-  Future<void> _forceStop() async {
-    if (_running) {
-      _running = false;
-      await Runner.sleep(milliseconds: 2048);
-    }
-  }
-
-  @override
-  Future<void> stop() async {
-    await _forceStop();
-    await super.stop();
-  }
-
-  @override
-  bool get isClosed => getStateMachine() == null;
-
-  // protected
   Future<void> run() async {
-    int lastTime = DateTime.now().millisecondsSinceEpoch;
+    int expired = 0;
+    int lastTime = 0;
     int interval = 16000;
     int now;
     Channel? sock;
     while (!isClosed) {
       await Runner.sleep(milliseconds: 1000);
-      // check time interval
+      //
+      //  1. check time interval
+      //
       now = DateTime.now().millisecondsSinceEpoch;
       if (now < lastTime + interval) {
         continue;
       }
       lastTime = now;
-      if (interval < 256) {
+      if (interval < 256000) {
         interval <<= 1;
       }
-      // check socket channel
-      sock = getChannel();
+      //
+      //  2. check socket channel
+      //
+      sock = channel;
       if (sock == null || sock.isClosed) {
         // get new socket channel via hub
-        sock = await hub?.open(remote: remoteAddress, local: localAddress);
-        if (sock != null) {
-          setChannel(sock);
+        Hub? hub = _hubRef?.target;
+        if (hub == null) {
+          assert(false, 'hub lost');
+          break;
         }
+        await openChannel(hub);
+        // connect timeout after 2 minutes
+        expired = now + 128 * 1000;
       } else if (sock.isAlive) {
         // socket channel is normal
-        interval = 16;
-      } else {
+        interval = 16000;
+      } else if (0 < expired && expired < now) {
+        // connect timeout
         await sock.close();
       }
     }

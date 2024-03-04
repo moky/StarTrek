@@ -54,7 +54,10 @@ class DockerPool extends AddressPairMap<Docker> {
   @override
   Docker? removeItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
     Docker? cached = super.removeItem(value, remote: remote, local: local);
-    if (cached == null || cached.isClosed) {} else {
+    if (value == null) {} else {
+      /*await */value.close();
+    }
+    if (cached == null || identical(cached, value)) {} else {
       /*await */cached.close();
     }
     return cached;
@@ -119,7 +122,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
       _dockerPool.setItem(docker, remote: remote, local: local);
 
   // protected
-  void removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
+  Docker? removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
       _dockerPool.removeItem(docker, remote: remote, local: local);
 
   //

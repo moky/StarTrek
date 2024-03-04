@@ -58,6 +58,15 @@ class BaseConnection extends AddressPairObject
   // connection state machine
   ConnectionStateMachine? _fsm;
 
+  // delegate for handling connection events
+  ConnectionDelegate? get delegate => _delegateRef?.target;
+  set delegate(ConnectionDelegate? gate) =>
+      _delegateRef = gate == null ? null : WeakReference(gate);
+
+  //
+  //  Channel
+  //
+
   Channel? get channel => _channel;
 
   // protected
@@ -71,10 +80,9 @@ class BaseConnection extends AddressPairObject
     }
   }
 
-  // delegate for handling connection events
-  ConnectionDelegate? get delegate => _delegateRef?.target;
-  set delegate(ConnectionDelegate? gate) =>
-      _delegateRef = gate == null ? null : WeakReference(gate);
+  //
+  //  State Machine
+  //
 
   // protected
   ConnectionStateMachine? get stateMachine => _fsm;
@@ -94,6 +102,10 @@ class BaseConnection extends AddressPairObject
     machine.delegate = this;
     return machine;
   }
+
+  //
+  //  Flags
+  //
 
   @override
   bool get isClosed => _channel?.isClosed != false;
@@ -125,8 +137,10 @@ class BaseConnection extends AddressPairObject
 
   @override
   Future<void> start(Hub hub) async {
-    await startMachine();
+    // 1. get channel from hub
     await openChannel(hub);
+    // 2. start state machine
+    await startMachine();
   }
 
   // protected
@@ -293,7 +307,9 @@ class ActiveConnection extends BaseConnection {
   @override
   Future<void> start(Hub hub) async {
     _hubRef = WeakReference(hub);
+    // 1. start state machine
     await startMachine();
+    // 2. start a background thread to check channel
     /*await */run();
   }
 

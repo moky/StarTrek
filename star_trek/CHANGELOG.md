@@ -1,3 +1,7 @@
+## 0.3.2
+
+- Bind a connection to a docker.
+
 ## 0.3.1
 
 - Weak Value Pair Map.

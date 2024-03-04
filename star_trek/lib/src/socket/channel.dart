@@ -130,8 +130,7 @@ abstract class ChannelWriter<C extends SelectableChannel>
 
 abstract class BaseChannel<C extends SelectableChannel>
     extends AddressPairObject implements Channel {
-  BaseChannel(C sock, {super.remote, super.local}) {
-    _sock = sock;
+  BaseChannel(this.socket, {super.remote, super.local}) {
     // create socket reader & writer
     reader = createReader();
     writer = createWriter();
@@ -145,21 +144,23 @@ abstract class BaseChannel<C extends SelectableChannel>
   late final SocketWriter writer;
 
   // inner socket
-  C? _sock;
+  final C socket;
 
-  C? get socket => _sock;
-
-  @override
-  bool get isBlocking => socketIsBlocking(_sock);
-
-  @override
-  bool get isClosed => socketIsClosed(_sock);
+  //
+  //  Flags
+  //
 
   @override
-  bool get isConnected => socketIsConnected(_sock);
+  bool get isBlocking => socketIsBlocking(socket);
 
   @override
-  bool get isBound => socketIsBound(_sock);
+  bool get isClosed => socketIsClosed(socket);
+
+  @override
+  bool get isConnected => socketIsConnected(socket);
+
+  @override
+  bool get isBound => socketIsBound(socket);
 
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
@@ -173,25 +174,19 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   SelectableChannel? configureBlocking(bool block) {
-    C? sock = socket;
-    if (sock == null) {
-      throw SocketException('socket closed');
-    } else {
-      sock.configureBlocking(block);
-    }
-    return sock;
+    socket.configureBlocking(block);
+    return socket;
   }
 
   @override
   Future<NetworkChannel?> bind(SocketAddress local) async {
-    C? sock = socket;
-    if (sock == null || sock.isClosed) {
-      throw SocketException('socket closed: $sock');
-    } else if (socketIsBound(sock)) {
-      SocketAddress? address = socketGetLocalAddress(sock);
+    if (socket.isClosed) {
+      throw SocketException('socket closed: $socket');
+    } else if (socketIsBound(socket)) {
+      SocketAddress? address = socketGetLocalAddress(socket);
       throw SocketException('socket already bound to: $address');
     }
-    NetworkChannel nc = sock as NetworkChannel;
+    NetworkChannel nc = socket as NetworkChannel;
     bool ok = await socketBind(nc, local);
     assert(ok, 'failed to bind socket: $local');
     localAddress = local;
@@ -200,14 +195,13 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   Future<NetworkChannel?> connect(SocketAddress remote) async {
-    C? sock = socket;
-    if (sock == null || sock.isClosed) {
-      throw SocketException('socket closed: $sock');
-    } else if (socketIsConnected(sock)) {
-      SocketAddress? address = socketGetRemoteAddress(sock);
+    if (socket.isClosed) {
+      throw SocketException('socket closed: $socket');
+    } else if (socketIsConnected(socket)) {
+      SocketAddress? address = socketGetRemoteAddress(socket);
       throw SocketException('socket already connected to: $address');
     }
-    NetworkChannel nc = sock as NetworkChannel;
+    NetworkChannel nc = socket as NetworkChannel;
     bool ok = await socketConnect(nc, remote);
     assert(ok, 'failed to connect socket: $remote');
     remoteAddress = remote;
@@ -216,14 +210,8 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   Future<ByteChannel?> disconnect() async {
-    // 1. clear inner channel
-    C? sock = _sock;
-    _sock = null;
-    // 2. close old channel
-    if (sock != null ) {
-      /*await */socketDisconnect(sock);
-    }
-    return sock is ByteChannel ? sock as ByteChannel : null;
+    await socketDisconnect(socket);
+    return socket is ByteChannel ? socket as ByteChannel : null;
   }
 
   @override

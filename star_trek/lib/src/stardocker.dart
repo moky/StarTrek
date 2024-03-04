@@ -41,20 +41,20 @@ import 'dock.dart';
 
 /// Base Docker
 abstract class StarDocker extends AddressPairObject implements Docker {
-  StarDocker(Connection conn) : super(remote: conn.remoteAddress, local: conn.localAddress) {
-    _conn = conn;
+  StarDocker(Connection conn)
+      : super(remote: conn.remoteAddress, local: conn.localAddress) {
+    connection = conn;
     _dock = createDock();
   }
 
-  WeakReference<DockerDelegate>? _delegateRef;
-
-  Connection? _conn;
-
-  Dock? _dock;
+  late final Connection connection;
+  late final Dock _dock;
 
   // remaining data to be sent
   Departure? _lastOutgo;
   List<Uint8List> _lastFragments = [];
+
+  WeakReference<DockerDelegate>? _delegateRef;
 
   // protected
   Dock createDock() => LockedDock();  // override for user-customized dock
@@ -64,17 +64,18 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   set delegate(DockerDelegate? keeper) =>
       _delegateRef = keeper == null ? null : WeakReference(keeper);
 
-  // protected
-  Connection? get connection => _conn;
+  //
+  //  Flags
+  //
 
   @override
-  bool get isClosed => _conn?.isClosed != false;
+  bool get isClosed => connection.isClosed != false;
 
   @override
-  bool get isAlive => _conn?.isAlive == true;
+  bool get isAlive => connection.isAlive == true;
 
   @override
-  DockerStatus get status => DockerStatus.getStatus(_conn?.state);
+  DockerStatus get status => DockerStatus.getStatus(connection.state);
 
   @override
   String toString() {
@@ -84,8 +85,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   }
 
   @override
-  Future<bool> sendShip(Departure ship) async =>
-      _dock?.addDeparture(ship) ?? false;
+  Future<bool> sendShip(Departure ship) async => _dock.addDeparture(ship);
 
   @override
   Future<void> processReceived(Uint8List data) async {
@@ -129,7 +129,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   // protected
   Future<Departure?> checkResponse(Arrival income) async {
     // check response for linked departure ship (same SN)
-    Departure? linked = _dock?.checkResponse(income);
+    Departure? linked = _dock.checkResponse(income);
     if (linked == null) {
       // linked departure task not found, or not finished yet
       return null;
@@ -145,7 +145,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   /// @return ship carrying completed data package
   // protected
   Arrival? assembleArrival(Arrival income) =>
-      _dock?.assembleArrival(income);
+      _dock.assembleArrival(income);
 
   ///  Get outgo ship from waiting queue
   ///
@@ -153,23 +153,13 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   /// @return next new or timeout task
   // protected
   Departure? getNextDeparture(DateTime now) =>
-      _dock?.getNextDeparture(now);
+      _dock.getNextDeparture(now);
 
   @override
-  int purge([DateTime? now]) => _dock?.purge(now) ?? -1;
+  int purge([DateTime? now]) => _dock.purge(now);
 
   @override
-  Future<void> close() async {
-    // 1. clear inner connection
-    Connection? old = _conn;
-    _conn = null;
-    // 2. close old connection
-    if (old != null) {
-      await old.close();
-    }
-    // 3. clear inner dock
-    _dock = null;
-  }
+  Future<void> close() async => await connection.close();
 
   //
   //  Processor
@@ -178,8 +168,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   @override
   Future<bool> process() async {
     // 1. get connection which is ready for sending data
-    Connection? conn = connection;
-    if (conn == null || !conn.isAlive) {
+    if (!connection.isAlive) {
       // connection not ready now
       return false;
     }
@@ -217,7 +206,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
     int index = 0, sent = 0;
     try {
       for (Uint8List fra in fragments) {
-        sent = await conn.sendData(fra);
+        sent = await connection.sendData(fra);
         if (sent < fra.length) {
           // buffer overflow?
           break;

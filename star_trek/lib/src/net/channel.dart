@@ -109,7 +109,7 @@ abstract interface class Channel implements ByteChannel {
 ///
 
 
-SocketAddress? socketGetLocalAddress(SelectableChannel? sock) {
+SocketAddress? socketGetLocalAddress(SelectableChannel sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.localAddress;
@@ -122,7 +122,7 @@ SocketAddress? socketGetLocalAddress(SelectableChannel? sock) {
   }
 }
 
-SocketAddress? socketGetRemoteAddress(SelectableChannel? sock) {
+SocketAddress? socketGetRemoteAddress(SelectableChannel sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.remoteAddress;
@@ -136,15 +136,11 @@ SocketAddress? socketGetRemoteAddress(SelectableChannel? sock) {
 }
 
 
-bool socketIsBlocking(SelectableChannel? sock) {
-  if (sock == null) {
-    assert(false, 'socket empty');
-    return false;
-  }
+bool socketIsBlocking(SelectableChannel sock) {
   return sock.isBlocking;
 }
 
-bool socketIsConnected(SelectableChannel? sock) {
+bool socketIsConnected(SelectableChannel sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.isConnected;
@@ -157,7 +153,7 @@ bool socketIsConnected(SelectableChannel? sock) {
   }
 }
 
-bool socketIsBound(SelectableChannel? sock) {
+bool socketIsBound(SelectableChannel sock) {
   if (sock is SocketChannel) {
     // TCP
     return sock.isBound;
@@ -170,11 +166,7 @@ bool socketIsBound(SelectableChannel? sock) {
   }
 }
 
-bool socketIsClosed(SelectableChannel? sock) {
-  if (sock == null) {
-    assert(false, 'socket empty');
-    return true;
-  }
+bool socketIsClosed(SelectableChannel sock) {
   return sock.isClosed;
 }
 

@@ -43,12 +43,16 @@ import 'type/mapping.dart';
 class DockerPool extends AddressPairMap<Docker> {
 
   @override
-  void setItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
+  Docker? setItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
     Docker? old = getItem(remote: remote, local: local);
     if (old == null || identical(old, value)) {} else {
       removeItem(old, remote: remote, local: local);
     }
-    super.setItem(value, remote: remote, local: local);
+    old = super.setItem(value, remote: remote, local: local);
+    if (old == null || identical(old, value)) {} else {
+      /*await */old.close();
+    }
+    return old;
   }
 
   @override
@@ -131,7 +135,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
       _dockerPool.getItem(remote: remote, local: local);
 
   // protected
-  void setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
+  Docker? setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
       _dockerPool.setItem(docker, remote: remote, local: local);
 
   //

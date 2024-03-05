@@ -52,7 +52,8 @@ abstract interface class PairMap<K, V> {
   /// @param remote - remote address
   /// @param local  - local address
   /// @param value  - mapping value
-  void setItem(V? value, {K? remote, K? local});
+  /// @return replaced value
+  V? setItem(V? value, {K? remote, K? local});
 
   ///  Remove mapping by key pair (remote, local)
   ///
@@ -119,7 +120,7 @@ abstract class AbstractPairMap<K, V> implements PairMap<K, V> {
   }
 
   @override
-  void setItem(V? value, {K? remote, K? local}) {
+  V? setItem(V? value, {K? remote, K? local}) {
     // create indexes with key pair (remote, local)
     K? key1, key2;
     if (remote == null) {
@@ -136,15 +137,18 @@ abstract class AbstractPairMap<K, V> implements PairMap<K, V> {
     Map<K, V>? table = _map[key1];
     if (table != null) {
       if (value == null) {
-        table.remove(key2);
+        return table.remove(key2);
       } else {
+        V? old = table[key2];
         table[key2!] = value;
+        return old;
       }
     } else if (value != null) {
       table = WeakValueMap();
       table[key2!] = value;
       _map[key1!] = table;
     }
+    return null;
   }
 
   @override
@@ -185,7 +189,7 @@ class HashPairMap<K, V> extends AbstractPairMap<K, V> {
   Iterable<V> get items => Set<V>.from(_values);  // copy
 
   @override
-  void setItem(V? value, {K? remote, K? local}) {
+  V? setItem(V? value, {K? remote, K? local}) {
     if (value != null) {
       // the caller may create different values with same pair (remote, local)
       // so here we should try to remove it first to make sure it's clean
@@ -194,7 +198,12 @@ class HashPairMap<K, V> extends AbstractPairMap<K, V> {
       _values.add(value);
     }
     // create indexes
-    super.setItem(value, remote: remote, local: local);
+    V? old = super.setItem(value, remote: remote, local: local);
+    // clear replaced value
+    if (old != null && old != value) {
+      _values.remove(old);
+    }
+    return old;
   }
 
   @override
@@ -205,7 +214,7 @@ class HashPairMap<K, V> extends AbstractPairMap<K, V> {
       _values.remove(old);
     }
     // clear cached value
-    if (value == null || identical(value, old)) {} else {
+    if (value != null && value != old) {
       _values.remove(value);
     }
     return old ?? value;

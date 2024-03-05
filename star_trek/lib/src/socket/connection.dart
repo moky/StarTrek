@@ -50,7 +50,7 @@ class BaseConnection extends AddressPairObject
   WeakReference<ConnectionDelegate>? _delegateRef;
 
   WeakReference<Channel>? _channelRef;
-  bool _closed = false;
+  bool? _closed;
 
   // active times
   DateTime? _lastSentTime;
@@ -115,7 +115,7 @@ class BaseConnection extends AddressPairObject
   //
 
   @override
-  bool get isClosed => channel?.isClosed ?? _closed;
+  bool get isClosed => _closed != null && channel?.isClosed != false;
 
   @override
   bool get isBound => channel?.isBound == true;
@@ -158,10 +158,14 @@ class BaseConnection extends AddressPairObject
   }
 
   // protected
-  Future<void> openChannel(Hub hub) async {
+  Future<Channel?> openChannel(Hub hub) async {
     Channel? sock = await hub.open(remote: remoteAddress, local: localAddress);
-    assert(sock != null, 'failed to open channel: remote=$remoteAddress, local=$localAddress');
-    await setChannel(sock);
+    if (sock == null) {
+      assert(false, 'failed to open channel: remote=$remoteAddress, local=$localAddress');
+    } else {
+      await setChannel(sock);
+    }
+    return sock;
   }
 
   //
@@ -225,8 +229,13 @@ class BaseConnection extends AddressPairObject
   ConnectionState? get state => stateMachine?.currentState;
 
   @override
-  Future<void> tick(DateTime now, int elapsed) async =>
-      await stateMachine?.tick(now, elapsed);
+  Future<void> tick(DateTime now, int elapsed) async {
+    if (_closed == null) {
+      // not initialized
+      return;
+    }
+    await stateMachine?.tick(now, elapsed);
+  }
 
   //
   //  Timed
@@ -350,9 +359,11 @@ class ActiveConnection extends BaseConnection {
           assert(false, 'hub lost');
           break;
         }
-        await openChannel(hub);
-        // connect timeout after 2 minutes
-        expired = now + 128 * 1000;
+        sock = await openChannel(hub);
+        if (sock != null) {
+          // connect timeout after 2 minutes
+          expired = now + 128 * 1000;
+        }
       } else if (sock.isAlive) {
         // socket channel is normal
         interval = 16000;

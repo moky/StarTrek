@@ -20,7 +20,7 @@ abstract class BaseGate<H extends Hub>
       super.getDocker(remote: remote);
 
   @override
-  void setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
+  Docker? setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
       super.setDocker(docker, remote: remote);
 
   @override

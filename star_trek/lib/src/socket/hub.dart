@@ -44,12 +44,16 @@ import '../type/mapping.dart';
 class ConnectionPool extends AddressPairMap<Connection> {
 
   @override
-  void setItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
+  Connection? setItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
     Connection? old = getItem(remote: remote, local: local);
     if (old == null || identical(old, value)) {} else {
       removeItem(old, remote: remote, local: local);
     }
-    super.setItem(value, remote: remote, local: local);
+    old = super.setItem(value, remote: remote, local: local);
+    if (old == null || identical(old, value)) {} else {
+      /*await */old.close();
+    }
+    return old;
   }
 
   @override
@@ -135,7 +139,7 @@ abstract class BaseHub implements Hub {
       _connectionPool.getItem(remote: remote, local: local);
 
   // protected
-  void setConnection(Connection conn, {required SocketAddress remote, SocketAddress? local}) =>
+  Connection? setConnection(Connection conn, {required SocketAddress remote, SocketAddress? local}) =>
       _connectionPool.setItem(conn, remote: remote, local: local);
 
   @override

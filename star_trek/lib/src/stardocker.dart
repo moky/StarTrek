@@ -48,7 +48,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   late final Dock _dock;
 
   WeakReference<Connection>? _connectionRef;
-  bool _closed = false;
+  bool? _closed;
 
   // remaining data to be sent
   Departure? _lastOutgo;
@@ -92,7 +92,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   //
 
   @override
-  bool get isClosed => connection?.isClosed ?? _closed;
+  bool get isClosed => _closed != null && connection?.isClosed != false;
 
   @override
   bool get isAlive => connection?.isAlive == true;

@@ -44,25 +44,25 @@ class DockerPool extends AddressPairMap<Docker> {
 
   @override
   Docker? setItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
-    Docker? old = getItem(remote: remote, local: local);
-    if (old == null || identical(old, value)) {} else {
-      removeItem(old, remote: remote, local: local);
+    // 1. remove cached item
+    Docker? cached = super.removeItem(value, remote: remote, local: local);
+    if (cached == null || identical(cached, value)) {} else {
+      /*await */cached.close();
     }
-    old = super.setItem(value, remote: remote, local: local);
-    if (old == null || identical(old, value)) {} else {
-      /*await */old.close();
-    }
-    return old;
+    // 2. set new item
+    Docker? old = super.setItem(value, remote: remote, local: local);
+    assert(old == null, 'should not happen');
+    return cached;
   }
 
   @override
   Docker? removeItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
     Docker? cached = super.removeItem(value, remote: remote, local: local);
-    if (value == null) {} else {
-      /*await */value.close();
-    }
     if (cached == null || identical(cached, value)) {} else {
       /*await */cached.close();
+    }
+    if (value == null) {} else {
+      /*await */value.close();
     }
     return cached;
   }
@@ -208,7 +208,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
         worker = createDocker([], remote: remote, local: local);
         setDocker(worker, remote: remote, local: local);
         // set connection for this docker
-        await worker.setConnection(connection);
+        await worker.assignConnection(connection);
       }
       // NOTICE: if the previous state is null, the docker maybe not
       //         created yet, this situation means the docker status
@@ -241,7 +241,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     worker = createDocker(advanceParty, remote: remote, local: local);
     setDocker(worker, remote: remote, local: local);
     // set connection for this docker
-    await worker.setConnection(connection);
+    await worker.assignConnection(connection);
 
     // process the advance parties one by one
     for (Uint8List part in advanceParty) {

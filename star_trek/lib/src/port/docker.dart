@@ -52,11 +52,6 @@ abstract interface class Docker implements Processor {
   SocketAddress? get remoteAddress;
   SocketAddress? get localAddress;
 
-  ///  Set connection for this docker
-  ///
-  /// @param conn - connection
-  Future<void> setConnection(Connection? conn);
-
   ///  Pack data to an outgo ship (with normal priority), and
   ///  append to the waiting queue for sending out
   ///
@@ -79,11 +74,16 @@ abstract interface class Docker implements Processor {
   ///  Send 'PING' for keeping connection alive
   Future<void> heartbeat();
 
+  ///  Clear all expired tasks
+  int purge([DateTime? now]);
+
   ///  Close connection for this docker
   Future<void> close();
 
-  ///  Clear all expired tasks
-  int purge([DateTime? now]);
+  ///  Set connection for this docker
+  ///
+  /// @param conn - connection
+  Future<void> assignConnection(Connection? conn);
 
 }
 

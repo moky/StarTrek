@@ -70,7 +70,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
 
   Connection? get connection => _connectionRef?.target;
 
-  @override
+  // protected
   Future<void> setConnection(Connection? conn) async {
     // 1. replace with new connection
     Connection? old = _connectionRef?.target;
@@ -179,10 +179,16 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       _dock.getNextDeparture(now);
 
   @override
-  int purge([DateTime? now]) => _dock.purge(now);
+  int purge([DateTime? now]) =>
+      _dock.purge(now);
 
   @override
-  Future<void> close() async => await connection?.close();
+  Future<void> close() async =>
+      await setConnection(null);
+
+  @override
+  Future<void> assignConnection(Connection? conn) async =>
+      await setConnection(conn);
 
   //
   //  Processor

@@ -54,11 +54,6 @@ abstract interface class Connection implements Ticker {
 
   ConnectionState? get state;
 
-  ///  Get channel from hub
-  ///
-  /// @param hub - connection hub
-  Future<void> start(Hub hub);
-
   ///  Send data
   ///
   /// @param data - outgo data package
@@ -72,6 +67,11 @@ abstract interface class Connection implements Ticker {
 
   ///  Close the connection
   Future<void> close();
+
+  ///  Get channel from hub
+  ///
+  /// @param hub - connection hub
+  Future<void> start(Hub hub);
 
 }
 

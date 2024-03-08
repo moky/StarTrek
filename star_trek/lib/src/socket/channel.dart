@@ -130,7 +130,7 @@ abstract class ChannelWriter<C extends SelectableChannel>
 
 abstract class BaseChannel<C extends SelectableChannel>
     extends AddressPairObject implements Channel {
-  BaseChannel(this.socket, {super.remote, super.local}) {
+  BaseChannel({super.remote, super.local}) {
     // create socket reader & writer
     reader = createReader();
     writer = createWriter();
@@ -144,50 +144,85 @@ abstract class BaseChannel<C extends SelectableChannel>
   late final SocketWriter writer;
 
   // inner socket
-  final C socket;
+  C? _sock;
+  bool? _closed;
+
+  //
+  //  Socket
+  //
+
+  C? get socket => _sock;
+  // protected
+  Future<void> setSocket(C? sock) async {
+    // 1. replace with new socket
+    C? old = _sock;
+    if (sock == null) {
+      _sock = null;
+      _closed = true;
+    } else {
+      _sock = sock;
+      _closed = false;  // socketIsClosed(sock);
+    }
+    // 2. close old socket
+    if (old == null || identical(old, sock)) {} else {
+      await socketDisconnect(old);
+    }
+  }
 
   //
   //  Flags
   //
 
   @override
-  bool get isBlocking => socketIsBlocking(socket);
+  bool get isClosed {
+    if (_closed == null) {
+      // initializing
+      return false;
+    }
+    C? sock = socket;
+    return sock == null || socketIsClosed(sock);
+  }
 
   @override
-  bool get isClosed => socketIsClosed(socket);
+  bool get isBound {
+    C? sock = socket;
+    return sock != null && socketIsBound(sock);
+  }
 
   @override
-  bool get isConnected => socketIsConnected(socket);
-
-  @override
-  bool get isBound => socketIsBound(socket);
+  bool get isConnected {
+    C? sock = socket;
+    return sock != null && socketIsConnected(sock);
+  }
 
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
 
   @override
+  bool get isBlocking {
+    C? sock = socket;
+    return sock != null && socketIsBlocking(sock);
+  }
+
+  @override
   String toString() {
     Type clazz = runtimeType;
-    return '<$clazz remote="$remoteAddress" local="$localAddress">\n\t'
+    return '<$clazz remote="$remoteAddress" local="$localAddress"'
+        ' closed=$isClosed bound=$isBound connected="$isConnected" >\n\t'
         '$socket\n</$clazz>';
   }
 
   @override
   SelectableChannel? configureBlocking(bool block) {
-    socket.configureBlocking(block);
-    return socket;
+    C? sock = socket;
+    sock?.configureBlocking(block);
+    return sock;
   }
 
   @override
   Future<NetworkChannel?> bind(SocketAddress local) async {
-    if (socket.isClosed) {
-      throw SocketException('socket closed: $socket');
-    } else if (socketIsBound(socket)) {
-      SocketAddress? address = socketGetLocalAddress(socket);
-      throw SocketException('socket already bound to: $address');
-    }
-    NetworkChannel nc = socket as NetworkChannel;
-    bool ok = await socketBind(nc, local);
+    NetworkChannel? nc = socket as NetworkChannel?;
+    bool ok = nc != null && await socketBind(nc, local);
     assert(ok, 'failed to bind socket: $local');
     localAddress = local;
     return nc;
@@ -195,14 +230,8 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   Future<NetworkChannel?> connect(SocketAddress remote) async {
-    if (socket.isClosed) {
-      throw SocketException('socket closed: $socket');
-    } else if (socketIsConnected(socket)) {
-      SocketAddress? address = socketGetRemoteAddress(socket);
-      throw SocketException('socket already connected to: $address');
-    }
-    NetworkChannel nc = socket as NetworkChannel;
-    bool ok = await socketConnect(nc, remote);
+    NetworkChannel? nc = socket as NetworkChannel?;
+    bool ok = nc != null && await socketConnect(nc, remote);
     assert(ok, 'failed to connect socket: $remote');
     remoteAddress = remote;
     return nc;
@@ -210,12 +239,19 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   Future<ByteChannel?> disconnect() async {
-    await socketDisconnect(socket);
-    return socket is ByteChannel ? socket as ByteChannel : null;
+    C? sock = _sock;
+    bool ok = sock != null && await socketDisconnect(sock);
+    assert(ok, 'failed to disconnect socket: $sock');
+    return sock is ByteChannel ? sock as ByteChannel : null;
   }
 
   @override
-  Future<void> close() async => await disconnect();
+  Future<void> close() async =>
+      await setSocket(null);
+
+  @override
+  Future<void> assignSocket(SelectableChannel sock) async =>
+      await setSocket(sock as C);
 
   //
   //  Reading, Writing

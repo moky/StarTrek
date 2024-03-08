@@ -257,7 +257,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
       T? trans = await state.evaluate(ctx, now);
       if (trans != null) {
         state = getTargetState(trans);
-        assert(state != null, 'state error: $trans');
+        assert(state != null, 'target state error: $trans');
         await _changeState(state, now);
       }
     }

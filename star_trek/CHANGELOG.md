@@ -1,3 +1,7 @@
+## 0.4.0
+
+- Assign socket/connection.
+
 ## 0.3.3
 
 - Set connection for docker after created.

@@ -51,6 +51,9 @@ abstract interface class Channel implements ByteChannel {
 
   // Future<void> close();
 
+  /// Set socket for this channel
+  Future<void> assignSocket(SelectableChannel sock);
+
   /*================================================*\
   |*          Readable Byte Channel                 *|
   \*================================================*/
@@ -177,7 +180,7 @@ Future<bool> socketBind(NetworkChannel sock, SocketAddress local) async {
     await sock.bind(local);
     return sock is SelectableChannel && socketIsBound(sock as SelectableChannel);
   } on IOException catch (e) {
-    print('[Socket] cannot bind socket: $local, $sock, $e');
+    print('[Socket] cannot bind to: $local, socket: $sock, $e');
     return false;
   }
 }
@@ -199,7 +202,7 @@ Future<bool> socketConnect(NetworkChannel sock, SocketAddress remote) async {
       return false;
     }
   } on IOException catch (e) {
-    print('[Socket] cannot connect socket: $remote, $sock, $e');
+    print('[Socket] cannot connect to: $remote, socket: $sock, $e');
     return false;
   }
 }

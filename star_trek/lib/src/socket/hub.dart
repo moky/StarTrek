@@ -45,25 +45,25 @@ class ConnectionPool extends AddressPairMap<Connection> {
 
   @override
   Connection? setItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
-    Connection? old = getItem(remote: remote, local: local);
-    if (old == null || identical(old, value)) {} else {
-      removeItem(old, remote: remote, local: local);
+    // 1. remove cached item
+    Connection? cached = super.removeItem(value, remote: remote, local: local);
+    if (cached == null || identical(cached, value)) {} else {
+      /*await */cached.close();
     }
-    old = super.setItem(value, remote: remote, local: local);
-    if (old == null || identical(old, value)) {} else {
-      /*await */old.close();
-    }
-    return old;
+    // 2. set new item
+    Connection? old = super.setItem(value, remote: remote, local: local);
+    assert(old == null, 'should not happen');
+    return cached;
   }
 
   @override
   Connection? removeItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
     Connection? cached = super.removeItem(value, remote: remote, local: local);
-    if (value == null) {} else {
-      /*await */value.close();
-    }
     if (cached == null || identical(cached, value)) {} else {
       /*await */cached.close();
+    }
+    if (value == null) {} else {
+      /*await */value.close();
     }
     return cached;
   }

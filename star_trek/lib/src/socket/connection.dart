@@ -65,6 +65,29 @@ class BaseConnection extends AddressPairObject
       _delegateRef = gate == null ? null : WeakReference(gate);
 
   //
+  //  State Machine
+  //
+
+  // protected
+  ConnectionStateMachine? get stateMachine => _fsm;
+  // private
+  Future<void> setStateMachine(ConnectionStateMachine? fsm) async {
+    // 1. replace with new machine
+    ConnectionStateMachine? old = _fsm;
+    _fsm = fsm;
+    // 2. stop old machine
+    if (old == null || identical(old, fsm)) {} else {
+      await old.stop();
+    }
+  }
+  // protected
+  ConnectionStateMachine createStateMachine() {
+    ConnectionStateMachine machine = ConnectionStateMachine(this);
+    machine.delegate = this;
+    return machine;
+  }
+
+  //
   //  Channel
   //
 
@@ -85,29 +108,6 @@ class BaseConnection extends AddressPairObject
     if (old == null || identical(old, sock)) {} else {
       await old.close();
     }
-  }
-
-  //
-  //  State Machine
-  //
-
-  // protected
-  ConnectionStateMachine? get stateMachine => _fsm;
-  // protected
-  Future<void> setStateMachine(ConnectionStateMachine? fsm) async {
-    // 1. replace with new machine
-    ConnectionStateMachine? old = _fsm;
-    _fsm = fsm;
-    // 2. stop old machine
-    if (old == null || identical(old, fsm)) {} else {
-      await old.stop();
-    }
-  }
-  // protected
-  ConnectionStateMachine createStateMachine() {
-    ConnectionStateMachine machine = ConnectionStateMachine(this);
-    machine.delegate = this;
-    return machine;
   }
 
   //
@@ -137,9 +137,9 @@ class BaseConnection extends AddressPairObject
   @override
   Future<void> close() async {
     // stop state machine
-    setStateMachine(null);
+    await setStateMachine(null);
     // close channel
-    setChannel(null);
+    await setChannel(null);
   }
 
   @override
@@ -360,7 +360,9 @@ class ActiveConnection extends BaseConnection {
           break;
         }
         sock = await openChannel(hub);
-        if (sock != null) {
+        if (sock == null) {
+          print('[Socket] failed to open channel: $localAddress -> $remoteAddress');
+        } else {
           // connect timeout after 2 minutes
           expired = now + 128 * 1000;
         }

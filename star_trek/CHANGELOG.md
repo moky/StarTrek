@@ -1,3 +1,7 @@
+## 0.4.1
+
+- Check connection available/vacant.
+
 ## 0.4.0
 
 - Assign socket/connection.

@@ -40,6 +40,8 @@ import '../nio/address.dart';
 import '../nio/exception.dart';
 import '../type/mapping.dart';
 
+import 'connection.dart';
+
 
 class ConnectionPool extends AddressPairMap<Connection> {
 
@@ -150,7 +152,11 @@ abstract class BaseHub implements Hub {
       conn = createConnection(remote: remote, local: local);
       setConnection(conn, remote: remote, local: local);
       // try to open channel with direction (remote, local)
-      await conn.start(this);
+      if (conn is BaseConnection) {
+        await conn.start(this);
+      } else {
+        assert(false, 'connection error: $remote, $conn');
+      }
     }
     return conn;
   }
@@ -161,8 +167,8 @@ abstract class BaseHub implements Hub {
 
   // protected
   Future<bool> driveChannel(Channel sock) async {
-    if (sock.isAlive) {} else {
-      // cannot drive closed channel
+    if (sock.isAvailable) {} else {
+      // channel has no data to received
       return false;
     }
     Pair<Uint8List?, SocketAddress?> pair;

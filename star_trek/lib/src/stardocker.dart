@@ -48,7 +48,6 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   late final Dock _dock;
 
   WeakReference<Connection>? _connectionRef;
-  bool? _closed;
 
   // remaining data to be sent
   Departure? _lastOutgo;
@@ -74,12 +73,10 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   Future<void> setConnection(Connection? conn) async {
     // 1. replace with new connection
     Connection? old = _connectionRef?.target;
-    if (conn == null) {
-      _connectionRef = null;
-      _closed = true;
-    } else {
+    if (conn != null) {
       _connectionRef = WeakReference(conn);
-      _closed = false;  // conn.isClosed;
+    // } else {
+    //   _connectionRef = null;
     }
     // 2. close old connection
     if (old == null || identical(old, conn)) {} else {
@@ -92,7 +89,15 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   //
 
   @override
-  bool get isClosed => _closed != null && connection?.isClosed != false;
+  bool get isClosed {
+    var ref = _connectionRef;
+    if (ref == null) {
+      // initializing
+      return false;
+    } else {
+      return ref.target?.isClosed != false;
+    }
+  }
 
   @override
   bool get isAlive => connection?.isAlive == true;
@@ -186,10 +191,6 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   Future<void> close() async =>
       await setConnection(null);
 
-  @override
-  Future<void> assignConnection(Connection? conn) async =>
-      await setConnection(conn);
-
   //
   //  Processor
   //
@@ -198,8 +199,11 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   Future<bool> process() async {
     Connection? conn = connection;
     // 1. get connection which is ready for sending data
-    if (conn == null || !conn.isAlive) {
-      // connection not ready now
+    if (conn == null) {
+      // waiting for connection
+      return false;
+    } else if (!conn.isVacant) {
+      // connection is not ready for sending data
       return false;
     }
     // 2. get data waiting to be sent out
@@ -251,6 +255,13 @@ abstract class StarDocker extends AddressPairObject implements Docker {
         throw SocketException('only $index/${fragments.length} fragments sent.');
       } else {
         // task done
+        if (outgo.isImportant) {
+          // this task needs response,
+          // so we cannot call 'onDockerSent()' immediately
+          // until the remote responded
+        } else {
+          await delegate?.onDockerSent(outgo, this);
+        }
         return true;
       }
     } on IOException catch (ex) {

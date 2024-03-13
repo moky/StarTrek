@@ -39,6 +39,8 @@ import 'port/gate.dart';
 import 'port/ship.dart';
 import 'type/mapping.dart';
 
+import 'stardocker.dart';
+
 
 class DockerPool extends AddressPairMap<Docker> {
 
@@ -208,7 +210,11 @@ abstract class StarGate implements Gate, ConnectionDelegate {
         worker = createDocker([], remote: remote, local: local);
         setDocker(worker, remote: remote, local: local);
         // set connection for this docker
-        await worker.assignConnection(connection);
+        if (worker is StarDocker) {
+          await worker.setConnection(connection);
+        } else {
+          assert(false, 'docker error: $remote, $worker');
+        }
       }
       // NOTICE: if the previous state is null, the docker maybe not
       //         created yet, this situation means the docker status
@@ -241,7 +247,11 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     worker = createDocker(advanceParty, remote: remote, local: local);
     setDocker(worker, remote: remote, local: local);
     // set connection for this docker
-    await worker.assignConnection(connection);
+    if (worker is StarDocker) {
+      await worker.setConnection(connection);
+    } else {
+      assert(false, 'docker error: $remote, $worker');
+    }
 
     // process the advance parties one by one
     for (Uint8List part in advanceParty) {

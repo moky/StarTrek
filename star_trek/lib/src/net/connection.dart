@@ -34,7 +34,6 @@ import '../fsm/ticker.dart';
 import '../nio/address.dart';
 import '../nio/exception.dart';
 
-import 'hub.dart';
 import 'state.dart';
 
 
@@ -43,11 +42,16 @@ abstract interface class Connection implements Ticker {
   //
   //  Flags
   //
-  bool get isClosed;  // !isOpen()
+  bool get isClosed;     // !isOpen()
   bool get isBound;
   bool get isConnected;
 
-  bool get isAlive;  // isOpen && (isConnected || isBound)
+  bool get isAlive;      // isOpen && (isConnected || isBound)
+
+  /// ready for reading
+  bool get isAvailable;  // isAlive
+  /// ready for writing
+  bool get isVacant;     // isAlive
 
   SocketAddress? get localAddress;
   SocketAddress? get remoteAddress;
@@ -67,11 +71,6 @@ abstract interface class Connection implements Ticker {
 
   ///  Close the connection
   Future<void> close();
-
-  ///  Get channel from hub
-  ///
-  /// @param hub - connection hub
-  Future<void> start(Hub hub);
 
 }
 

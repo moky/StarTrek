@@ -31,7 +31,6 @@
 import 'dart:typed_data';
 
 import '../fsm/runner.dart';
-import '../net/connection.dart';
 import '../net/state.dart';
 import '../nio/address.dart';
 import '../nio/exception.dart';
@@ -47,6 +46,7 @@ abstract interface class Docker implements Processor {
 
   bool get isClosed;        // connection.isClosed
   bool get isAlive;         // connection.isAlive
+
   DockerStatus get status;  // connection.state
 
   SocketAddress? get remoteAddress;
@@ -79,11 +79,6 @@ abstract interface class Docker implements Processor {
 
   ///  Close connection for this docker
   Future<void> close();
-
-  ///  Set connection for this docker
-  ///
-  /// @param conn - connection
-  Future<void> assignConnection(Connection? conn);
 
 }
 

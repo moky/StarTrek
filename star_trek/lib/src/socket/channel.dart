@@ -145,23 +145,21 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   // inner socket
   C? _sock;
-  bool? _closed;
 
   //
   //  Socket
   //
 
   C? get socket => _sock;
-  // protected
+
+  /// Set inner socket for this channel
   Future<void> setSocket(C? sock) async {
     // 1. replace with new socket
     C? old = _sock;
-    if (sock == null) {
-      _sock = null;
-      _closed = true;
-    } else {
+    if (sock != null) {
       _sock = sock;
-      _closed = false;  // socketIsClosed(sock);
+    // } else {
+    //   _sock = null;
     }
     // 2. close old socket
     if (old == null || identical(old, sock)) {} else {
@@ -175,12 +173,13 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   bool get isClosed {
-    if (_closed == null) {
+    C? sock = _sock;
+    if (sock == null) {
       // initializing
       return false;
+    } else {
+      return socketIsClosed(sock);
     }
-    C? sock = socket;
-    return sock == null || socketIsClosed(sock);
   }
 
   @override
@@ -197,6 +196,12 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
+
+  @override
+  bool get isAvailable => isAlive;
+
+  @override
+  bool get isVacant => isAlive;
 
   @override
   bool get isBlocking {
@@ -240,7 +245,10 @@ abstract class BaseChannel<C extends SelectableChannel>
   @override
   Future<ByteChannel?> disconnect() async {
     C? sock = _sock;
-    bool ok = sock != null && await socketDisconnect(sock);
+    if (sock == null) {
+      return null;
+    }
+    bool ok = await socketDisconnect(sock);
     assert(ok, 'failed to disconnect socket: $sock');
     return sock is ByteChannel ? sock as ByteChannel : null;
   }
@@ -248,10 +256,6 @@ abstract class BaseChannel<C extends SelectableChannel>
   @override
   Future<void> close() async =>
       await setSocket(null);
-
-  @override
-  Future<void> assignSocket(SelectableChannel sock) async =>
-      await setSocket(sock as C);
 
   //
   //  Reading, Writing

@@ -47,12 +47,14 @@ abstract interface class Channel implements ByteChannel {
 
   bool get isBound;
 
-  bool get isAlive;  // isOpen && (isConnected || isBound)
+  bool get isAlive;      // isOpen && (isConnected || isBound)
+
+  /// ready for reading
+  bool get isAvailable;  // isAlive
+  /// ready for writing
+  bool get isVacant;     // isAlive
 
   // Future<void> close();
-
-  /// Set socket for this channel
-  Future<void> assignSocket(SelectableChannel sock);
 
   /*================================================*\
   |*          Readable Byte Channel                 *|

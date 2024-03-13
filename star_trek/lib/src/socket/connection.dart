@@ -50,7 +50,6 @@ class BaseConnection extends AddressPairObject
   WeakReference<ConnectionDelegate>? _delegateRef;
 
   WeakReference<Channel>? _channelRef;
-  bool? _closed;
 
   // active times
   DateTime? _lastSentTime;
@@ -97,12 +96,10 @@ class BaseConnection extends AddressPairObject
   Future<void> setChannel(Channel? sock) async {
     // 1. replace with new channel
     Channel? old = _channelRef?.target;
-    if (sock == null) {
-      _channelRef = null;
-      _closed = true;
-    } else {
+    if (sock != null) {
       _channelRef = WeakReference(sock);
-      _closed = false;  // sock.isClosed;
+    // } else {
+    //   _channelRef = null;
     }
     // 2. close old channel
     if (old == null || identical(old, sock)) {} else {
@@ -115,7 +112,15 @@ class BaseConnection extends AddressPairObject
   //
 
   @override
-  bool get isClosed => _closed != null && channel?.isClosed != false;
+  bool get isClosed {
+    var ref = _channelRef;
+    if (ref == null) {
+      // initializing
+      return false;
+    } else {
+      return ref.target?.isClosed != false;
+    }
+  }
 
   @override
   bool get isBound => channel?.isBound == true;
@@ -126,6 +131,12 @@ class BaseConnection extends AddressPairObject
   @override
   bool get isAlive => (!isClosed) && (isConnected || isBound);
   // bool get isAlive => channel?.isAlive == true;
+
+  @override
+  bool get isAvailable => channel?.isAvailable == true;
+
+  @override
+  bool get isVacant => channel?.isVacant == true;
 
   @override
   String toString() {
@@ -142,7 +153,7 @@ class BaseConnection extends AddressPairObject
     await setChannel(null);
   }
 
-  @override
+  /// Get channel from hub
   Future<void> start(Hub hub) async {
     // 1. get channel from hub
     await openChannel(hub);
@@ -230,7 +241,7 @@ class BaseConnection extends AddressPairObject
 
   @override
   Future<void> tick(DateTime now, int elapsed) async {
-    if (_closed == null) {
+    if (_channelRef == null) {
       // not initialized
       return;
     }
@@ -351,27 +362,31 @@ class ActiveConnection extends BaseConnection {
       //
       //  2. check socket channel
       //
-      sock = channel;
-      if (sock == null || sock.isClosed) {
-        // get new socket channel via hub
-        Hub? hub = _hubRef?.target;
-        if (hub == null) {
-          assert(false, 'hub lost');
-          break;
+      try {
+        sock = channel;
+        if (sock == null || sock.isClosed) {
+          // get new socket channel via hub
+          Hub? hub = _hubRef?.target;
+          if (hub == null) {
+            assert(false, 'hub not found: $localAddress -> $remoteAddress');
+            break;
+          }
+          sock = await openChannel(hub);
+          if (sock == null) {
+            print('[Socket] cannot open channel: $localAddress -> $remoteAddress');
+          } else {
+            // connect timeout after 2 minutes
+            expired = now + 128 * 1000;
+          }
+        } else if (sock.isAlive) {
+          // socket channel is normal
+          interval = 16000;
+        } else if (0 < expired && expired < now) {
+          // connect timeout
+          await sock.close();
         }
-        sock = await openChannel(hub);
-        if (sock == null) {
-          print('[Socket] failed to open channel: $localAddress -> $remoteAddress');
-        } else {
-          // connect timeout after 2 minutes
-          expired = now + 128 * 1000;
-        }
-      } else if (sock.isAlive) {
-        // socket channel is normal
-        interval = 16000;
-      } else if (0 < expired && expired < now) {
-        // connect timeout
-        await sock.close();
+      } catch (e, st) {
+        print('[Socket] active connection error: $e, $st');
       }
     }
   }

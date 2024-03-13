@@ -145,6 +145,7 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   // inner socket
   C? _sock;
+  bool? _closed;
 
   //
   //  Socket
@@ -158,8 +159,10 @@ abstract class BaseChannel<C extends SelectableChannel>
     C? old = _sock;
     if (sock != null) {
       _sock = sock;
-    // } else {
-    //   _sock = null;
+      _closed = true;
+    } else {
+      _sock = null;
+      _closed = false;
     }
     // 2. close old socket
     if (old == null || identical(old, sock)) {} else {
@@ -173,13 +176,12 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   bool get isClosed {
-    C? sock = _sock;
-    if (sock == null) {
+    if (_closed == null) {
       // initializing
       return false;
-    } else {
-      return socketIsClosed(sock);
     }
+    C? sock = socket;
+    return sock == null || socketIsClosed(sock);
   }
 
   @override

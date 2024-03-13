@@ -113,13 +113,11 @@ class BaseConnection extends AddressPairObject
 
   @override
   bool get isClosed {
-    var ref = _channelRef;
-    if (ref == null) {
+    if (_channelRef == null) {
       // initializing
       return false;
-    } else {
-      return ref.target?.isClosed != false;
     }
+    return channel?.isClosed != false;
   }
 
   @override

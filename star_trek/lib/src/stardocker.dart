@@ -90,13 +90,11 @@ abstract class StarDocker extends AddressPairObject implements Docker {
 
   @override
   bool get isClosed {
-    var ref = _connectionRef;
-    if (ref == null) {
+    if (_connectionRef == null) {
       // initializing
       return false;
-    } else {
-      return ref.target?.isClosed != false;
     }
+    return connection?.isClosed != false;
   }
 
   @override

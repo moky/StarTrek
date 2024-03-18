@@ -159,10 +159,10 @@ abstract class BaseChannel<C extends SelectableChannel>
     C? old = _sock;
     if (sock != null) {
       _sock = sock;
-      _closed = true;
+      _closed = false;
     } else {
       _sock = null;
-      _closed = false;
+      _closed = true;
     }
     // 2. close old socket
     if (old == null || identical(old, sock)) {} else {

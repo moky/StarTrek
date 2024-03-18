@@ -7,6 +7,7 @@ library startrek;
 export 'src/net/channel.dart';
 export 'src/net/connection.dart';
 export 'src/net/state.dart';
+export 'src/net/transition.dart';
 export 'src/net/hub.dart';
 
 export 'src/port/ship.dart';

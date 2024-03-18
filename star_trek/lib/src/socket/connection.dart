@@ -341,44 +341,47 @@ class ActiveConnection extends BaseConnection {
   Future<void> run() async {
     int expired = 0;
     int lastTime = 0;
-    int interval = 16000;
+    int interval = 8000;
     int now;
     Channel? sock;
     while (!isClosed) {
       await Runner.sleep(milliseconds: 1000);
-      //
-      //  1. check time interval
-      //
       now = DateTime.now().millisecondsSinceEpoch;
-      if (now < lastTime + interval) {
-        continue;
-      }
-      lastTime = now;
-      if (interval < 256000) {
-        interval <<= 1;
-      }
-      //
-      //  2. check socket channel
-      //
       try {
         sock = channel;
         if (sock == null || sock.isClosed) {
+          // first time to try connecting (lastTime == 0)?
+          // or connection lost, then try to reconnect again.
+          // check time interval for the trying here
+          if (now < lastTime + interval) {
+            continue;
+          } else {
+            // update last connect time
+            lastTime = now;
+          }
           // get new socket channel via hub
           Hub? hub = _hubRef?.target;
           if (hub == null) {
             assert(false, 'hub not found: $localAddress -> $remoteAddress');
             break;
           }
+          // try to open a new socket channel from the hub.
+          // the returned socket channel is opened for connecting,
+          // but maybe failed,
+          // so set an expired time to close it after timeout;
+          // if failed to open a new socket channel,
+          // then extend the time interval for next trying.
           sock = await openChannel(hub);
-          if (sock == null) {
-            print('[Socket] cannot open channel: $localAddress -> $remoteAddress');
-          } else {
+          if (sock != null) {
             // connect timeout after 2 minutes
-            expired = now + 128 * 1000;
+            expired = now + 128000;
+          } else if (interval < 128000) {
+            interval <<= 1;
           }
         } else if (sock.isAlive) {
-          // socket channel is normal
-          interval = 16000;
+          // socket channel is normal, reset the time interval here.
+          // this will work when the current connection lost
+          interval = 8000;
         } else if (0 < expired && expired < now) {
           // connect timeout
           await sock.close();

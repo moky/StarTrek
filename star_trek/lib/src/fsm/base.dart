@@ -57,9 +57,9 @@ abstract class BaseState<C extends MachineContext, T extends StateTransition<C>>
   }
 
   @override
-  Future<T?> evaluate(C ctx, DateTime now) async {
+  T? evaluate(C ctx, DateTime now) {
     for (T trans in _transitions) {
-      if (await trans.evaluate(ctx, now)) {
+      if (trans.evaluate(ctx, now)) {
         // OK, get target state from this transition
         return trans;
       }
@@ -254,7 +254,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     C ctx = context;
     S? state = currentState;
     if (state != null && _status == _Status.running) {
-      T? trans = await state.evaluate(ctx, now);
+      T? trans = state.evaluate(ctx, now);
       if (trans != null) {
         state = getTargetState(trans);
         assert(state != null, 'target state error: $trans');

@@ -42,7 +42,7 @@ class ConnectionStateTransition extends BaseTransition<ConnectionStateMachine> {
   final ConnectionStateEvaluate eval;
 
   @override
-  Future<bool> evaluate(ConnectionStateMachine ctx, DateTime now) async => eval(ctx, now);
+  bool evaluate(ConnectionStateMachine ctx, DateTime now) => eval(ctx, now);
 
 }
 

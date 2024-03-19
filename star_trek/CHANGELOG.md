@@ -1,3 +1,7 @@
+## 0.4.2
+
+- Synchronized evaluate.
+
 ## 0.4.1
 
 - Check connection available/vacant.

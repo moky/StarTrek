@@ -49,7 +49,7 @@ abstract interface class StateTransition<C extends MachineContext> {
   /// @param ctx     - context (machine)
   /// @param now     - current time
   /// @return true when current state should be changed
-  Future<bool> evaluate(C ctx, DateTime now);
+  bool evaluate(C ctx, DateTime now);
 
 }
 
@@ -60,6 +60,15 @@ abstract interface class StateTransition<C extends MachineContext> {
 /// @param <C> - context
 /// @param <T> - transition
 abstract interface class State<C extends MachineContext, T extends StateTransition<C>> {
+
+  ///  Called by machine.tick() to evaluate each transitions
+  ///
+  /// @param ctx     - context (machine)
+  /// @param now     - current time
+  /// @return success transition, or null to stay the current state
+  T? evaluate(C ctx, DateTime now);
+
+  //-------- events
 
   ///  Called after new state entered
   ///
@@ -86,13 +95,6 @@ abstract interface class State<C extends MachineContext, T extends StateTransiti
   /// @param ctx - context (machine)
   /// @param now - current time
   Future<void> onResume(C ctx, DateTime now);
-
-  ///  Called by machine.tick() to evaluate each transitions
-  ///
-  /// @param ctx     - context (machine)
-  /// @param now     - current time
-  /// @return success transition, or null to stay the current state
-  Future<T?> evaluate(C ctx, DateTime now);
 
 }
 

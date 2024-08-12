@@ -219,7 +219,7 @@ class BaseConnection extends AddressPairObject
       // print(e);
       error = IOError(ex);
       // socket error, close current channel
-      setChannel(null);
+      await setChannel(null);
     }
     // callback
     if (error == null) {
@@ -243,6 +243,7 @@ class BaseConnection extends AddressPairObject
       // not initialized
       return;
     }
+    // drive state machine forward
     await stateMachine?.tick(now, elapsed);
   }
 
@@ -286,8 +287,9 @@ class BaseConnection extends AddressPairObject
   @override
   Future<void> exitState(ConnectionState? previous, ConnectionStateMachine ctx, DateTime now) async {
     ConnectionState? current = ctx.currentState;
+    int index = current?.index ?? -1;
     // if current == 'ready'
-    if (current?.index == ConnectionStateOrder.ready.index) {
+    if (index == ConnectionStateOrder.ready.index) {
       // if preparing == 'preparing'
       if (previous?.index == ConnectionStateOrder.preparing.index) {
         // connection state changed from 'preparing' to 'ready',
@@ -305,6 +307,11 @@ class BaseConnection extends AddressPairObject
     }
     // callback
     await delegate?.onConnectionStateChanged(previous, current, this);
+    // if current == 'error'
+    if (index == ConnectionStateOrder.error.index) {
+      // remove channel when error
+      await setChannel(null);
+    }
   }
 
   @override
@@ -344,8 +351,11 @@ class ActiveConnection extends BaseConnection {
     int interval = 8000;
     int now;
     Channel? sock;
-    while (!isClosed) {
+    while (true) {
       await Runner.sleep(milliseconds: 1000);
+      if (isClosed) {
+        break;
+      }
       now = DateTime.now().millisecondsSinceEpoch;
       try {
         sock = channel;
@@ -390,6 +400,7 @@ class ActiveConnection extends BaseConnection {
         print('[Socket] active connection error: $e, $st');
       }
     }
+    print('[Socket] active connection exits: $remoteAddress');
   }
 
 }

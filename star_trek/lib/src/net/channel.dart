@@ -41,7 +41,19 @@ import '../nio/selectable.dart';
 import '../nio/socket.dart';
 
 
+// protected
+enum ChannelState {
+  init,    // initializing
+  open,    // initialized
+  alive,   // (not closed) and (connected or bound)
+  closed;  // closed
+}
+
+
 abstract interface class Channel implements ByteChannel {
+
+  /// Channel State Order
+  ChannelState get state;
 
   // bool get isClosed;  // !isOpen()
 
@@ -141,6 +153,11 @@ SocketAddress? socketGetRemoteAddress(SelectableChannel sock) {
 }
 
 
+///
+/// Flags
+///
+
+
 bool socketIsBlocking(SelectableChannel sock) {
   return sock.isBlocking;
 }
@@ -173,6 +190,42 @@ bool socketIsBound(SelectableChannel sock) {
 
 bool socketIsClosed(SelectableChannel sock) {
   return sock.isClosed;
+}
+
+
+/// Ready for reading
+bool socketIsAvailable(SelectableChannel sock) {
+  // TODO: check reading buffer
+  return true;
+}
+
+/// Ready for writing
+bool socketIsVacant(SelectableChannel sock) {
+  // TODO: check writing buffer
+  return true;
+}
+
+
+///
+/// Async Socket I/O
+///
+
+
+Future<int> socketSend(SelectableChannel sock, Uint8List data) async {
+  if (sock is WritableByteChannel) {
+    return await (sock as WritableByteChannel).write(data);
+  } else {
+    assert(false, 'socket error, cannot write data: ${data.lengthInBytes} byte(s)');
+    return -1;
+  }
+}
+
+Future<Uint8List?> socketReceive(SelectableChannel sock, int maxLen) async {
+  if (sock is ReadableByteChannel) {
+    return await (sock as ReadableByteChannel).read(maxLen);
+  }
+  assert(false, 'socket error, cannot read data: $sock');
+  return null;
 }
 
 

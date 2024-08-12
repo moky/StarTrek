@@ -47,28 +47,27 @@ class ConnectionPool extends AddressPairMap<Connection> {
 
   @override
   Connection? setItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
-    // 1. remove cached item
+    // remove cached item
     Connection? cached = super.removeItem(value, remote: remote, local: local);
-    if (cached == null || identical(cached, value)) {} else {
-      /*await */cached.close();
-    }
-    // 2. set new item
+    // if (cached == null || identical(cached, value)) {} else {
+    //   /*await */cached.close();
+    // }
     Connection? old = super.setItem(value, remote: remote, local: local);
     assert(old == null, 'should not happen');
     return cached;
   }
 
-  @override
-  Connection? removeItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
-    Connection? cached = super.removeItem(value, remote: remote, local: local);
-    if (cached == null || identical(cached, value)) {} else {
-      /*await */cached.close();
-    }
-    if (value == null) {} else {
-      /*await */value.close();
-    }
-    return cached;
-  }
+  // @override
+  // Connection? removeItem(Connection? value, {SocketAddress? remote, SocketAddress? local}) {
+  //   Connection? cached = super.removeItem(value, remote: remote, local: local);
+  //   if (cached == null || identical(cached, value)) {} else {
+  //     /*await */cached.close();
+  //   }
+  //   if (value == null) {} else {
+  //     /*await */value.close();
+  //   }
+  //   return cached;
+  // }
 
 }
 
@@ -146,17 +145,23 @@ abstract class BaseHub implements Hub {
 
   @override
   Future<Connection?> connect({required SocketAddress remote, SocketAddress? local}) async {
-    Connection? conn = getConnection(remote: remote, local: local);
-    if (conn == null) {
+    Connection? conn;
+    // try to get connection
+    var old = getConnection(remote: remote, local: local);
+    if (old == null) {
       // create & cache connection
       conn = createConnection(remote: remote, local: local);
-      setConnection(conn, remote: remote, local: local);
-      // try to open channel with direction (remote, local)
-      if (conn is BaseConnection) {
-        await conn.start(this);
-      } else {
-        assert(false, 'connection error: $remote, $conn');
+      var cached = setConnection(conn, remote: remote, local: local);
+      if (cached == null || identical(cached, conn)) {} else {
+        await cached.close();
       }
+    } else {
+      conn = old;
+    }
+    assert(conn is BaseConnection, 'connection error: $remote, $conn');
+    if (old == null && conn is BaseConnection) {
+      // try to open channel with direction (remote, local)
+      await conn.start(this);
     }
     return conn;
   }
@@ -167,17 +172,22 @@ abstract class BaseHub implements Hub {
 
   // protected
   Future<bool> driveChannel(Channel sock) async {
-    if (sock.isAvailable) {} else {
-      // channel has no data to received
+    ChannelState cs = sock.state;
+    if (cs == ChannelState.init) {
+      // preparing
+      return false;
+    } else if (cs == ChannelState.closed) {
+      // finished
       return false;
     }
-    Pair<Uint8List?, SocketAddress?> pair;
+    // cs == opened
+    // cs == alive
     Uint8List? data;
     SocketAddress? remote;
     SocketAddress? local;
     // try to receiver
     try {
-      pair = await sock.receive(kMSS);
+      Pair<Uint8List?, SocketAddress?> pair = await sock.receive(kMSS);
       data = pair.first;
       remote = pair.second;
     } on IOException catch (e) {
@@ -197,19 +207,20 @@ abstract class BaseHub implements Hub {
           await gate.onConnectionError(IOError(e), conn);
         }
       }
+      await sock.close();
       return false;
     }
-    if (remote == null) {
+    if (remote == null || data == null) {
       // received nothing
       return false;
     } else {
-      assert(data != null, 'data should not empty: $remote');
+      assert(data.isNotEmpty, 'data should not empty: $remote');
       local = sock.localAddress;
     }
     // get connection for processing received data
     Connection? conn = await connect(remote: remote, local: local);
     if (conn != null) {
-      await conn.onReceivedData(data!);
+      await conn.onReceivedData(data);
     }
     return true;
   }

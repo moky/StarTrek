@@ -87,6 +87,16 @@ abstract class ChannelController<C extends SelectableChannel> {
 
   C? get socket => channel?.socket;
 
+  // protected
+  Future<Uint8List?> receivePackage(SelectableChannel sock, int maxLen) async =>
+      /// TODO: override for async receiving
+      await socketReceive(sock, maxLen);
+
+  // protected
+  Future<int> sendAll(SelectableChannel sock, Uint8List data) async =>
+      /// TODO: override for async sending
+      await socketSend(sock, data);
+
 }
 
 abstract class ChannelReader<C extends SelectableChannel>
@@ -98,11 +108,8 @@ abstract class ChannelReader<C extends SelectableChannel>
     C? sock = socket;
     if (sock == null || sock.isClosed) {
       throw ClosedChannelException();
-    } else if (sock is ReadableByteChannel) {
-      return await (sock as ReadableByteChannel).read(maxLen);
     } else {
-      assert(false, 'socket error, cannot read data: $sock');
-      return null;
+      return await receivePackage(sock, maxLen);
     }
   }
 
@@ -117,11 +124,8 @@ abstract class ChannelWriter<C extends SelectableChannel>
     C? sock = socket;
     if (sock == null || sock.isClosed) {
       throw ClosedChannelException();
-    } else if (sock is WritableByteChannel) {
-      return await (sock as WritableByteChannel).write(src);
     } else {
-      assert(false, 'socket error, cannot write data: ${src.lengthInBytes} byte(s)');
-      return -1;
+      return await sendAll(sock, src);
     }
   }
 
@@ -171,8 +175,27 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   //
-  //  Flags
+  //  States
   //
+
+  @override
+  ChannelState get state {
+    if (_closed == null) {
+      // initializing
+      return ChannelState.init;
+    }
+    C? sock = socket;
+    if (sock == null || socketIsClosed(sock)) {
+      // closed
+      return ChannelState.closed;
+    } else if (socketIsConnected(sock) || socketIsBound(sock)) {
+      // normal
+      return ChannelState.alive;
+    } else {
+      // opened
+      return ChannelState.open;
+    }
+  }
 
   @override
   bool get isClosed {
@@ -200,10 +223,36 @@ abstract class BaseChannel<C extends SelectableChannel>
   bool get isAlive => (!isClosed) && (isConnected || isBound);
 
   @override
-  bool get isAvailable => isAlive;
+  bool get isAvailable {
+    C? sock = socket;
+    if (sock == null || socketIsClosed(sock)) {
+      return false;
+    } else if (socketIsConnected(sock) || socketIsBound(sock)) {
+      // alive, check reading buffer
+      return checkAvailable(sock);
+    } else {
+      return false;
+    }
+  }
+
+  // protected
+  bool checkAvailable(C sock) => socketIsAvailable(sock);
 
   @override
-  bool get isVacant => isAlive;
+  bool get isVacant {
+    C? sock = socket;
+    if (sock == null || socketIsClosed(sock)) {
+      return false;
+    } else if (socketIsConnected(sock) || socketIsBound(sock)) {
+      // alive, check writing buffer
+      return checkVacant(sock);
+    } else {
+      return false;
+    }
+  }
+
+  // protected
+  bool checkVacant(C sock) => socketIsVacant(sock);
 
   @override
   bool get isBlocking {
@@ -226,32 +275,61 @@ abstract class BaseChannel<C extends SelectableChannel>
     return sock;
   }
 
+  // protected
+  Future<bool> doBind(C sock, SocketAddress local) async {
+    if (sock is NetworkChannel) {
+      return await socketBind(sock as NetworkChannel, local);
+    }
+    assert(false, 'socket error: $sock');
+    return false;
+  }
+
+  // protected
+  Future<bool> doConnect(C sock, SocketAddress remote) async {
+    if (sock is NetworkChannel) {
+      return await socketConnect(sock as NetworkChannel, remote);
+    }
+    assert(false, 'socket error: $sock');
+    return false;
+  }
+
+  // protected
+  Future<bool> doDisconnect(C sock) async =>
+      await socketDisconnect(sock);
+
   @override
   Future<NetworkChannel?> bind(SocketAddress local) async {
-    NetworkChannel? nc = socket as NetworkChannel?;
-    bool ok = nc != null && await socketBind(nc, local);
-    assert(ok, 'failed to bind socket: $local');
+    C? sock = socket;
+    bool ok = sock != null && await doBind(sock, local);
+    if (!ok) {
+      assert(false, 'failed to bind socket: $local');
+      return null;
+    }
     localAddress = local;
-    return nc;
+    return sock as NetworkChannel;
   }
 
   @override
   Future<NetworkChannel?> connect(SocketAddress remote) async {
-    NetworkChannel? nc = socket as NetworkChannel?;
-    bool ok = nc != null && await socketConnect(nc, remote);
-    assert(ok, 'failed to connect socket: $remote');
+    C? sock = socket;
+    bool ok = sock != null && await doConnect(sock, remote);
+    if (!ok) {
+      assert(false, 'failed to connect socket: $remote');
+      return null;
+    }
     remoteAddress = remote;
-    return nc;
+    return sock as NetworkChannel;
   }
 
   @override
   Future<ByteChannel?> disconnect() async {
     C? sock = _sock;
-    if (sock == null) {
+    bool ok = sock == null || await doDisconnect(sock);
+    if (!ok) {
+      assert(ok, 'failed to disconnect socket: $sock');
       return null;
     }
-    bool ok = await socketDisconnect(sock);
-    assert(ok, 'failed to disconnect socket: $sock');
+    // remoteAddress = null;
     return sock is ByteChannel ? sock as ByteChannel : null;
   }
 

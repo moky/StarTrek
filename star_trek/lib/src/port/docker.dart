@@ -38,16 +38,16 @@ import '../nio/exception.dart';
 import 'ship.dart';
 
 
-///  Star Worker
+///  Star Docker
 ///  ~~~~~~~~~~~
 ///
 ///  Processor for Star Ships
-abstract interface class Docker implements Processor {
+abstract interface class Porter implements Processor {
 
   bool get isClosed;        // connection.isClosed
   bool get isAlive;         // connection.isAlive
 
-  DockerStatus get status;  // connection.state
+  PorterStatus get status;  // connection.state
 
   SocketAddress? get remoteAddress;
   SocketAddress? get localAddress;
@@ -82,7 +82,7 @@ abstract interface class Docker implements Processor {
 
 }
 
-enum DockerStatus {
+enum PorterStatus {
   init,
   preparing,
   ready,
@@ -91,7 +91,7 @@ enum DockerStatus {
   //
   //  State Convert
   //
-  static DockerStatus getStatus(ConnectionState? state) {
+  static PorterStatus getStatus(ConnectionState? state) {
     if (state == null) {
       return error;
     } else if (state.index == ConnectionStateOrder.ready.index
@@ -110,39 +110,39 @@ enum DockerStatus {
 }
 
 
-abstract interface class DockerDelegate {
+abstract interface class PorterDelegate {
 
   ///  Callback when new package received
   ///
   /// @param arrival     - income data package container
-  /// @param docker      - connection docker
-  Future<void> onDockerReceived(Arrival arrival, Docker docker);
+  /// @param porter      - connection docker
+  Future<void> onPorterReceived(Arrival arrival, Porter porter);
 
   ///  Callback when package sent
   ///
   /// @param departure   - outgo data package container
-  /// @param docker      - connection docker
-  Future<void> onDockerSent(Departure departure, Docker docker);
+  /// @param porter      - connection docker
+  Future<void> onPorterSent(Departure departure, Porter porter);
 
   ///  Callback when failed to send package
   ///
   /// @param error       - error message
   /// @param departure   - outgo data package container
-  /// @param docker      - connection docker
-  Future<void> onDockerFailed(IOError error, Departure departure, Docker docker);
+  /// @param porter      - connection docker
+  Future<void> onPorterFailed(IOError error, Departure departure, Porter porter);
 
   ///  Callback when connection error
   ///
   /// @param error       - error message
   /// @param departure   - outgo data package container
-  /// @param docker      - connection docker
-  Future<void> onDockerError(IOError error, Departure departure, Docker docker);
+  /// @param porter      - connection docker
+  Future<void> onPorterError(IOError error, Departure departure, Porter porter);
 
   ///  Callback when connection status changed
   ///
   /// @param previous    - old status
   /// @param current     - new status
-  /// @param docker      - connection docker
-  Future<void> onDockerStatusChanged(DockerStatus previous, DockerStatus current, Docker docker);
+  /// @param porter      - connection docker
+  Future<void> onPorterStatusChanged(PorterStatus previous, PorterStatus current, Porter porter);
 
 }

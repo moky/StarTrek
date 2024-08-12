@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:startrek/fsm.dart';
 import 'package:startrek/nio.dart';
 import 'package:startrek/startrek.dart';
@@ -16,16 +14,16 @@ abstract class BaseGate<H extends Hub>
   //
 
   @override
-  Docker? getDocker({required SocketAddress remote, SocketAddress? local}) =>
-      super.getDocker(remote: remote);
+  Porter? getPorter({required SocketAddress remote, SocketAddress? local}) =>
+      super.getPorter(remote: remote);
 
   @override
-  Docker? setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
-      super.setDocker(docker, remote: remote);
+  Porter? setPorter(Porter porter, {required SocketAddress remote, SocketAddress? local}) =>
+      super.setPorter(porter, remote: remote);
 
   @override
-  Docker? removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
-      super.removeDocker(docker, remote: remote);
+  Porter? removePorter(Porter? porter, {required SocketAddress remote, SocketAddress? local}) =>
+      super.removePorter(porter, remote: remote);
 
   // @override
   // Future<void> heartbeat(Connection connection) async {
@@ -34,21 +32,6 @@ abstract class BaseGate<H extends Hub>
   //     super.heartbeat(connection);
   //   }
   // }
-
-  @override
-  List<Uint8List> cacheAdvanceParty(Uint8List data, Connection connection) {
-    // TODO: cache the advance party before decide which docker to use
-    List<Uint8List> array = [];
-    if (data.isNotEmpty) {
-      array.add(data);
-    }
-    return array;
-  }
-
-  @override
-  void clearAdvanceParty(Connection connection) {
-    // TODO: remove advance party for this connection
-  }
 
 }
 

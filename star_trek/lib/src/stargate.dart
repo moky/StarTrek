@@ -42,74 +42,74 @@ import 'type/mapping.dart';
 import 'stardocker.dart';
 
 
-class DockerPool extends AddressPairMap<Docker> {
+class PorterPool extends AddressPairMap<Porter> {
 
   @override
-  Docker? setItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
-    // 1. remove cached item
-    Docker? cached = super.removeItem(value, remote: remote, local: local);
-    if (cached == null || identical(cached, value)) {} else {
-      /*await */cached.close();
-    }
-    // 2. set new item
-    Docker? old = super.setItem(value, remote: remote, local: local);
+  Porter? setItem(Porter? value, {SocketAddress? remote, SocketAddress? local}) {
+    // remove cached item
+    Porter? cached = super.removeItem(value, remote: remote, local: local);
+    // if (cached == null || identical(cached, value)) {} else {
+    //   /*await */cached.close();
+    // }
+    Porter? old = super.setItem(value, remote: remote, local: local);
     assert(old == null, 'should not happen');
     return cached;
   }
 
-  @override
-  Docker? removeItem(Docker? value, {SocketAddress? remote, SocketAddress? local}) {
-    Docker? cached = super.removeItem(value, remote: remote, local: local);
-    if (cached == null || identical(cached, value)) {} else {
-      /*await */cached.close();
-    }
-    if (value == null) {} else {
-      /*await */value.close();
-    }
-    return cached;
-  }
+  // @override
+  // Porter? removeItem(Porter? value, {SocketAddress? remote, SocketAddress? local}) {
+  //   Porter? cached = super.removeItem(value, remote: remote, local: local);
+  //   if (cached == null || identical(cached, value)) {} else {
+  //     /*await */cached.close();
+  //   }
+  //   if (value == null) {} else {
+  //     /*await */value.close();
+  //   }
+  //   return cached;
+  // }
+
 }
 
 
 abstract class StarGate implements Gate, ConnectionDelegate {
-  StarGate(DockerDelegate keeper) {
+  StarGate(PorterDelegate keeper) {
     _delegateRef = WeakReference(keeper);
-    _dockerPool = createDockerPool();
+    _porterPool = createPorterPool();
   }
 
   // protected
-  AddressPairMap<Docker> createDockerPool() => DockerPool();
+  AddressPairMap<Porter> createPorterPool() => PorterPool();
 
   // delegate for handling docker events
-  DockerDelegate? get delegate => _delegateRef.target;
+  PorterDelegate? get delegate => _delegateRef.target;
 
-  late final AddressPairMap<Docker> _dockerPool;
-  late final WeakReference<DockerDelegate> _delegateRef;
+  late final AddressPairMap<Porter> _porterPool;
+  late final WeakReference<PorterDelegate> _delegateRef;
 
   @override
   Future<bool> sendData(Uint8List payload, {required SocketAddress remote, SocketAddress? local}) async {
-    Docker? worker = getDocker(remote: remote, local: local);
-    if (worker == null) {
+    Porter? docker = getPorter(remote: remote, local: local);
+    if (docker == null) {
       assert(false, 'docker not found: $local -> $remote');
       return false;
-    } else if (!worker.isAlive) {
+    } else if (!docker.isAlive) {
       assert(false, 'docker not alive: $local -> $remote');
       return false;
     }
-    return await worker.sendData(payload);
+    return await docker.sendData(payload);
   }
 
   @override
   Future<bool> sendShip(Departure outgo, {required SocketAddress remote, SocketAddress? local}) async {
-    Docker? worker = getDocker(remote: remote, local: local);
-    if (worker == null) {
+    Porter? docker = getPorter(remote: remote, local: local);
+    if (docker == null) {
       assert(false, 'docker not found: $local -> $remote');
       return false;
-    } else if (!worker.isAlive) {
+    } else if (!docker.isAlive) {
       assert(false, 'docker not alive: $local -> $remote');
       return false;
     }
-    return await worker.sendShip(outgo);
+    return await docker.sendShip(outgo);
   }
 
   //
@@ -123,22 +123,50 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   /// @param local  - local address
   /// @return Docker
   // protected
-  Docker createDocker(List<Uint8List> data, {required SocketAddress remote, SocketAddress? local});
+  Porter createPorter({required SocketAddress remote, SocketAddress? local});
 
   // protected
-  Iterable<Docker> allDockers() => _dockerPool.items;
+  Iterable<Porter> allPorters() => _porterPool.items;
 
   // protected
-  Docker? removeDocker(Docker? docker, {required SocketAddress remote, SocketAddress? local}) =>
-      _dockerPool.removeItem(docker, remote: remote, local: local);
+  Porter? removePorter(Porter? porter, {required SocketAddress remote, SocketAddress? local}) =>
+      _porterPool.removeItem(porter, remote: remote, local: local);
 
   // protected
-  Docker? getDocker({required SocketAddress remote, SocketAddress? local}) =>
-      _dockerPool.getItem(remote: remote, local: local);
+  Porter? getPorter({required SocketAddress remote, SocketAddress? local}) =>
+      _porterPool.getItem(remote: remote, local: local);
 
   // protected
-  Docker? setDocker(Docker docker, {required SocketAddress remote, SocketAddress? local}) =>
-      _dockerPool.setItem(docker, remote: remote, local: local);
+  Porter? setPorter(Porter porter, {required SocketAddress remote, SocketAddress? local}) =>
+      _porterPool.setItem(porter, remote: remote, local: local);
+
+  // protected
+  Future<Porter?> dock(Connection connection, bool newPorter) async {
+    SocketAddress? remote = connection.remoteAddress;
+    SocketAddress? local = connection.localAddress;
+    if (remote == null) {
+      assert(false, 'remote address should not empty');
+      return null;
+    }
+    Porter? docker;
+    // try to get docker
+    var old = getPorter(remote: remote, local: local);
+    if (old == null && newPorter) {
+      // create & cache docker
+      docker = createPorter(remote: remote, local: local);
+      var cached = setPorter(docker, remote: remote, local: local);
+      if (cached == null || identical(cached, docker)) {} else {
+        await cached.close();
+      }
+    } else {
+      docker = old;
+    }
+    if (old == null && docker is StarPorter) {
+      // set connection for this docker
+      await docker.setConnection(connection);
+    }
+    return docker;
+  }
 
   //
   //  Processor
@@ -146,34 +174,34 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   @override
   Future<bool> process() async {
-    Iterable<Docker> dockers = allDockers();
+    Iterable<Porter> dockers = allPorters();
     // 1. drive all dockers to process
-    int count = await driveDockers(dockers);
+    int count = await drivePorters(dockers);
     // 2. cleanup for dockers
-    cleanupDockers(dockers);
+    cleanupPorters(dockers);
     return count > 0;
   }
 
   // protected
-  Future<int> driveDockers(Iterable<Docker> dockers) async {
+  Future<int> drivePorters(Iterable<Porter> porters) async {
     int count = 0;
-    for (Docker worker in dockers) {
-      if (await worker.process()) {
+    for (Porter docker in porters) {
+      if (await docker.process()) {
         ++count;  // it's busy
       }
     }
     return count;
   }
   // protected
-  void cleanupDockers(Iterable<Docker> dockers) {
+  void cleanupPorters(Iterable<Porter> porters) {
     DateTime now = DateTime.now();
-    for (Docker worker in dockers) {
-      if (worker.isClosed) {
+    for (Porter docker in porters) {
+      if (docker.isClosed) {
         // remove docker when connection closed
-        removeDocker(worker, remote: worker.remoteAddress!, local: worker.localAddress);
+        removePorter(docker, remote: docker.remoteAddress!, local: docker.localAddress);
       } else {
         // clear expired tasks
-        worker.purge(now);
+        docker.purge(now);
       }
     }
   }
@@ -183,8 +211,8 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   Future<void> heartbeat(Connection connection) async {
     SocketAddress remote = connection.remoteAddress!;
     SocketAddress? local = connection.localAddress;
-    Docker? worker = getDocker(remote: remote, local: local);
-    await worker?.heartbeat();
+    Porter? docker = getPorter(remote: remote, local: local);
+    await docker?.heartbeat();
   }
 
   //
@@ -194,32 +222,18 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   @override
   Future<void> onConnectionStateChanged(ConnectionState? previous, ConnectionState? current, Connection connection) async {
     // convert status
-    DockerStatus s1 = DockerStatus.getStatus(previous);
-    DockerStatus s2 = DockerStatus.getStatus(current);
+    PorterStatus s1 = PorterStatus.getStatus(previous);
+    PorterStatus s2 = PorterStatus.getStatus(current);
     // 1. callback when status changed
     if (s1 != s2) {
-      SocketAddress remote = connection.remoteAddress!;
-      SocketAddress? local = connection.localAddress;
-      Docker? worker = getDocker(remote: remote, local: local);
-      if (worker == null) {
-        if (s2 == DockerStatus.error) {
-          // connection closed and docker removed
-          return;
-        }
-        // create & cache docker
-        worker = createDocker([], remote: remote, local: local);
-        setDocker(worker, remote: remote, local: local);
-        // set connection for this docker
-        if (worker is StarDocker) {
-          await worker.setConnection(connection);
-        } else {
-          assert(false, 'docker error: $remote, $worker');
-        }
+      bool notFinished = s2 != PorterStatus.error;
+      Porter? docker = await dock(connection, notFinished);
+      if (docker == null) {
+        // connection closed and docker removed
+        return;
       }
-      // NOTICE: if the previous state is null, the docker maybe not
-      //         created yet, this situation means the docker status
-      //         not changed too, so no need to callback here.
-      await delegate?.onDockerStatusChanged(s1, s2, worker);
+      // callback for docker status
+      await delegate?.onPorterStatusChanged(s1, s2, docker);
     }
     // 2. heartbeat when connection expired
     if (current?.index == ConnectionStateOrder.expired.index) {
@@ -229,43 +243,13 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   @override
   Future<void> onConnectionReceived(Uint8List data, Connection connection) async {
-    SocketAddress remote = connection.remoteAddress!;
-    SocketAddress? local = connection.localAddress;
-    // get docker by (remote, local)
-    Docker? worker = getDocker(remote: remote, local: local);
-    if (worker != null) {
-      // docker exists, call docker.onReceived(data);
-      await worker.processReceived(data);
-      return;
-    }
-    // docker not exists, check the data to decide which docker should be created
-
-    // cache advance party for this connection
-    List<Uint8List> advanceParty = cacheAdvanceParty(data, connection);
-    assert(advanceParty.isNotEmpty, 'advance party error');
-    // create & cache docker
-    worker = createDocker(advanceParty, remote: remote, local: local);
-    setDocker(worker, remote: remote, local: local);
-    // set connection for this docker
-    if (worker is StarDocker) {
-      await worker.setConnection(connection);
+    Porter? docker = await dock(connection, true);
+    if (docker == null) {
+      assert(false, 'failed to create docker: $connection');
     } else {
-      assert(false, 'docker error: $remote, $worker');
+      await docker.processReceived(data);
     }
-
-    // process the advance parties one by one
-    for (Uint8List part in advanceParty) {
-      await worker.processReceived(part);
-    }
-    // remove advance party
-    clearAdvanceParty(connection);
   }
-
-  /// cache the advance party before decide which docker to use
-  // protected
-  List<Uint8List> cacheAdvanceParty(Uint8List data, Connection connection);
-  // protected
-  void clearAdvanceParty(Connection connection);
 
   @override
   Future<void> onConnectionSent(int sent, Uint8List data, Connection connection) async {

@@ -38,7 +38,7 @@ import 'ship.dart';
 /*
  *  Architecture:
  *
- *              Docker Delegate   Docker Delegate   Docker Delegate
+ *              Porter Delegate   Porter Delegate   Porter Delegate
  *                     ^                 ^               ^
  *                     :                 :               :
  *        ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~
@@ -48,7 +48,7 @@ import 'ship.dart';
  *          ||         :      Gate       :               :         ||
  *          ||         :                 :               :         ||
  *          ||  +------------+    +------------+   +------------+  ||
- *          ||  |   docker   |    |   docker   |   |   docker   |  ||
+ *          ||  |   porter   |    |   porter   |   |   porter   |  ||
  *          +===+------------+====+------------+===+------------+===+
  *          ||  | connection |    | connection |   | connection |  ||
  *          ||  +------------+    +------------+   +------------+  ||

@@ -35,6 +35,36 @@ import 'channel.dart';
 import 'connection.dart';
 
 
+/*
+ *  Architecture:
+ *
+ *                 Connection        Connection      Connection
+ *                 Delegate          Delegate        Delegate
+ *                     ^                 ^               ^
+ *                     :                 :               :
+ *        ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~
+ *                     :                 :               :
+ *          +===+------V-----+====+------V-----+===+-----V------+===+
+ *          ||  | connection |    | connection |   | connection |  ||
+ *          ||  +------------+    +------------+   +------------+  ||
+ *          ||          :                :               :         ||
+ *          ||          :      HUB       :...............:         ||
+ *          ||          :                        :                 ||
+ *          ||     +-----------+           +-----------+           ||
+ *          ||     |  channel  |           |  channel  |           ||
+ *          +======+-----------+===========+-----------+============+
+ *                 |  socket   |           |  socket   |
+ *                 +-----^-----+           +-----^-----+
+ *                       : (TCP)                 : (UDP)
+ *                       :               ........:........
+ *                       :               :               :
+ *        ~ ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~ ~:~ ~ ~ ~ ~ ~ ~
+ *                       :               :               :
+ *                       V               V               V
+ *                  Remote Peer     Remote Peer     Remote Peer
+ */
+
+
 ///  Connections & Channels Container
 ///  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 abstract interface class Hub implements Processor {

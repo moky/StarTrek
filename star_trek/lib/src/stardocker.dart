@@ -39,9 +39,9 @@ import 'type/pair.dart';
 import 'dock.dart';
 
 
-/// Base Docker
-abstract class StarDocker extends AddressPairObject implements Docker {
-  StarDocker({super.remote, super.local}) {
+/// Star Docker
+abstract class StarPorter extends AddressPairObject implements Porter {
+  StarPorter({super.remote, super.local}) {
     _dock = createDock();
   }
 
@@ -53,14 +53,14 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   Departure? _lastOutgo;
   List<Uint8List> _lastFragments = [];
 
-  WeakReference<DockerDelegate>? _delegateRef;
+  WeakReference<PorterDelegate>? _delegateRef;
 
   // protected
   Dock createDock() => LockedDock();  // override for user-customized dock
 
   // delegate for handling docker events
-  DockerDelegate? get delegate => _delegateRef?.target;
-  set delegate(DockerDelegate? keeper) =>
+  PorterDelegate? get delegate => _delegateRef?.target;
+  set delegate(PorterDelegate? keeper) =>
       _delegateRef = keeper == null ? null : WeakReference(keeper);
 
   //
@@ -101,7 +101,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   bool get isAlive => connection?.isAlive == true;
 
   @override
-  DockerStatus get status => DockerStatus.getStatus(connection?.state);
+  PorterStatus get status => PorterStatus.getStatus(connection?.state);
 
   @override
   String toString() {
@@ -121,17 +121,17 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       // waiting for more data
       return;
     }
-    DockerDelegate? keeper = delegate;
+    PorterDelegate? keeper = delegate;
     Arrival? income;
     for (Arrival item in ships) {
       // 2. check income ship for response
-      income = checkArrival(item);
+      income = await checkArrival(item);
       if (income == null) {
         // waiting for more fragment
         continue;
       }
       // 3. callback for processing income ship with completed data package
-      await keeper?.onDockerReceived(income, this);
+      await keeper?.onPorterReceived(income, this);
     }
   }
 
@@ -147,7 +147,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
   /// @param income - income ship carrying data package/fragment/response
   /// @return income ship carrying completed data package
   // protected
-  Arrival? checkArrival(Arrival income);
+  Future<Arrival?> checkArrival(Arrival income);
 
   ///  Check and remove linked departure ship with same SN (and page index for fragment)
   ///
@@ -161,7 +161,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
       return null;
     }
     // all fragments responded, task finished
-    await delegate?.onDockerSent(linked, this);
+    await delegate?.onPorterSent(linked, this);
     return linked;
   }
 
@@ -220,7 +220,7 @@ abstract class StarDocker extends AddressPairObject implements Docker {
         return false;
       } else if (outgo.getStatus(now) == ShipStatus.failed) {
         // callback for mission failed
-        await delegate?.onDockerFailed(IOError('Request timeout'), outgo, this);
+        await delegate?.onPorterFailed(IOError('Request timeout'), outgo, this);
         // task timeout, return true to process next one
         return true;
       } else {
@@ -255,10 +255,10 @@ abstract class StarDocker extends AddressPairObject implements Docker {
         // task done
         if (outgo.isImportant) {
           // this task needs response,
-          // so we cannot call 'onDockerSent()' immediately
+          // so we cannot call 'onPorterSent()' immediately
           // until the remote responded
         } else {
-          await delegate?.onDockerSent(outgo, this);
+          await delegate?.onPorterSent(outgo, this);
         }
         return true;
       }
@@ -279,8 +279,8 @@ abstract class StarDocker extends AddressPairObject implements Docker {
     _lastOutgo = outgo;
     _lastFragments = fragments;
     // 6. callback for error
-    //await delegate?.onDockerFailed(error, outgo, this);
-    await delegate?.onDockerError(error, outgo, this);
+    //await delegate?.onPorterFailed(error, outgo, this);
+    await delegate?.onPorterError(error, outgo, this);
     return false;
   }
 

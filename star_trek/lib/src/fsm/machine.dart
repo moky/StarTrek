@@ -112,7 +112,7 @@ abstract interface class MachineDelegate<C extends MachineContext, T extends Sta
   ///
   /// @param next     - new state
   /// @param ctx      - context (machine)
-  /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
+  /// @param now      - current time
   Future<void> enterState(S? next, C ctx, DateTime now);
 
   ///  Called after old state exited
@@ -120,21 +120,21 @@ abstract interface class MachineDelegate<C extends MachineContext, T extends Sta
   ///
   /// @param previous - old state
   /// @param ctx      - context (machine)
-  /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
+  /// @param now      - current time
   Future<void> exitState(S? previous, C ctx, DateTime now);
 
   ///  Called after current state paused
   ///
   /// @param current  - current state
   /// @param ctx      - context (machine)
-  /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
+  /// @param now      - current time
   Future<void> pauseState(S? current, C ctx, DateTime now);
 
   ///  Called before current state resumed
   ///
   /// @param current  - current state
   /// @param ctx      - context (machine)
-  /// @param now      - current time (milliseconds, from Jan 1, 1970 UTC)
+  /// @param now      - current time
   Future<void> resumeState(S? current, C ctx, DateTime now);
 
 }

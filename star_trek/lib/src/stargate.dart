@@ -118,7 +118,6 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   ///  Create new docker for received data
   ///
-  /// @param data   - advance party
   /// @param remote - remote address
   /// @param local  - local address
   /// @return Docker
@@ -178,7 +177,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     // 1. drive all dockers to process
     int count = await drivePorters(dockers);
     // 2. cleanup for dockers
-    cleanupPorters(dockers);
+    await cleanupPorters(dockers);
     return count > 0;
   }
 
@@ -193,12 +192,16 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     return count;
   }
   // protected
-  void cleanupPorters(Iterable<Porter> porters) {
+  Future<void> cleanupPorters(Iterable<Porter> porters) async {
     DateTime now = DateTime.now();
+    Porter? cached;
     for (Porter docker in porters) {
       if (docker.isClosed) {
         // remove docker when connection closed
-        removePorter(docker, remote: docker.remoteAddress!, local: docker.localAddress);
+        cached = removePorter(docker, remote: docker.remoteAddress!, local: docker.localAddress);
+        if (cached == null || identical(cached, docker)) {} else {
+          await cached.close();
+        }
       } else {
         // clear expired tasks
         docker.purge(now);

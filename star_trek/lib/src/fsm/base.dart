@@ -135,7 +135,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   ///  Exit current state, and enter new state
   ///
   /// @param newState - next state
-  /// @param now     - current time (milliseconds, from Jan 1, 1970 UTC)
+  /// @param now      - current time
   Future<bool> _changeState(S? newState, DateTime now) async {
     S? oldState = currentState;
     if (oldState == null) {

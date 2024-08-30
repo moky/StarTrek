@@ -264,7 +264,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   String toString() {
     Type clazz = runtimeType;
     return '<$clazz remote="$remoteAddress" local="$localAddress"'
-        ' closed=$isClosed bound=$isBound connected="$isConnected" >\n\t'
+        ' closed=$isClosed bound=$isBound connected=$isConnected>\n\t'
         '$socket\n</$clazz>';
   }
 
@@ -326,7 +326,7 @@ abstract class BaseChannel<C extends SelectableChannel>
     C? sock = _sock;
     bool ok = sock == null || await doDisconnect(sock);
     if (!ok) {
-      assert(ok, 'failed to disconnect socket: $sock');
+      assert(false, 'failed to disconnect socket: $sock');
       return null;
     }
     // remoteAddress = null;

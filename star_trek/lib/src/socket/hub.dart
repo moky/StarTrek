@@ -145,6 +145,7 @@ abstract class BaseHub implements Hub {
 
   @override
   Future<Connection?> connect({required SocketAddress remote, SocketAddress? local}) async {
+    // TODO: check local address
     Connection? conn;
     // try to get connection
     var old = getConnection(remote: remote, local: local);
@@ -171,6 +172,17 @@ abstract class BaseHub implements Hub {
   //
 
   // protected
+  Future<void> closeChannel(Channel sock) async {
+    try {
+      if (sock.isClosed) {} else {
+        await sock.close();
+      }
+    } on IOException catch (_) {
+      // print(e);
+    }
+  }
+
+  // protected
   Future<bool> driveChannel(Channel sock) async {
     ChannelState cs = sock.state;
     if (cs == ChannelState.init) {
@@ -195,19 +207,23 @@ abstract class BaseHub implements Hub {
       remote = sock.remoteAddress;
       local = sock.localAddress;
       ConnectionDelegate? gate = delegate;
+      Channel? cached;
       if (gate == null || remote == null) {
         // UDP channel may not connected,
         // so no connection for it
-        removeChannel(sock, remote: remote, local: local);
+        cached = removeChannel(sock, remote: remote, local: local);
       } else {
         // remove channel and callback with connection
         Connection? conn = getConnection(remote: remote, local: local);
-        removeChannel(sock, remote: remote, local: local);
+        cached = removeChannel(sock, remote: remote, local: local);
         if (conn != null) {
           await gate.onConnectionError(IOError(e), conn);
         }
       }
-      await sock.close();
+      if (cached == null || identical(cached, sock)) {} else {
+        await closeChannel(cached);
+      }
+      await closeChannel(sock);
       return false;
     }
     if (remote == null || data == null) {
@@ -238,12 +254,16 @@ abstract class BaseHub implements Hub {
   }
 
   // protected
-  void cleanupChannels(Iterable<Channel> channels) {
+  Future<void> cleanupChannels(Iterable<Channel> channels) async {
+    Channel? cached;
     for (Channel sock in channels) {
       if (sock.isClosed) {
         // if channel not connected (TCP) and not bound (UDP),
         // means it's closed, remove it from the hub
-        removeChannel(sock, remote: sock.remoteAddress, local: sock.localAddress);
+        cached = removeChannel(sock, remote: sock.remoteAddress, local: sock.localAddress);
+        if (cached == null || identical(cached, sock)) {} else {
+          await closeChannel(cached);
+        }
       }
     }
   }
@@ -264,13 +284,17 @@ abstract class BaseHub implements Hub {
   }
 
   // protected
-  void cleanupConnections(Iterable<Connection> connections) {
+  Future<void> cleanupConnections(Iterable<Connection> connections) async {
+    Connection? cached;
     for (Connection conn in connections) {
       if (conn.isClosed) {
         // if connection closed, remove it from the hub; notice that
         // ActiveConnection can reconnect, it'll be not connected
         // but still open, don't remove it in this situation.
-        removeConnection(conn, remote: conn.remoteAddress!, local: conn.localAddress);
+        cached = removeConnection(conn, remote: conn.remoteAddress!, local: conn.localAddress);
+        if (cached == null || identical(cached, conn)) {} else {
+          await cached.close();
+        }
       }
     }
   }
@@ -284,8 +308,8 @@ abstract class BaseHub implements Hub {
     Iterable<Connection> connections = allConnections;
     await driveConnections(connections);
     // 3. cleanup closed channels and connections
-    cleanupChannels(channels);
-    cleanupConnections(connections);
+    await cleanupChannels(channels);
+    await cleanupConnections(connections);
     return count > 0;
   }
 

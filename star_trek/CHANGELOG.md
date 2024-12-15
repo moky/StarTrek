@@ -1,3 +1,7 @@
+## 0.5.1
+
+- Sleep duration.
+
 ## 0.5.0
 
 - Star Porter.

@@ -45,7 +45,7 @@ class BaseConnection extends AddressPairObject
     implements Connection, TimedConnection, ConnectionStateDelegate {
   BaseConnection({super.remote, super.local});
 
-  static int kExpires = 16 * 1000;  // 16 seconds
+  static Duration kExpires = Duration(seconds: 16);
 
   WeakReference<ConnectionDelegate>? _delegateRef;
 
@@ -238,7 +238,7 @@ class BaseConnection extends AddressPairObject
   ConnectionState? get state => stateMachine?.currentState;
 
   @override
-  Future<void> tick(DateTime now, int elapsed) async {
+  Future<void> tick(DateTime now, Duration elapsed) async {
     if (_channelRef == null) {
       // not initialized
       return;
@@ -259,20 +259,32 @@ class BaseConnection extends AddressPairObject
 
   @override
   bool isSentRecently(DateTime now) {
-    int last = _lastSentTime?.millisecondsSinceEpoch ?? 0;
-    return now.millisecondsSinceEpoch <= last + kExpires;
+    DateTime? lastTime = _lastSentTime;
+    if (lastTime == null) {
+      return false;
+    }
+    // return now <= last + kExpires;
+    return lastTime.add(kExpires).isAfter(now);
   }
 
   @override
   bool isReceivedRecently(DateTime now) {
-    int last = _lastReceivedTime?.millisecondsSinceEpoch ?? 0;
-    return now.millisecondsSinceEpoch <= last + kExpires;
+    DateTime? lastTime = _lastSentTime;
+    if (lastTime == null) {
+      return false;
+    }
+    // return now <= last + kExpires;
+    return lastTime.add(kExpires).isAfter(now);
   }
 
   @override
   bool isNotReceivedLongTimeAgo(DateTime now) {
-    int last = _lastReceivedTime?.millisecondsSinceEpoch ?? 0;
-    return now.millisecondsSinceEpoch > last + (kExpires << 3);
+    DateTime? lastTime = _lastSentTime;
+    if (lastTime == null) {
+      return false;
+    }
+    // return now > last + (kExpires << 3);
+    return lastTime.add(kExpires * 8).isBefore(now);
   }
 
   //
@@ -294,14 +306,15 @@ class BaseConnection extends AddressPairObject
       if (previous?.index == ConnectionStateOrder.preparing.index) {
         // connection state changed from 'preparing' to 'ready',
         // set times to expired soon.
-        int soon = now.millisecondsSinceEpoch - (kExpires >> 1);
-        int st = _lastSentTime?.millisecondsSinceEpoch ?? 0;
-        if (st < soon) {
-          _lastSentTime = DateTime.fromMillisecondsSinceEpoch(soon);
+        DateTime soon = now.subtract(kExpires ~/ 2);
+        // int soon = now - (kExpires >> 1);
+        DateTime? st = _lastSentTime;
+        if (st == null || st.isBefore(soon)) {
+          _lastSentTime = soon;
         }
-        int rt = _lastReceivedTime?.millisecondsSinceEpoch ?? 0;
-        if (rt < soon) {
-          _lastReceivedTime = DateTime.fromMillisecondsSinceEpoch(soon);
+        DateTime? rt = _lastReceivedTime;
+        if (rt == null || rt.isBefore(soon)) {
+          _lastReceivedTime = soon;
         }
       }
     }
@@ -346,13 +359,14 @@ class ActiveConnection extends BaseConnection {
   }
 
   Future<void> run() async {
+    Duration sleeping = Duration(milliseconds: 1000);
     int expired = 0;
     int lastTime = 0;
     int interval = 8000;
     int now;
     Channel? sock;
     while (true) {
-      await Runner.sleep(milliseconds: 1000);
+      await Runner.sleep(sleeping);
       if (isClosed) {
         break;
       }
@@ -396,8 +410,10 @@ class ActiveConnection extends BaseConnection {
           // connect timeout
           await sock.close();
         }
-      } catch (e, st) {
-        print('[Socket] active connection error: $e, $st');
+      } catch (e) {
+        // print('[Socket] active connection error: $e, $st');
+        var error = IOError(e);
+        delegate?.onConnectionError(error, this);
       }
     }
     print('[Socket] active connection exits: $remoteAddress');

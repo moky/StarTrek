@@ -49,7 +49,7 @@ abstract class DepartureShip implements Departure {
 
   ///  Departure task will be expired after 2 minutes
   ///  if no response received.
-  static int kExpires = 120 * 1000;  // milliseconds
+  static Duration kExpires = Duration(seconds: 120);
 
   ///  Important departure task will be retried 2 times
   ///  if response timeout.
@@ -64,7 +64,7 @@ abstract class DepartureShip implements Departure {
     // decrease counter
     --_tries;
     // update retried time
-    _expired = DateTime.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch + kExpires);
+    _expired = now.add(kExpires);
   }
 
   @override

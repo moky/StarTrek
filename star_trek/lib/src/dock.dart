@@ -103,17 +103,18 @@ class Dock {
 
 class LockedDock extends Dock {
 
-  int _nextPurgeTime = 0;
+  DateTime? _nextPurgeTime;
+  static const Duration halfMinute = Duration(seconds: 30);
 
   @override
   int purge([DateTime? now]) {
     now ??= DateTime.now();
-    int ts = now.millisecondsSinceEpoch;
-    if (ts < _nextPurgeTime) {
+    DateTime? nextTime = _nextPurgeTime;
+    if (nextTime != null && now.isBefore(nextTime)) {
       return -1;
     } else {
       // next purge after half a minute
-      _nextPurgeTime = ts + 30 * 1000;
+      _nextPurgeTime = now.add(halfMinute);
     }
     return super.purge(now);
   }

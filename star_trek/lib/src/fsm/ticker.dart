@@ -39,7 +39,7 @@ abstract interface class Ticker {
   ///
   /// @param now     - current time
   /// @param elapsed - milliseconds from previous tick
-  Future<void> tick(DateTime now, int elapsed);
+  Future<void> tick(DateTime now, Duration elapsed);
 
 }
 
@@ -47,15 +47,14 @@ abstract interface class Ticker {
 class Metronome extends Runner {
 
   // at least wait 1/60 of a second
-  static int minInterval = Duration.millisecondsPerSecond ~/ 60;  //  16 ms
+  static Duration minInterval = Duration(
+      microseconds: Duration.microsecondsPerSecond ~/ 60);  //  16 millis
 
-  Metronome(super.millis) : _lastTime = 0 {
-    _allTickers = WeakSet();
-  }
+  Metronome(super.interval);
 
-  int _lastTime;
+  late DateTime _lastTime;
 
-  late final Set<Ticker> _allTickers;
+  final Set<Ticker> _allTickers = WeakSet();
 
   void addTicker(Ticker ticker) => _allTickers.add(ticker);
 
@@ -72,7 +71,7 @@ class Metronome extends Runner {
   @override
   Future<void> setup() async {
     await super.setup();
-    _lastTime = DateTime.now().millisecondsSinceEpoch;
+    _lastTime = DateTime.now();
   }
 
   @override
@@ -83,17 +82,17 @@ class Metronome extends Runner {
       // return false to have a rest ^_^
       return false;
     }
-    // 1. check time
     DateTime now = DateTime.now();
-    int current = now.millisecondsSinceEpoch;
-    int elapsed = current - _lastTime;
-    int waiting = interval - elapsed;
+    int delta = now.microsecondsSinceEpoch - _lastTime.microsecondsSinceEpoch;
+    // 1. check time
+    Duration elapsed = Duration(microseconds: delta);
+    Duration waiting = interval - elapsed;
     if (waiting < minInterval) {
       waiting = minInterval;
     }
-    await Runner.sleep(milliseconds: waiting);
-    now = now.add(Duration(milliseconds: waiting));
-    elapsed += waiting;
+    await Runner.sleep(waiting);
+    now = now.add(waiting);
+    elapsed = elapsed + waiting;
     // 2. drive tickers
     for (Ticker item in tickers) {
       try {
@@ -103,7 +102,7 @@ class Metronome extends Runner {
       }
     }
     // 3. update last time
-    _lastTime = now.millisecondsSinceEpoch;
+    _lastTime = now;
     return true;
   }
 
@@ -117,7 +116,7 @@ class PrimeMetronome {
   factory PrimeMetronome() => _instance;
   static final PrimeMetronome _instance = PrimeMetronome._internal();
   PrimeMetronome._internal() {
-    _metronome = Metronome(Runner.intervalSlow);
+    _metronome = Metronome(Runner.kIntervalSlow);
     /*await */_metronome.start();
   }
 

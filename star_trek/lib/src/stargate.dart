@@ -147,22 +147,33 @@ abstract class StarGate implements Gate, ConnectionDelegate {
       assert(false, 'remote address should not empty');
       return null;
     }
-    Porter? docker;
-    // try to get docker
-    var old = getPorter(remote: remote, local: local);
-    if (old == null && newPorter) {
-      // create & cache docker
-      docker = createPorter(remote: remote, local: local);
-      var cached = setPorter(docker, remote: remote, local: local);
-      if (cached == null || identical(cached, docker)) {} else {
-        await cached.close();
-      }
-    } else {
-      docker = old;
+    //
+    //  1. try to get docker
+    //
+    Porter? docker = getPorter(remote: remote, local: local);
+    if (docker != null) {
+      // found
+      return docker;
+    } else if (!newPorter) {
+      // no need to create new docker
+      return null;
     }
-    if (old == null && docker is StarPorter) {
+    //
+    //  2. create new docker
+    //
+    docker = createPorter(remote: remote, local: local);
+    Porter? cached = setPorter(docker, remote: remote, local: local);
+    if (cached == null || identical(cached, docker)) {} else {
+      await cached.close();
+    }
+    //
+    //  3. set connection for this docker
+    //
+    if (docker is StarPorter) {
       // set connection for this docker
       await docker.setConnection(connection);
+    } else {
+      assert(false, 'docker error: $remote, $docker');
     }
     return docker;
   }
@@ -196,15 +207,16 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     DateTime now = DateTime.now();
     Porter? cached;
     for (Porter docker in porters) {
-      if (docker.isClosed) {
-        // remove docker when connection closed
-        cached = removePorter(docker, remote: docker.remoteAddress!, local: docker.localAddress);
-        if (cached == null || identical(cached, docker)) {} else {
-          await cached.close();
-        }
-      } else {
+      if (!docker.isClosed) {
+        // docker connected,
         // clear expired tasks
         docker.purge(now);
+        continue;
+      }
+      // remove docker when connection closed
+      cached = removePorter(docker, remote: docker.remoteAddress!, local: docker.localAddress);
+      if (cached == null || identical(cached, docker)) {} else {
+        await cached.close();
       }
     }
   }
@@ -227,7 +239,9 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     // convert status
     PorterStatus s1 = PorterStatus.getStatus(previous);
     PorterStatus s2 = PorterStatus.getStatus(current);
-    // 1. callback when status changed
+    //
+    //  1. callback when status changed
+    //
     if (s1 != s2) {
       bool notFinished = s2 != PorterStatus.error;
       Porter? docker = await dock(connection, notFinished);
@@ -238,7 +252,9 @@ abstract class StarGate implements Gate, ConnectionDelegate {
       // callback for docker status
       await delegate?.onPorterStatusChanged(s1, s2, docker);
     }
-    // 2. heartbeat when connection expired
+    //
+    //  2. heartbeat when connection expired
+    //
     if (current?.index == ConnectionStateOrder.expired.index) {
       await heartbeat(connection);
     }

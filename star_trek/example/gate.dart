@@ -40,6 +40,8 @@ abstract class AutoGate <H extends Hub>
     extends BaseGate<H> implements Runnable {
   AutoGate(super.keeper);
 
+  final Duration _interval = Duration(milliseconds: 128);
+
   bool _running = false;
 
   bool get isRunning => _running;
@@ -71,7 +73,7 @@ abstract class AutoGate <H extends Hub>
   }
 
   // protected
-  Future<void> idle() async => await Runner.sleep(milliseconds: 128);
+  Future<void> idle() async => await Runner.sleep(_interval);
 
   @override
   Future<bool> process() async {

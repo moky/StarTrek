@@ -273,10 +273,11 @@ abstract class BaseHub implements Hub {
   // protected
   Future<void> driveConnections(Iterable<Connection> connections) async {
     DateTime now = DateTime.now();
-    int delta = now.millisecondsSinceEpoch - _last.millisecondsSinceEpoch;
+    int delta = now.microsecondsSinceEpoch - _last.microsecondsSinceEpoch;
+    Duration elapsed = Duration(microseconds: delta);
     for (Connection conn in connections) {
       // drive connection to go on
-      await conn.tick(now, delta);
+      await conn.tick(now, elapsed);
       // NOTICE: let the delegate to decide whether close an error connection
       //         or just remove it.
     }

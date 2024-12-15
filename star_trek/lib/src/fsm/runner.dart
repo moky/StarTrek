@@ -75,16 +75,18 @@ abstract class Runner implements Runnable, Handler, Processor {
   //     and will appear like the effect of a movie.
   // (4) At 24fps, there is a feeling of 'motion blur',
   //     while at 60fps, the image is the smoothest and cleanest.
-  static int intervalSlow   = Duration.millisecondsPerSecond ~/ 10;  // 100 ms
-  static int intervalNormal = Duration.millisecondsPerSecond ~/ 25;  //  40 ms
-  static int intervalFast   = Duration.millisecondsPerSecond ~/ 60;  //  16 ms
+  static Duration kIntervalSlow   = Duration(
+      microseconds: Duration.microsecondsPerSecond ~/ 10);  // 100 millis
+  static Duration kIntervalNormal = Duration(
+      microseconds: Duration.microsecondsPerSecond ~/ 25);  //  40 millis
+  static Duration kIntervalFast   = Duration(
+      microseconds: Duration.microsecondsPerSecond ~/ 60);  //  16 millis
 
-  Runner(int millis) {
-    assert(millis > 0, 'interval error: $millis');
-    interval = millis;
+  Runner(this.interval) {
+    assert(interval.inMicroseconds > 0, 'interval error: $interval');
   }
 
-  late final int interval;
+  final Duration interval;
 
   bool _running = false;
 
@@ -128,10 +130,9 @@ abstract class Runner implements Runnable, Handler, Processor {
   }
 
   // protected
-  Future<void> idle() async =>
-      await sleep(milliseconds: interval);  // Duration.millisecondsPerSecond ~/ 60
+  Future<void> idle() async => await sleep(interval);
 
-  static Future<void> sleep({required int milliseconds}) async =>
-      await Future.delayed(Duration(milliseconds: milliseconds));
+  static Future<void> sleep(Duration duration) async =>
+      await Future.delayed(duration);
 
 }

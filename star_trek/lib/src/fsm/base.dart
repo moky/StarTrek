@@ -95,6 +95,10 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   // protected
   C get context;  // the machine itself
 
+  // bool get isStopped => _status == _Status.stopped;
+  bool get isRunning => _status == _Status.running;
+  bool get isPaused  => _status == _Status.paused;
+
   //
   //  States
   //
@@ -249,11 +253,15 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   //
 
   @override
-  Future<void> tick(DateTime now, int elapsed) async {
+  Future<void> tick(DateTime now, Duration elapsed) async {
     ///  Drive the machine running forward
-    C ctx = context;
+    if (!isRunning) {
+      // paused, stopped
+      return;
+    }
     S? state = currentState;
-    if (state != null && _status == _Status.running) {
+    if (state != null) {
+      C ctx = context;
       T? trans = state.evaluate(ctx, now);
       if (trans != null) {
         state = getTargetState(trans);

@@ -196,7 +196,9 @@ abstract class StarPorter extends AddressPairObject implements Porter {
   @override
   Future<bool> process() async {
     Connection? conn = connection;
-    // 1. get connection which is ready for sending data
+    //
+    //  1. get connection which is ready for sending data
+    //
     if (conn == null) {
       // waiting for connection
       return false;
@@ -204,7 +206,9 @@ abstract class StarPorter extends AddressPairObject implements Porter {
       // connection is not ready for sending data
       return false;
     }
-    // 2. get data waiting to be sent out
+    //
+    //  2. get data waiting to be sent out
+    //
     Departure? outgo = _lastOutgo;
     List<Uint8List> fragments = _lastFragments;
     if (outgo != null && fragments.isNotEmpty) {
@@ -233,7 +237,9 @@ abstract class StarPorter extends AddressPairObject implements Porter {
         }
       }
     }
-    // 3. process fragments of outgo task
+    //
+    //  3. process fragments of outgo task
+    //
     IOError error;
     int index = 0, sent = 0;
     try {
@@ -266,7 +272,9 @@ abstract class StarPorter extends AddressPairObject implements Porter {
       // socket error, callback
       error = IOError(ex);
     }
-    // 4. remove sent fragments
+    //
+    //  4. remove sent fragments
+    //
     for (; index > 0; --index) {
       fragments.removeAt(0);
     }
@@ -275,10 +283,14 @@ abstract class StarPorter extends AddressPairObject implements Porter {
       Uint8List last = fragments.removeAt(0);
       fragments.insert(0, last.sublist(sent));
     }
-    // 5. store remaining data
+    //
+    //  5. store remaining data
+    //
     _lastOutgo = outgo;
     _lastFragments = fragments;
-    // 6. callback for error
+    //
+    //  6. callback for error
+    //
     //await delegate?.onPorterFailed(error, outgo, this);
     await delegate?.onPorterError(error, outgo, this);
     return false;

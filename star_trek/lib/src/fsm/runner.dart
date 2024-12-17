@@ -75,12 +75,13 @@ abstract class Runner implements Runnable, Handler, Processor {
   //     and will appear like the effect of a movie.
   // (4) At 24fps, there is a feeling of 'motion blur',
   //     while at 60fps, the image is the smoothest and cleanest.
-  static Duration kIntervalSlow   = Duration(
+  static Duration INTERVAL_SLOW   = Duration(
       microseconds: Duration.microsecondsPerSecond ~/ 10);  // 100 millis
-  static Duration kIntervalNormal = Duration(
+  static Duration INTERVAL_NORMAL = Duration(
       microseconds: Duration.microsecondsPerSecond ~/ 25);  //  40 millis
-  static Duration kIntervalFast   = Duration(
+  static Duration INTERVAL_FAST   = Duration(
       microseconds: Duration.microsecondsPerSecond ~/ 60);  //  16 millis
+  // ignore_for_file: non_constant_identifier_names
 
   Runner(this.interval) {
     assert(interval.inMicroseconds > 0, 'interval error: $interval');

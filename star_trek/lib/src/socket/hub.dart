@@ -96,7 +96,8 @@ abstract class BaseHub implements Hub {
      *  TCP header :   20 bytes
      *  UDP header :    8 bytes
      */
-  static int kMSS = 1472;  // 1500 - 20 - 8
+  // ignore: non_constant_identifier_names
+  static int MSS = 1472;  // 1500 - 20 - 8
 
   //
   //  Channel
@@ -164,6 +165,7 @@ abstract class BaseHub implements Hub {
     //
     conn = createConnection(remote: remote, local: local);
     local ??= conn.localAddress;
+    // cache the connection
     var cached = setConnection(conn, remote: remote, local: local);
     if (cached == null || identical(cached, conn)) {} else {
       await cached.close();
@@ -217,7 +219,7 @@ abstract class BaseHub implements Hub {
     //  1. try to receive
     //
     try {
-      Pair<Uint8List?, SocketAddress?> pair = await sock.receive(kMSS);
+      Pair<Uint8List?, SocketAddress?> pair = await sock.receive(MSS);
       data = pair.first;
       remote = pair.second;
     } on IOException catch (e) {

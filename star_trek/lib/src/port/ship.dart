@@ -118,8 +118,9 @@ abstract interface class Departure implements Ship {
 
 abstract class DeparturePriority {
 
-  static const int kUrgent = -1;
-  static const int kNormal = 0;
-  static const int kSlower = 1;
+  // ignore_for_file: constant_identifier_names
+  static const int URGENT = -1;
+  static const int NORMAL = 0;
+  static const int SLOWER = 1;
 
 }

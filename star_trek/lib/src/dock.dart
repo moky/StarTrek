@@ -104,7 +104,6 @@ class Dock {
 class LockedDock extends Dock {
 
   DateTime? _nextPurgeTime;
-  static const Duration halfMinute = Duration(seconds: 30);
 
   @override
   int purge([DateTime? now]) {
@@ -118,5 +117,7 @@ class LockedDock extends Dock {
     }
     return super.purge(now);
   }
+
+  static const Duration halfMinute = Duration(seconds: 30);
 
 }

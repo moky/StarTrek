@@ -36,19 +36,20 @@ import 'port/ship.dart';
 abstract class ArrivalShip implements Arrival {
   ArrivalShip([DateTime? now]) {
     now ??= DateTime.now();
-    _expired = now.add(kExpires);
+    _expired = now.add(EXPIRES);
   }
 
   late DateTime _expired;
 
   ///  Arrival task will be expired after 5 minutes
   ///  if still not completed.
-  static Duration kExpires = Duration(seconds: 300);
+  // ignore: non_constant_identifier_names
+  static Duration EXPIRES = Duration(minutes: 5);
 
   @override
   void touch(DateTime now) {
     // update expired time
-    _expired = now.add(kExpires);
+    _expired = now.add(EXPIRES);
   }
 
   @override

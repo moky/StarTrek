@@ -116,6 +116,9 @@ abstract interface class ConnectionDelegate {
 ///  Connection with sent/received time
 abstract interface class TimedConnection {
 
+  // ignore: non_constant_identifier_names
+  static Duration EXPIRES = Duration(seconds: 16);
+
   DateTime? get lastSentTime;
 
   DateTime? get lastReceivedTime;

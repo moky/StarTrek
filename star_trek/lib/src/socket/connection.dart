@@ -45,8 +45,6 @@ class BaseConnection extends AddressPairObject
     implements Connection, TimedConnection, ConnectionStateDelegate {
   BaseConnection({super.remote, super.local});
 
-  static Duration kExpires = Duration(seconds: 16);
-
   WeakReference<ConnectionDelegate>? _delegateRef;
 
   WeakReference<Channel>? _channelRef;
@@ -267,8 +265,8 @@ class BaseConnection extends AddressPairObject
     if (lastTime == null) {
       return false;
     }
-    // return now <= last + kExpires;
-    return lastTime.add(kExpires).isAfter(now);
+    // return now <= last + EXPIRES;
+    return lastTime.add(TimedConnection.EXPIRES).isAfter(now);
   }
 
   @override
@@ -277,8 +275,8 @@ class BaseConnection extends AddressPairObject
     if (lastTime == null) {
       return false;
     }
-    // return now <= last + kExpires;
-    return lastTime.add(kExpires).isAfter(now);
+    // return now <= last + EXPIRES;
+    return lastTime.add(TimedConnection.EXPIRES).isAfter(now);
   }
 
   @override
@@ -287,8 +285,8 @@ class BaseConnection extends AddressPairObject
     if (lastTime == null) {
       return false;
     }
-    // return now > last + (kExpires << 3);
-    return lastTime.add(kExpires * 8).isBefore(now);
+    // return now > last + (EXPIRES << 3);
+    return lastTime.add(TimedConnection.EXPIRES * 8).isBefore(now);
   }
 
   //
@@ -310,8 +308,8 @@ class BaseConnection extends AddressPairObject
       if (previous?.index == ConnectionStateOrder.preparing.index) {
         // connection state changed from 'preparing' to 'ready',
         // set times to expired soon.
-        DateTime soon = now.subtract(kExpires ~/ 2);
-        // int soon = now - (kExpires >> 1);
+        DateTime soon = now.subtract(TimedConnection.EXPIRES ~/ 2);
+        // int soon = now - (EXPIRES >> 1);
         DateTime? st = _lastSentTime;
         if (st == null || st.isBefore(soon)) {
           _lastSentTime = soon;

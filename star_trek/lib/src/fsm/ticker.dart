@@ -115,7 +115,7 @@ class PrimeMetronome {
   factory PrimeMetronome() => _instance;
   static final PrimeMetronome _instance = PrimeMetronome._internal();
   PrimeMetronome._internal() {
-    _metronome = Metronome(Runner.kIntervalSlow);
+    _metronome = Metronome(Runner.INTERVAL_SLOW);
     /*await */_metronome.start();
   }
 

@@ -38,7 +38,7 @@ abstract class DepartureShip implements Departure {
     assert(maxTries != 0, 'max tries should not be 0');
     _prior = priority ?? 0;
     _expired = null;
-    _tries = maxTries ?? 1 + kRetries;
+    _tries = maxTries ?? 1 + RETRIES;
   }
 
   DateTime? _expired;
@@ -49,11 +49,12 @@ abstract class DepartureShip implements Departure {
 
   ///  Departure task will be expired after 2 minutes
   ///  if no response received.
-  static Duration kExpires = Duration(seconds: 120);
+  static Duration EXPIRES = Duration(minutes: 2);
 
   ///  Important departure task will be retried 2 times
   ///  if response timeout.
-  static int kRetries = 2;
+  static int RETRIES = 2;
+  // ignore_for_file: non_constant_identifier_names
 
   @override
   int get priority => _prior;
@@ -64,7 +65,7 @@ abstract class DepartureShip implements Departure {
     // decrease counter
     --_tries;
     // update retried time
-    _expired = now.add(kExpires);
+    _expired = now.add(EXPIRES);
   }
 
   @override

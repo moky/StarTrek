@@ -5,6 +5,7 @@ library startrek;
 // export 'pair.dart';
 
 export 'src/net/channel.dart';
+export 'src/net/helper.dart';
 export 'src/net/connection.dart';
 export 'src/net/state.dart';
 export 'src/net/transition.dart';

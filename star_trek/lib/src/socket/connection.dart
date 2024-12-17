@@ -103,7 +103,11 @@ class BaseConnection extends AddressPairObject
     }
     // 2. close old channel
     if (old == null || identical(old, sock)) {} else {
-      await old.close();
+      try {
+        await old.close();
+      } catch (e) {
+        // await delegate?.onConnectionError(IOError(e), this);
+      }
     }
   }
 
@@ -346,6 +350,9 @@ class ActiveConnection extends BaseConnection {
 
   WeakReference<Hub>? _hubRef;
 
+  // // private
+  // Hub? get hub => _hubRef?.target;
+
   @override
   bool get isClosed => stateMachine == null;
 
@@ -416,6 +423,7 @@ class ActiveConnection extends BaseConnection {
         delegate?.onConnectionError(error, this);
       }
     }
+    // connection exists
     print('[Socket] active connection exits: $remoteAddress');
   }
 

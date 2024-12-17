@@ -30,6 +30,7 @@
  */
 import 'address.dart';
 import 'channel.dart';
+import 'network.dart';
 import 'selectable.dart';
 
 
@@ -107,8 +108,9 @@ import 'selectable.dart';
 /// or write operation while an invocation of one of these methods is in
 /// progress will block until that invocation is complete.  </p>
 abstract class SocketChannel extends AbstractSelectableChannel
-    implements ByteChannel {
+    implements ByteChannel, NetworkChannel {
 
+  @override
   Future<SocketChannel?> bind(SocketAddress local);
 
   bool get isBound;
@@ -180,6 +182,7 @@ abstract class SocketChannel extends AbstractSelectableChannel
   ///          {@code SocketAddress} representing the loopback address if
   ///          denied by the security manager, or {@code null} if the
   ///          channel's socket is not bound
+  @override
   SocketAddress? get localAddress;
 
 }

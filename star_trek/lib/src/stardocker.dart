@@ -48,12 +48,11 @@ abstract class StarPorter extends AddressPairObject implements Porter {
   late final Dock _dock;
 
   WeakReference<Connection>? _connectionRef;
+  WeakReference<PorterDelegate>? _delegateRef;
 
   // remaining data to be sent
   Departure? _lastOutgo;
   List<Uint8List> _lastFragments = [];
-
-  WeakReference<PorterDelegate>? _delegateRef;
 
   // protected
   Dock createDock() => LockedDock();  // override for user-customized dock

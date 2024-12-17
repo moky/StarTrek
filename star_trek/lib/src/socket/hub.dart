@@ -132,10 +132,6 @@ abstract class BaseHub implements Hub {
   Iterable<Connection> get allConnections => _connectionPool.items;
 
   // protected
-  Connection? removeConnection(Connection? conn, {required SocketAddress remote, SocketAddress? local}) =>
-      _connectionPool.removeItem(conn, remote: remote, local: local);
-
-  // protected
   Connection? getConnection({required SocketAddress remote, SocketAddress? local}) =>
       _connectionPool.getItem(remote: remote, local: local);
 
@@ -143,26 +139,43 @@ abstract class BaseHub implements Hub {
   Connection? setConnection(Connection conn, {required SocketAddress remote, SocketAddress? local}) =>
       _connectionPool.setItem(conn, remote: remote, local: local);
 
+  // protected
+  Connection? removeConnection(Connection? conn, {required SocketAddress remote, SocketAddress? local}) =>
+      _connectionPool.removeItem(conn, remote: remote, local: local);
+
   @override
   Future<Connection?> connect({required SocketAddress remote, SocketAddress? local}) async {
-    // TODO: check local address
-    Connection? conn;
-    // try to get connection
-    var old = getConnection(remote: remote, local: local);
-    if (old == null) {
-      // create & cache connection
-      conn = createConnection(remote: remote, local: local);
-      var cached = setConnection(conn, remote: remote, local: local);
-      if (cached == null || identical(cached, conn)) {} else {
-        await cached.close();
+    //
+    //  0. pre-checking
+    //
+    Connection? conn = getConnection(remote: remote, local: local);
+    if (conn != null) {
+      // check local address
+      if (local == null) {
+        return conn;
       }
-    } else {
-      conn = old;
+      SocketAddress? address = conn.localAddress;
+      if (address == null || address == local) {
+        return conn;
+      }
     }
-    assert(conn is BaseConnection, 'connection error: $remote, $conn');
-    if (old == null && conn is BaseConnection) {
+    //
+    //  1. create new connection & cache it
+    //
+    conn = createConnection(remote: remote, local: local);
+    local ??= conn.localAddress;
+    var cached = setConnection(conn, remote: remote, local: local);
+    if (cached == null || identical(cached, conn)) {} else {
+      await cached.close();
+    }
+    //
+    //  2. start the new connection
+    //
+    if (conn is BaseConnection) {
       // try to open channel with direction (remote, local)
       await conn.start(this);
+    } else {
+      assert(false, 'connection error: $remote, $conn');
     }
     return conn;
   }
@@ -184,11 +197,14 @@ abstract class BaseHub implements Hub {
 
   // protected
   Future<bool> driveChannel(Channel sock) async {
-    ChannelState cs = sock.state;
-    if (cs == ChannelState.init) {
+    //
+    //  0. check channel state
+    //
+    ChannelStatus cs = sock.status;
+    if (cs == ChannelStatus.init) {
       // preparing
       return false;
-    } else if (cs == ChannelState.closed) {
+    } else if (cs == ChannelStatus.closed) {
       // finished
       return false;
     }
@@ -197,7 +213,9 @@ abstract class BaseHub implements Hub {
     Uint8List? data;
     SocketAddress? remote;
     SocketAddress? local;
-    // try to receiver
+    //
+    //  1. try to receive
+    //
     try {
       Pair<Uint8List?, SocketAddress?> pair = await sock.receive(kMSS);
       data = pair.first;

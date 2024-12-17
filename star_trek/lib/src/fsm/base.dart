@@ -95,10 +95,6 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   // protected
   C get context;  // the machine itself
 
-  // bool get isStopped => _status == _Status.stopped;
-  bool get isRunning => _status == _Status.running;
-  bool get isPaused  => _status == _Status.paused;
-
   //
   //  States
   //
@@ -192,25 +188,41 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   //
 
   @override
-  Future<void> start() async {
+  Future<bool> start() async {
     ///  start machine from default state
+    if (_status != _Status.stopped) {
+      // running or paused,
+      // cannot start again
+      return false;
+    }
     DateTime now = DateTime.now();
     bool ok = await _changeState(defaultState, now);
     assert(ok, 'failed to change default state');
     _status = _Status.running;
+    return ok;
   }
 
   @override
-  Future<void> stop() async {
+  Future<bool> stop() async {
     ///  stop machine and set current state to null
+    if (_status == _Status.stopped) {
+      // stopped,
+      // cannot stop again
+      return false;
+    }
     _status = _Status.stopped;
     DateTime now = DateTime.now();
-    await _changeState(null, now);  // force current state to null
+    return await _changeState(null, now);  // force current state to null
   }
 
   @override
-  Future<void> pause() async {
+  Future<bool> pause() async {
     ///  pause machine, current state not change
+    if (_status != _Status.running) {
+      // paused or stopped,
+      // cannot pause now
+      return false;
+    }
     DateTime now = DateTime.now();
     C ctx = context;
     S? current = currentState;
@@ -226,11 +238,17 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     //  Events after state paused
     //
     await delegate?.pauseState(current, ctx, now);
+    return true;
   }
 
   @override
-  Future<void> resume() async {
+  Future<bool> resume() async {
     ///  resume machine with current state
+    if (_status != _Status.paused) {
+      // running or stopped,
+      // cannot resume now
+      return false;
+    }
     DateTime now = DateTime.now();
     C ctx = context;
     S? current = currentState;
@@ -246,6 +264,7 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
     //  Events after state resumed
     //
     await current?.onResume(ctx, now);
+    return true;
   }
 
   //
@@ -255,8 +274,9 @@ abstract class BaseMachine<C extends MachineContext, T extends BaseTransition<C>
   @override
   Future<void> tick(DateTime now, Duration elapsed) async {
     ///  Drive the machine running forward
-    if (!isRunning) {
-      // paused, stopped
+    if (_status != _Status.running) {
+      // paused or stopped,
+      // cannot evaluate the transitions of current state
       return;
     }
     S? state = currentState;

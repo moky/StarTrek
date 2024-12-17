@@ -82,10 +82,9 @@ class Metronome extends Runner {
       // return false to have a rest ^_^
       return false;
     }
-    DateTime now = DateTime.now();
-    int delta = now.microsecondsSinceEpoch - _lastTime.microsecondsSinceEpoch;
     // 1. check time
-    Duration elapsed = Duration(microseconds: delta);
+    DateTime now = DateTime.now();
+    Duration elapsed = now.difference(_lastTime);
     Duration waiting = interval - elapsed;
     if (waiting < minInterval) {
       waiting = minInterval;

@@ -63,7 +63,7 @@ abstract interface class NetworkChannel implements NIOChannel {
   ///          to an automatically assigned socket address
   ///
   /// @return  This channel
-  Future<NetworkChannel> bind(SocketAddress local);
+  Future<NetworkChannel?> bind(SocketAddress local);
 
   /// Returns the socket address that this channel's socket is bound to.
   ///

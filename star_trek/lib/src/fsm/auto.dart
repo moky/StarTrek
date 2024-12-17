@@ -37,31 +37,33 @@ abstract class AutoMachine<C extends MachineContext, T extends BaseTransition<C>
     extends BaseMachine<C, T, S> {
 
   @override
-  Future<void> start() async {
-    await super.start();
+  Future<bool> start() async {
+    bool ok = await super.start();
     PrimeMetronome timer = PrimeMetronome();
     timer.addTicker(this);
+    return ok;
   }
 
   @override
-  Future<void> stop() async {
+  Future<bool> stop() async {
     PrimeMetronome timer = PrimeMetronome();
     timer.removeTicker(this);
-    await super.stop();
+    return await super.stop();
   }
 
   @override
-  Future<void> pause() async {
+  Future<bool> pause() async {
     PrimeMetronome timer = PrimeMetronome();
     timer.removeTicker(this);
-    await super.pause();
+    return await super.pause();
   }
 
   @override
-  Future<void> resume() async {
-    await super.resume();
+  Future<bool> resume() async {
+    bool ok = await super.resume();
     PrimeMetronome timer = PrimeMetronome();
     timer.addTicker(this);
+    return ok;
   }
 
 }

@@ -128,10 +128,6 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   Iterable<Porter> allPorters() => _porterPool.items;
 
   // protected
-  Porter? removePorter(Porter? porter, {required SocketAddress remote, SocketAddress? local}) =>
-      _porterPool.removeItem(porter, remote: remote, local: local);
-
-  // protected
   Porter? getPorter({required SocketAddress remote, SocketAddress? local}) =>
       _porterPool.getItem(remote: remote, local: local);
 
@@ -140,17 +136,25 @@ abstract class StarGate implements Gate, ConnectionDelegate {
       _porterPool.setItem(porter, remote: remote, local: local);
 
   // protected
+  Porter? removePorter(Porter? porter, {required SocketAddress remote, SocketAddress? local}) =>
+      _porterPool.removeItem(porter, remote: remote, local: local);
+
+  // protected
   Future<Porter?> dock(Connection connection, bool newPorter) async {
+    //
+    //  0. pre-checking
+    //
     SocketAddress? remote = connection.remoteAddress;
     SocketAddress? local = connection.localAddress;
     if (remote == null) {
       assert(false, 'remote address should not empty');
       return null;
     }
+    Porter? docker, cached;
     //
     //  1. try to get docker
     //
-    Porter? docker = getPorter(remote: remote, local: local);
+    docker = getPorter(remote: remote, local: local);
     if (docker != null) {
       // found
       return docker;
@@ -162,7 +166,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     //  2. create new docker
     //
     docker = createPorter(remote: remote, local: local);
-    Porter? cached = setPorter(docker, remote: remote, local: local);
+    cached = setPorter(docker, remote: remote, local: local);
     if (cached == null || identical(cached, docker)) {} else {
       await cached.close();
     }

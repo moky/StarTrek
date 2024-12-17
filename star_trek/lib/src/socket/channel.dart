@@ -34,9 +34,9 @@ import 'dart:typed_data';
 import 'package:object_key/object_key.dart';
 
 import '../net/channel.dart';
+import '../net/helper.dart';
 import '../nio/address.dart';
 import '../nio/channel.dart';
-import '../nio/exception.dart';
 import '../nio/network.dart';
 import '../nio/selectable.dart';
 import '../type/pair.dart';
@@ -87,48 +87,6 @@ abstract class ChannelController<C extends SelectableChannel> {
 
   C? get socket => channel?.socket;
 
-  // protected
-  Future<Uint8List?> receivePackage(SelectableChannel sock, int maxLen) async =>
-      /// TODO: override for async receiving
-      await socketReceive(sock, maxLen);
-
-  // protected
-  Future<int> sendAll(SelectableChannel sock, Uint8List data) async =>
-      /// TODO: override for async sending
-      await socketSend(sock, data);
-
-}
-
-abstract class ChannelReader<C extends SelectableChannel>
-    extends ChannelController<C> implements SocketReader {
-  ChannelReader(super.channel);
-
-  @override
-  Future<Uint8List?> read(int maxLen) async {
-    C? sock = socket;
-    if (sock == null || sock.isClosed) {
-      throw ClosedChannelException();
-    } else {
-      return await receivePackage(sock, maxLen);
-    }
-  }
-
-}
-
-abstract class ChannelWriter<C extends SelectableChannel>
-    extends ChannelController<C> implements SocketWriter {
-  ChannelWriter(super.channel);
-
-  @override
-  Future<int> write(Uint8List src) async {
-    C? sock = socket;
-    if (sock == null || sock.isClosed) {
-      throw ClosedChannelException();
-    } else {
-      return await sendAll(sock, src);
-    }
-  }
-
 }
 
 
@@ -170,7 +128,7 @@ abstract class BaseChannel<C extends SelectableChannel>
     }
     // 2. close old socket
     if (old == null || identical(old, sock)) {} else {
-      await socketDisconnect(old);
+      await SocketHelper.socketDisconnect(old);
     }
   }
 
@@ -179,21 +137,21 @@ abstract class BaseChannel<C extends SelectableChannel>
   //
 
   @override
-  ChannelState get state {
+  ChannelStatus get status {
     if (_closed == null) {
       // initializing
-      return ChannelState.init;
+      return ChannelStatus.init;
     }
-    C? sock = socket;
-    if (sock == null || socketIsClosed(sock)) {
+    C? sock = _sock;
+    if (sock == null || SocketHelper.socketIsClosed(sock)) {
       // closed
-      return ChannelState.closed;
-    } else if (socketIsConnected(sock) || socketIsBound(sock)) {
+      return ChannelStatus.closed;
+    } else if (SocketHelper.socketIsConnected(sock) || SocketHelper.socketIsBound(sock)) {
       // normal
-      return ChannelState.alive;
+      return ChannelStatus.alive;
     } else {
       // opened
-      return ChannelState.open;
+      return ChannelStatus.open;
     }
   }
 
@@ -203,20 +161,20 @@ abstract class BaseChannel<C extends SelectableChannel>
       // initializing
       return false;
     }
-    C? sock = socket;
-    return sock == null || socketIsClosed(sock);
+    C? sock = _sock;
+    return sock == null || SocketHelper.socketIsClosed(sock);
   }
 
   @override
   bool get isBound {
-    C? sock = socket;
-    return sock != null && socketIsBound(sock);
+    C? sock = _sock;
+    return sock != null && SocketHelper.socketIsBound(sock);
   }
 
   @override
   bool get isConnected {
-    C? sock = socket;
-    return sock != null && socketIsConnected(sock);
+    C? sock = _sock;
+    return sock != null && SocketHelper.socketIsConnected(sock);
   }
 
   @override
@@ -224,10 +182,10 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   bool get isAvailable {
-    C? sock = socket;
-    if (sock == null || socketIsClosed(sock)) {
+    C? sock = _sock;
+    if (sock == null || SocketHelper.socketIsClosed(sock)) {
       return false;
-    } else if (socketIsConnected(sock) || socketIsBound(sock)) {
+    } else if (SocketHelper.socketIsConnected(sock) || SocketHelper.socketIsBound(sock)) {
       // alive, check reading buffer
       return checkAvailable(sock);
     } else {
@@ -236,14 +194,14 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   // protected
-  bool checkAvailable(C sock) => socketIsAvailable(sock);
+  bool checkAvailable(C sock) => SocketHelper.socketIsAvailable(sock);
 
   @override
   bool get isVacant {
-    C? sock = socket;
-    if (sock == null || socketIsClosed(sock)) {
+    C? sock = _sock;
+    if (sock == null || SocketHelper.socketIsClosed(sock)) {
       return false;
-    } else if (socketIsConnected(sock) || socketIsBound(sock)) {
+    } else if (SocketHelper.socketIsConnected(sock) || SocketHelper.socketIsBound(sock)) {
       // alive, check writing buffer
       return checkVacant(sock);
     } else {
@@ -252,12 +210,12 @@ abstract class BaseChannel<C extends SelectableChannel>
   }
 
   // protected
-  bool checkVacant(C sock) => socketIsVacant(sock);
+  bool checkVacant(C sock) => SocketHelper.socketIsVacant(sock);
 
   @override
   bool get isBlocking {
-    C? sock = socket;
-    return sock != null && socketIsBlocking(sock);
+    C? sock = _sock;
+    return sock != null && SocketHelper.socketIsBlocking(sock);
   }
 
   @override
@@ -265,7 +223,7 @@ abstract class BaseChannel<C extends SelectableChannel>
     Type clazz = runtimeType;
     return '<$clazz remote="$remoteAddress" local="$localAddress"'
         ' closed=$isClosed bound=$isBound connected=$isConnected>\n\t'
-        '$socket\n</$clazz>';
+        '$_sock\n</$clazz>';
   }
 
   @override
@@ -278,7 +236,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   // protected
   Future<bool> doBind(C sock, SocketAddress local) async {
     if (sock is NetworkChannel) {
-      return await socketBind(sock as NetworkChannel, local);
+      return await SocketHelper.socketBind(sock as NetworkChannel, local);
     }
     assert(false, 'socket error: $sock');
     return false;
@@ -287,7 +245,7 @@ abstract class BaseChannel<C extends SelectableChannel>
   // protected
   Future<bool> doConnect(C sock, SocketAddress remote) async {
     if (sock is NetworkChannel) {
-      return await socketConnect(sock as NetworkChannel, remote);
+      return await SocketHelper.socketConnect(sock as NetworkChannel, remote);
     }
     assert(false, 'socket error: $sock');
     return false;
@@ -295,7 +253,7 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   // protected
   Future<bool> doDisconnect(C sock) async =>
-      await socketDisconnect(sock);
+      await SocketHelper.socketDisconnect(sock);
 
   @override
   Future<NetworkChannel?> bind(SocketAddress local) async {

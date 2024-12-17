@@ -152,15 +152,15 @@ abstract interface class Machine<C extends MachineContext, T extends StateTransi
   S? get currentState;
 
   ///  Change current state to 'default'
-  Future<void> start();
+  Future<bool> start();
 
   ///  Change current state to null
-  Future<void> stop();
+  Future<bool> stop();
 
   ///  Pause machine, current state not change
-  Future<void> pause();
+  Future<bool> pause();
 
   ///  Resume machine with current state
-  Future<void> resume();
+  Future<bool> resume();
 
 }

@@ -119,13 +119,11 @@ class DepartureHall {
     }
     // 2. insert to the sorted queue
     int priority = outgo.priority;
-    int index = _newDepartures.length;
-    while (index > 0) {
-      --index;
-      if (_newDepartures[index].priority <= priority) {
+    int index = 0;
+    for (; index < _newDepartures.length; ++index) {
+      if (_newDepartures[index].priority > priority) {
         // take the place before first ship
         // which priority is greater then this one.
-        ++index;  // insert after
         break;
       }
     }
@@ -220,20 +218,19 @@ class DepartureHall {
     _departureLevel[sn] = priority;
   }
   void _insertPriority(int priority) {
-    int index = 0;
+    int index = 0, value;
     // seeking position for new priority
-    for (int value in _priorities) {
+    for (; index < _priorities.length; ++index) {
+      value = _priorities[index];
       if (value == priority) {
         // duplicated
         return;
       } else if (value > priority) {
         // got it
         break;
-      } else {
-        // current value is smaller than the new value,
-        // keep going
-        ++index;
       }
+      // current value is smaller than the new value,
+      // keep going
     }
     // insert new value before the bigger one
     _priorities.insert(index, priority);

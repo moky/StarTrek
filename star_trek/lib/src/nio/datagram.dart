@@ -34,6 +34,7 @@ import 'package:object_key/object_key.dart';
 
 import 'address.dart';
 import 'channel.dart';
+import 'network.dart';
 import 'selectable.dart';
 
 
@@ -107,8 +108,9 @@ import 'selectable.dart';
 /// support concurrent reading and writing, though at most one thread may be
 /// reading and at most one thread may be writing at any given time.  </p>
 abstract class DatagramChannel extends AbstractSelectableChannel
-    implements ByteChannel {
+    implements ByteChannel, NetworkChannel {
 
+  @override
   Future<DatagramChannel?> bind(SocketAddress local);
 
   bool get isBound;
@@ -271,6 +273,7 @@ abstract class DatagramChannel extends AbstractSelectableChannel
   ///          {@code SocketAddress} representing the loopback address if
   ///          denied by the security manager, or {@code null} if the
   ///          channel's socket is not bound
+  @override
   SocketAddress? get localAddress;
 
 }

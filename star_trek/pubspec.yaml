@@ -1,6 +1,6 @@
 name: startrek
 description: Interstellar Transport
-version: 0.5.2
+version: 1.0.0
 homepage: https://github.com/moky/StarTrek
 repository: https://github.com/moky/StarTrek
 issue_tracker: https://github.com/moky/StarTrek/issues
@@ -10,7 +10,7 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
-  object_key: ^0.1.1
+  object_key: ^1.0.0
 
 dev_dependencies:
   lints: ^2.0.0

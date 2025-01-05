@@ -88,14 +88,14 @@ abstract class BaseHub implements Hub {
   late final WeakReference<ConnectionDelegate> _delegateRef;
 
   /*  Maximum Segment Size
-     *  ~~~~~~~~~~~~~~~~~~~~
-     *  Buffer size for receiving package
-     *
-     *  MTU        : 1500 bytes (excludes 14 bytes ethernet header & 4 bytes FCS)
-     *  IP header  :   20 bytes
-     *  TCP header :   20 bytes
-     *  UDP header :    8 bytes
-     */
+   *  ~~~~~~~~~~~~~~~~~~~~
+   *  Buffer size for receiving package
+   *
+   *  MTU        : 1500 bytes (excludes 14 bytes ethernet header & 4 bytes FCS)
+   *  IP header  :   20 bytes
+   *  TCP header :   20 bytes
+   *  UDP header :    8 bytes
+   */
   // ignore: non_constant_identifier_names
   static int MSS = 1472;  // 1500 - 20 - 8
 
@@ -240,6 +240,7 @@ abstract class BaseHub implements Hub {
           await gate.onConnectionError(IOError(e), conn);
         }
       }
+      // close removed/error channels
       if (cached == null || identical(cached, sock)) {} else {
         await closeChannel(cached);
       }
@@ -253,7 +254,9 @@ abstract class BaseHub implements Hub {
       assert(data.isNotEmpty, 'data should not empty: $remote');
       local = sock.localAddress;
     }
-    // get connection for processing received data
+    //
+    //  2. get connection for processing received data
+    //
     Connection? conn = await connect(remote: remote, local: local);
     if (conn != null) {
       await conn.onReceivedData(data);

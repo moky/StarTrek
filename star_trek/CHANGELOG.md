@@ -1,3 +1,7 @@
+## 1.0.0
+
+- OK released.
+
 ## 0.5.2
 
 - Constant identifier names.

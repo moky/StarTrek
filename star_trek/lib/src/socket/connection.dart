@@ -418,7 +418,7 @@ class ActiveConnection extends BaseConnection {
       } catch (e) {
         // print('[Socket] active connection error: $e, $st');
         var error = IOError(e);
-        delegate?.onConnectionError(error, this);
+        await delegate?.onConnectionError(error, this);
       }
     }
     // connection exists

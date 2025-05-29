@@ -199,9 +199,17 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   // protected
   Future<int> drivePorters(Iterable<Porter> porters) async {
     int count = 0;
+    List<Future<bool>> futures = [];
+    Future<bool> task;
     for (Porter docker in porters) {
-      if (await docker.process()) {
-        ++count;  // it's busy
+      // drive porter to send data
+      task = docker.process();
+      futures.add(task);
+    }
+    List<bool> results = await Future.wait(futures);
+    for (bool busy in results) {
+      if (busy) {
+        count += 1;  // it's busy
       }
     }
     return count;

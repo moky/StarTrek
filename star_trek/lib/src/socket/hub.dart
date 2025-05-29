@@ -267,10 +267,17 @@ abstract class BaseHub implements Hub {
   // protected
   Future<int> driveChannels(Iterable<Channel> channels) async {
     int count = 0;
+    List<Future<bool>> futures = [];
+    Future<bool> task;
     for (Channel sock in channels) {
       // drive channel to receive data
-      if (await driveChannel(sock)) {
-        count += 1;
+      task = driveChannel(sock);
+      futures.add(task);
+    }
+    List<bool> results = await Future.wait(futures);
+    for (bool busy in results) {
+      if (busy) {
+        count += 1;  // it's busy
       }
     }
     return count;
@@ -298,12 +305,16 @@ abstract class BaseHub implements Hub {
     DateTime now = DateTime.now();
     int delta = now.microsecondsSinceEpoch - _last.microsecondsSinceEpoch;
     Duration elapsed = Duration(microseconds: delta);
+    List<Future<void>> futures = [];
+    Future<void> task;
     for (Connection conn in connections) {
       // drive connection to go on
-      await conn.tick(now, elapsed);
+      task = conn.tick(now, elapsed);
+      futures.add(task);
       // NOTICE: let the delegate to decide whether close an error connection
       //         or just remove it.
     }
+    await Future.wait(futures);
     _last = now;
   }
 

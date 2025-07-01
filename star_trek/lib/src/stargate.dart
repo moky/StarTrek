@@ -80,7 +80,7 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   // protected
   AddressPairMap<Porter> createPorterPool() => PorterPool();
 
-  // delegate for handling docker events
+  // delegate for handling porter events
   PorterDelegate? get delegate => _delegateRef.target;
 
   late final AddressPairMap<Porter> _porterPool;
@@ -88,35 +88,35 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   @override
   Future<bool> sendData(Uint8List payload, {required SocketAddress remote, SocketAddress? local}) async {
-    Porter? docker = getPorter(remote: remote, local: local);
-    if (docker == null) {
-      assert(false, 'docker not found: $local -> $remote');
+    Porter? worker = getPorter(remote: remote, local: local);
+    if (worker == null) {
+      assert(false, 'porter not found: $local -> $remote');
       return false;
-    } else if (!docker.isAlive) {
-      assert(false, 'docker not alive: $local -> $remote');
+    } else if (!worker.isAlive) {
+      assert(false, 'porter not alive: $local -> $remote');
       return false;
     }
-    return await docker.sendData(payload);
+    return await worker.sendData(payload);
   }
 
   @override
   Future<bool> sendShip(Departure outgo, {required SocketAddress remote, SocketAddress? local}) async {
-    Porter? docker = getPorter(remote: remote, local: local);
-    if (docker == null) {
-      assert(false, 'docker not found: $local -> $remote');
+    Porter? worker = getPorter(remote: remote, local: local);
+    if (worker == null) {
+      assert(false, 'porter not found: $local -> $remote');
       return false;
-    } else if (!docker.isAlive) {
-      assert(false, 'docker not alive: $local -> $remote');
+    } else if (!worker.isAlive) {
+      assert(false, 'porter not alive: $local -> $remote');
       return false;
     }
-    return await docker.sendShip(outgo);
+    return await worker.sendShip(outgo);
   }
 
   //
   //  Docker
   //
 
-  ///  Create new docker for received data
+  ///  Create new porter for received data
   ///
   /// @param remote - remote address
   /// @param local  - local address
@@ -150,36 +150,36 @@ abstract class StarGate implements Gate, ConnectionDelegate {
       assert(false, 'remote address should not empty');
       return null;
     }
-    Porter? docker, cached;
+    Porter? worker, cached;
     //
-    //  1. try to get docker
+    //  1. try to get porter
     //
-    docker = getPorter(remote: remote, local: local);
-    if (docker != null) {
+    worker = getPorter(remote: remote, local: local);
+    if (worker != null) {
       // found
-      return docker;
+      return worker;
     } else if (!newPorter) {
-      // no need to create new docker
+      // no need to create new porter
       return null;
     }
     //
-    //  2. create new docker
+    //  2. create new porter
     //
-    docker = createPorter(remote: remote, local: local);
-    cached = setPorter(docker, remote: remote, local: local);
-    if (cached == null || identical(cached, docker)) {} else {
+    worker = createPorter(remote: remote, local: local);
+    cached = setPorter(worker, remote: remote, local: local);
+    if (cached == null || identical(cached, worker)) {} else {
       await cached.close();
     }
     //
-    //  3. set connection for this docker
+    //  3. set connection for this porter
     //
-    if (docker is StarPorter) {
-      // set connection for this docker
-      await docker.setConnection(connection);
+    if (worker is StarPorter) {
+      // set connection for this porter
+      await worker.setConnection(connection);
     } else {
-      assert(false, 'docker error: $remote, $docker');
+      assert(false, 'porter error: $remote, $worker');
     }
-    return docker;
+    return worker;
   }
 
   //
@@ -201,9 +201,9 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     int count = 0;
     List<Future<bool>> futures = [];
     Future<bool> task;
-    for (Porter docker in porters) {
+    for (Porter worker in porters) {
       // drive porter to send data
-      task = docker.process();
+      task = worker.process();
       futures.add(task);
     }
     List<bool> results = await Future.wait(futures);
@@ -218,16 +218,16 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   Future<void> cleanupPorters(Iterable<Porter> porters) async {
     DateTime now = DateTime.now();
     Porter? cached;
-    for (Porter docker in porters) {
-      if (!docker.isClosed) {
-        // docker connected,
+    for (Porter worker in porters) {
+      if (!worker.isClosed) {
+        // porter connected,
         // clear expired tasks
-        docker.purge(now);
+        worker.purge(now);
         continue;
       }
-      // remove docker when connection closed
-      cached = removePorter(docker, remote: docker.remoteAddress!, local: docker.localAddress);
-      if (cached == null || identical(cached, docker)) {} else {
+      // remove porter when connection closed
+      cached = removePorter(worker, remote: worker.remoteAddress!, local: worker.localAddress);
+      if (cached == null || identical(cached, worker)) {} else {
         await cached.close();
       }
     }
@@ -238,8 +238,8 @@ abstract class StarGate implements Gate, ConnectionDelegate {
   Future<void> heartbeat(Connection connection) async {
     SocketAddress remote = connection.remoteAddress!;
     SocketAddress? local = connection.localAddress;
-    Porter? docker = getPorter(remote: remote, local: local);
-    await docker?.heartbeat();
+    Porter? worker = getPorter(remote: remote, local: local);
+    await worker?.heartbeat();
   }
 
   //
@@ -256,13 +256,13 @@ abstract class StarGate implements Gate, ConnectionDelegate {
     //
     if (s1 != s2) {
       bool notFinished = s2 != PorterStatus.error;
-      Porter? docker = await dock(connection, notFinished);
-      if (docker == null) {
-        // connection closed and docker removed
+      Porter? worker = await dock(connection, notFinished);
+      if (worker == null) {
+        // connection closed and porter removed
         return;
       }
-      // callback for docker status
-      await delegate?.onPorterStatusChanged(s1, s2, docker);
+      // callback for porter status
+      await delegate?.onPorterStatusChanged(s1, s2, worker);
     }
     //
     //  2. heartbeat when connection expired
@@ -274,11 +274,11 @@ abstract class StarGate implements Gate, ConnectionDelegate {
 
   @override
   Future<void> onConnectionReceived(Uint8List data, Connection connection) async {
-    Porter? docker = await dock(connection, true);
-    if (docker == null) {
-      assert(false, 'failed to create docker: $connection');
+    Porter? worker = await dock(connection, true);
+    if (worker == null) {
+      assert(false, 'failed to create porter: $connection');
     } else {
-      await docker.processReceived(data);
+      await worker.processReceived(data);
     }
   }
 

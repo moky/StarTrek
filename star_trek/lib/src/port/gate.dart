@@ -73,7 +73,7 @@ import 'ship.dart';
 abstract interface class Gate implements Processor {
 
   ///  Pack data to an outgo ship (with normal priority), and
-  ///  append to the waiting queue of docker for remote address
+  ///  append to the waiting queue of porter for remote address
   ///
   /// @param payload - data to be sent
   /// @param remote  - remote address
@@ -82,7 +82,7 @@ abstract interface class Gate implements Processor {
   Future<bool> sendData(Uint8List payload, {required SocketAddress remote, SocketAddress? local});
 
   ///  Append outgo ship (carrying data package, with priority)
-  ///  to the waiting queue of docker for remote address
+  ///  to the waiting queue of porter for remote address
   ///
   /// @param outgo  - departure ship
   /// @param remote - remote address

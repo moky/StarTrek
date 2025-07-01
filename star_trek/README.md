@@ -60,7 +60,7 @@
 	* Departure
 * Dock
 	* ArrivalHall
-	* DepartureShip
+	* DepartureHall
 * Porter
 	* PorterDelegate
 * Gate

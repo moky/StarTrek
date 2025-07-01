@@ -57,7 +57,7 @@ abstract class StarPorter extends AddressPairObject implements Porter {
   // protected
   Dock createDock() => LockedDock();  // override for user-customized dock
 
-  // delegate for handling docker events
+  // delegate for handling porter events
   PorterDelegate? get delegate => _delegateRef?.target;
   set delegate(PorterDelegate? keeper) =>
       _delegateRef = keeper == null ? null : WeakReference(keeper);

@@ -1,3 +1,7 @@
+## 1.1.0
+
+- Drive channels concurrently.
+
 ## 1.0.0
 
 - OK released.

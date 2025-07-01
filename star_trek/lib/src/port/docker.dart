@@ -77,7 +77,7 @@ abstract interface class Porter implements Processor {
   ///  Clear all expired tasks
   int purge([DateTime? now]);
 
-  ///  Close connection for this docker
+  ///  Close connection for this porter
   Future<void> close();
 
 }
@@ -115,34 +115,34 @@ abstract interface class PorterDelegate {
   ///  Callback when new package received
   ///
   /// @param arrival     - income data package container
-  /// @param porter      - connection docker
+  /// @param porter      - connection worker
   Future<void> onPorterReceived(Arrival arrival, Porter porter);
 
   ///  Callback when package sent
   ///
   /// @param departure   - outgo data package container
-  /// @param porter      - connection docker
+  /// @param porter      - connection worker
   Future<void> onPorterSent(Departure departure, Porter porter);
 
   ///  Callback when failed to send package
   ///
   /// @param error       - error message
   /// @param departure   - outgo data package container
-  /// @param porter      - connection docker
+  /// @param porter      - connection worker
   Future<void> onPorterFailed(IOError error, Departure departure, Porter porter);
 
   ///  Callback when connection error
   ///
   /// @param error       - error message
   /// @param departure   - outgo data package container
-  /// @param porter      - connection docker
+  /// @param porter      - connection worker
   Future<void> onPorterError(IOError error, Departure departure, Porter porter);
 
   ///  Callback when connection status changed
   ///
   /// @param previous    - old status
   /// @param current     - new status
-  /// @param porter      - connection docker
+  /// @param porter      - connection worker
   Future<void> onPorterStatusChanged(PorterStatus previous, PorterStatus current, Porter porter);
 
 }

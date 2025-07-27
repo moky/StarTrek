@@ -168,7 +168,7 @@ abstract interface class WritableByteChannel implements NIOChannel {
 }
 
 /// A channel that can read and write bytes.  This interface simply unifies
-/// {@link ReadableByteChannel} and {@link WritableByteChannel}; it does not
+/// the {@link ReadableByteChannel} and {@link WritableByteChannel}; it does not
 /// specify any new operations.
 abstract interface class ByteChannel implements ReadableByteChannel, WritableByteChannel {
 

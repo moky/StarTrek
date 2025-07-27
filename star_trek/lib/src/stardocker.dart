@@ -104,7 +104,7 @@ abstract class StarPorter extends AddressPairObject implements Porter {
 
   @override
   String toString() {
-    Type clazz = runtimeType;
+    String clazz = className;
     return '<$clazz remote="$remoteAddress" local="$localAddress">\n\t'
         '$connection\n</$clazz>';
   }

@@ -67,8 +67,8 @@ abstract interface class InterruptibleChannel implements NIOChannel {
 /// invoked while another thread is blocked in a native I/O operation upon the
 /// channel then that operation will immediately return, either by throwing an
 /// exception or by returning normally.  If a thread is interrupted or the
-/// channel upon which it is blocked is asynchronously closed then the channel's
-/// {@link #end end} method will throw the appropriate exception.
+/// channel upon which it is blocked is asynchronously closed then
+/// the channel's {@link #end end} method will throw the appropriate exception.
 ///
 /// <p> This class performs the synchronization required to implement the {@link
 /// java.nio.channels.Channel} specification.  Implementations of the {@link

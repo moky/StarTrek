@@ -140,7 +140,7 @@ class BaseConnection extends AddressPairObject
 
   @override
   String toString() {
-    Type clazz = runtimeType;
+    String clazz = className;
     return '<$clazz remote="$remoteAddress" local="$localAddress">\n\t'
         '$channel\n</$clazz>';
   }

@@ -65,8 +65,18 @@ class AddressPairObject {
 
   @override
   String toString() {
-    Type clazz = runtimeType;
+    String clazz = className;
     return '<$clazz remote="$remoteAddress" local="$localAddress" />';
   }
 
+  String get className => _runtimeType(this, 'AddressPairObject');
+
+}
+
+String _runtimeType(Object object, String className) {
+  assert(() {
+    className = object.runtimeType.toString();
+    return true;
+  }());
+  return className;
 }

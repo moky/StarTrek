@@ -220,7 +220,7 @@ abstract class BaseChannel<C extends SelectableChannel>
 
   @override
   String toString() {
-    Type clazz = runtimeType;
+    String clazz = className;
     return '<$clazz remote="$remoteAddress" local="$localAddress"'
         ' closed=$isClosed bound=$isBound connected=$isConnected>\n\t'
         '$_sock\n</$clazz>';

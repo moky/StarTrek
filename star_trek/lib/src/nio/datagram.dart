@@ -223,7 +223,7 @@ abstract class DatagramChannel extends AbstractSelectableChannel
   /// address.
   ///
   /// <p> The datagram is transferred from the byte buffer as if by a regular
-  /// {@link WritableByteChannel#write(java.nio.ByteBuffer) write} operation.
+  /// write {@link WritableByteChannel#write(java.nio.ByteBuffer) write} operation.
   ///
   /// <p> This method performs exactly the same security checks as the {@link
   /// java.net.DatagramSocket#send send} method of the {@link
@@ -260,17 +260,17 @@ abstract class DatagramChannel extends AbstractSelectableChannel
 
   // Future<int> write(Uint8List src);
 
-  /// {@inheritDoc}
+  /// See {@inheritDoc}
   /// <p>
   /// If there is a security manager set, its {@code checkConnect} method is
   /// called with the local address and {@code -1} as its arguments to see
   /// if the operation is allowed. If the operation is not allowed,
-  /// a {@code SocketAddress} representing the
-  /// {@link java.net.InetAddress#getLoopbackAddress loopback} address and the
-  /// local port of the channel's socket is returned.
+  /// a {@code SocketAddress} representing
+  /// the {@link java.net.InetAddress#getLoopbackAddress loopback} address and
+  /// the local port of the channel's socket is returned.
   ///
-  /// @return  The {@code SocketAddress} that the socket is bound to, or the
-  ///          {@code SocketAddress} representing the loopback address if
+  /// @return  The {@code SocketAddress} that the socket is bound to, or
+  ///          the {@code SocketAddress} representing the loopback address if
   ///          denied by the security manager, or {@code null} if the
   ///          channel's socket is not bound
   @override

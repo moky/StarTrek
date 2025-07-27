@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Runtime class name.
+
 ## 1.1.0
 
 - Drive channels concurrently.
